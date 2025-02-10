@@ -23,6 +23,7 @@ public class Break {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private LocalDateTime createdAt;
+    //Yenilendi 
     private LocalDateTime updatedAt;
 }
 

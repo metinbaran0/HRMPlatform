@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hrmplatform.hrmplatform.enums.Role;
-
+//proje oluşturuldu
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

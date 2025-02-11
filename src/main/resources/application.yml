@@ -4,16 +4,16 @@ server:
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: ${HRM_POSTGRE_URL}
-    username: ${HRM_POSTGRE_USERNAME}
-    password: ${HRM_POSTGRE_PASSWORD}
+    url: jdbc:postgresql://localhost:5432/hrmplatformdb
+    username: postgres
+    password: root
 
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
 
-hrmplatform:
-  jwt:
-    secret-key: ${HRM_JWT_SECRETKEY}
-    issuer: ${HRM_JWT_ISSUER}
+#security:
+#  jwt:
+#    secret:
+#    expiration:

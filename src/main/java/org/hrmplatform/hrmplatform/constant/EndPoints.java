@@ -12,14 +12,19 @@ public class EndPoints {
 	public static final String ROOT = VERSION + DEVELOPER;
 	
 	public static final String USER = ROOT + "/user";
-	public static final String USERYETKI = ROOT + "/useryetki";
+	public static final String USERROLE =ROOT+ "/userrole";
 	
 	//USER
 	
 	public static final String REGISTER = "/register";
 	public static final String DOLOGIN = "/dologin";
 	
-	
+	//USERROLE
+	public static final String GETASSIGNROLE = "/get-assign-role";
+	public static final String ASSIGNROLES = "/assign-roles";
+	public static final String FINDALL = "/findall";
+	public static final String FINDBYUSERID = "/findbyuserid";
+	public static final String DELETEUSERROLE = "/userrole/delete/{userId}";
 	
 	
 }

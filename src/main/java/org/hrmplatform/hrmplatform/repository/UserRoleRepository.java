@@ -13,8 +13,10 @@ public interface UserRoleRepository extends JpaRepository<UserRole,Long> {
 	
 	void deleteByUserId(Long userId);
 	
-	Optional<UserRole> findByUserIdAndRole(Long userId, Role role);
-	
 	void deleteByUserIdAndRole(Long userId, Role role);
+	
+	List<UserRole> findByUser_NameContainingIgnoreCase(String name);
+	
+	List<UserRole> findByRole(Role role);
 	
 }

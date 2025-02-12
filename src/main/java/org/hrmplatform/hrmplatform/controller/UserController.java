@@ -1,5 +1,6 @@
 package org.hrmplatform.hrmplatform.controller;
 
+import jakarta.validation.Valid;
 import org.hrmplatform.hrmplatform.dto.request.LoginRequestDto;
 import org.hrmplatform.hrmplatform.dto.request.RegisterRequestDto;
 import org.hrmplatform.hrmplatform.service.UserService;
@@ -19,10 +20,17 @@ public class UserController {
 	}
 	
 	@PostMapping(REGISTER)
-	public ResponseEntity<String> register(@RequestBody RegisterRequestDto request) {
+	public ResponseEntity<String> register(@RequestBody @Valid RegisterRequestDto request) {
 		String response = userService.register(request);
 		return ResponseEntity.ok(response);
 	}
+	
+	@PostMapping(DOLOGIN)
+	public ResponseEntity<String> doLogin(@RequestBody @Valid LoginRequestDto request) {
+		String token = userService.doLogin(request);
+		return ResponseEntity.ok(token);
+	}
+	
 	
 
 }

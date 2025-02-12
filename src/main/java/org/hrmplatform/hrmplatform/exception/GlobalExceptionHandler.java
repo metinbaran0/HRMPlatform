@@ -35,7 +35,7 @@ public class GlobalExceptionHandler {
 		
 	}
 	
-	// Özel HospitalAppointmentException hataları için handler
+	// Özel HRMPlatformException hataları için handler
 	@ExceptionHandler(HRMPlatformException.class)
 	public ResponseEntity<ErrorMessage> hrmPlatformExceptionHandler(HRMPlatformException e) {
 		return createResponseEntity(e.getErrorType(), null);
@@ -45,12 +45,12 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ErrorMessage> validationExceptionHandler(MethodArgumentNotValidException e) {
 		log.error("Validasyon Exception "+e.getMessage());
-		
+
 		List<String> fieldErrors = new ArrayList<>();
 		e.getBindingResult().getFieldErrors().forEach(fieldError->{
 			fieldErrors.add(fieldError.getField()+" Validasyon hatası. Detay :"+fieldError.getDefaultMessage());
 		});
-		
+
 		return createResponseEntity(ErrorType.VALIDATION_ERROR, fieldErrors);
 	}
 	
@@ -63,8 +63,9 @@ public class GlobalExceptionHandler {
 	// Geçersiz parametre hatası için özel handler
 	@ExceptionHandler(InvalidArgumentException.class)
 	public ResponseEntity<ErrorMessage> invalidArgumentExceptionHandler(InvalidArgumentException e) {
-		return createResponseEntity(CustomErrorType.INVALID_ARGUMENT, null);
+		return createResponseEntity(e.getErrorType(), null); // Hatanın kendi türünü döndür!
 	}
+	
 	// IllegalArgumentException hatası için özel handler
 	@ExceptionHandler(IllegalArgumentException.class)
 	public ResponseEntity<ErrorMessage> illegalArgumentExceptionHandler(IllegalArgumentException e) {

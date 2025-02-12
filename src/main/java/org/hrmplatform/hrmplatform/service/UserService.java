@@ -4,8 +4,7 @@ import jakarta.validation.Valid;
 import org.hrmplatform.hrmplatform.dto.request.LoginRequestDto;
 import org.hrmplatform.hrmplatform.dto.request.RegisterRequestDto;
 import org.hrmplatform.hrmplatform.entity.User;
-import org.hrmplatform.hrmplatform.exception.DoLoginException;
-import org.hrmplatform.hrmplatform.exception.ErrorType;
+import org.hrmplatform.hrmplatform.exception.*;
 import org.hrmplatform.hrmplatform.repository.UserRepository;
 
 import org.hrmplatform.hrmplatform.util.JwtManager;
@@ -29,15 +28,37 @@ public class UserService {
 	
 	
 	public String register(@Valid RegisterRequestDto dto) {
-		if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
-			throw new DoLoginException(ErrorType.USERID_NOTFOUND);
+		// Email zaten var mı kontrol et
+		if (userRepository.findByEmail(dto.email()).isPresent()) {
+			throw new HRMPlatformException(ErrorType.USER_ALREADY_EXISTS);
 		}
 		
-		User user = User.builder().name(dto.getName()).email(dto.getEmail())
-		                .password(passwordEncoder.encode(dto.getPassword())) // Şifreyi encode ettik
-		                .role(dto.getRole()).status(true).build();
+		if (!dto.password().equals(dto.rePassword())) {
+			throw new HRMPlatformException(ErrorType.PASSWORD_MISMATCH); //PASSWORD_MISMATCH
+		}
+		
+		User user = User.builder()
+		                .email(dto.email())
+		                .password(passwordEncoder.encode(dto.password())) // Şifreyi encode ettik
+		                .status(true)
+		                .build();
 		
 		userRepository.save(user);
 		return "Kullanıcı başarıyla kaydedildi.";
+	}
+	
+	public String doLogin(@Valid LoginRequestDto dto) {
+		Optional<User> userOptional = userRepository.findByEmail(dto.email());
+		if (userOptional.isEmpty() || !passwordEncoder.matches(dto.password(), userOptional.get().getPassword())) {
+			throw new InvalidArgumentException(CustomErrorType.INVALID_EMAIL_OR_PASSWORD);  //GIRIS BASARISIZ.
+		}
+		
+		return jwtManager.createJWT(userOptional.get().getId());
+	}
+	
+	public Optional<User> findById(Long userId) {
+		
+		return userRepository.findById(userId);
+	
 	}
 }

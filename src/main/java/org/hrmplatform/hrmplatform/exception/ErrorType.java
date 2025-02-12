@@ -19,6 +19,7 @@ public enum ErrorType implements ErrorTypeInterface {
 	
 	
 	
+	
 	private final int code;
 	private final String message;
 	private final HttpStatus httpStatus;

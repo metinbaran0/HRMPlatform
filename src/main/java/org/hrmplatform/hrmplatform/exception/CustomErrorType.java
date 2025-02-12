@@ -22,6 +22,7 @@ public enum CustomErrorType implements ErrorTypeInterface {
 	// İçsel sunucu hataları (örneğin beklenmedik hata)
 	INTERNAL_SERVER_ERROR(500, "Sunucuda beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.", HttpStatus.INTERNAL_SERVER_ERROR),
 	INVALID_ID_OR_PASSWORD(3001, "TcIdNumber veya Password yanlış", HttpStatus.BAD_REQUEST),
+	INVALID_EMAIL_OR_PASSWORD(3001, "Email veya Password yanlış", HttpStatus.BAD_REQUEST),
 	
 	// Geçersiz rol hatası
 	INVALID_ROLE(2006, "Geçersiz bir rol değeri sağlandı.", HttpStatus.BAD_REQUEST);

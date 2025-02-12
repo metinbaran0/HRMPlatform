@@ -24,9 +24,5 @@ public class UserController {
 		return ResponseEntity.ok(response);
 	}
 	
-	@PostMapping(DOLOGIN)
-	public ResponseEntity<String> login(@RequestBody LoginRequestDto request) {
-		String response = userService.doLogin(request);
-		return ResponseEntity.ok(response);
-	}
+
 }

@@ -20,11 +20,13 @@ public class EndPoints {
 	public static final String DOLOGIN = "/dologin";
 	
 	//USERROLE
-	public static final String GETASSIGNROLE = "/get-assign-role";
 	public static final String ASSIGNROLES = "/assign-roles";
 	public static final String FINDALL = "/findall";
 	public static final String FINDBYUSERID = "/findbyuserid";
+	public static final String SEARCHBYNAME = "/searchByName";
+	public static final String SEARCHBYROLE = "/searchByRole";
 	public static final String DELETEUSERROLE = "/userrole/delete/{userId}";
+	
 	
 	
 }

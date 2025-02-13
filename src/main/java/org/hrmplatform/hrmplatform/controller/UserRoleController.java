@@ -8,6 +8,7 @@ import org.hrmplatform.hrmplatform.dto.response.UserRoleResponseDto;
 import org.hrmplatform.hrmplatform.entity.UserRole;
 import org.hrmplatform.hrmplatform.enums.Role;
 import org.hrmplatform.hrmplatform.service.UserRoleService;
+import org.hrmplatform.hrmplatform.view.VwUserRole;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -40,9 +41,14 @@ public class UserRoleController {
 	 */
 	@Transactional
 	@PostMapping(ASSIGNROLES)
-	public List<UserRole> assignRoleToUser(UserRoleRequestDto dto) {
-		return userRoleService.assignRoleToUser(dto);
-		
+	public ResponseEntity<BaseResponse<Boolean>> assignRoleToUser(UserRoleRequestDto dto) {
+		 userRoleService.assignRoleToUser(dto);
+		return ResponseEntity.ok(BaseResponse.<Boolean>builder()
+		                                     .code(200)
+		                                     .success(true)
+		                                     .data(true)
+		                                     .message("User Rol Kaydedildi")
+		                                     .build());
 	}
 	
 	/**
@@ -71,8 +77,13 @@ public class UserRoleController {
 	 * @return Kullanıcının sahip olduğu rollerin listesi
 	 */
 	@GetMapping(FINDBYUSERID)
-	public List<UserRole> findByUserId(@RequestParam Long userId) {
-		return userRoleService.findByUserId(userId);
+	public ResponseEntity<BaseResponse<List<UserRole>>> findByUserId(@RequestParam Long userId) {
+		return ResponseEntity.ok(BaseResponse.<List<UserRole>>builder()
+		                                     .code(200)
+		                                     .success(true)
+		                                     .data(userRoleService.findAllByUserId(userId))
+		                                     .message("User yetkiler listelendi")
+		                                     .build());
 	}
 	
 	/**
@@ -81,8 +92,9 @@ public class UserRoleController {
 	 * @param dto Kullanıcının ID’si ve silinecek rol bilgisini içeren DTO.
 	 * @return HTTP 204 No Content: Kaynak başarıyla silindi, ancak herhangi bir veri geri dönmemektedir.
 	 */
+	@Transactional
 	@DeleteMapping(DELETEUSERROLE)
-	public void deleteUserRole(@PathVariable UserRoleRequestDto dto) {
+	public void deleteUserRole(@RequestBody  UserRoleRequestDto dto) {
 		userRoleService.deleteUserRole(dto);
 		ResponseEntity.noContent().build();
 	}
@@ -93,8 +105,8 @@ public class UserRoleController {
 	 * @param name Kullanıcı adı
 	 * @return Arama kriterlerine göre bulunan kullanıcı ve rollerin listesi
 	 */
-	@GetMapping("/searchByName")
-	public List<UserRole> searchByUsername(@RequestParam String name) {
+	@GetMapping(SEARCHBYNAME)
+	public List<VwUserRole> searchByName(@RequestParam String name) {
 		return userRoleService.searchByName(name);
 	}
 	
@@ -103,8 +115,8 @@ public class UserRoleController {
 	 * @param role Rol adı
 	 * @return O role sahip tüm kullanıcıların listesi
 	 */
-	@GetMapping("/searchByRole")
-	public List<UserRole> searchByRole(@RequestParam Role role) {
+	@GetMapping(SEARCHBYROLE)
+	public List<VwUserRole> searchByRole(@RequestParam Role role) {
 		return userRoleService.searchByRole(role);
 	}
 	

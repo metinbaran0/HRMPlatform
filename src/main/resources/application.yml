@@ -2,6 +2,10 @@ server:
   port: 9090
 
 spring:
+  security:
+    user:
+      name: hrmplatform
+      password: Hrm12345
   datasource:
     driver-class-name: org.postgresql.Driver
     url: ${HRM_POSTGRE_URL}

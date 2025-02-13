@@ -30,7 +30,7 @@ public class JwtManager {
 	private String SECRETKEY;
 	@Value("${HRM_JWT_ISSUER}")
 	private String ISSUER;
-	private final Long EXPIRATION_TIME = 1000L * 60*20;
+	private final Long EXPIRATION_TIME = 1000L * 60 * 60;
 	
 	
 	

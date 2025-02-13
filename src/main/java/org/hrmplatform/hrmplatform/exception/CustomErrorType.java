@@ -19,8 +19,13 @@ public enum CustomErrorType implements ErrorTypeInterface {
 	// Eksik veya Beklenen Veri Hatası
 	HRMPLATFORM_ID_MISSING(2005, "Hospital ID claim eksik.", HttpStatus.BAD_REQUEST),
 	
+	// email hatası
+	EMAIL_MISSING(2007, "Email claim eksik.", HttpStatus.BAD_REQUEST),
+	
 	// İçsel sunucu hataları (örneğin beklenmedik hata)
 	INTERNAL_SERVER_ERROR(500, "Sunucuda beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.", HttpStatus.INTERNAL_SERVER_ERROR),
+	
+	// Kullanıcı hataları
 	INVALID_ID_OR_PASSWORD(3001, "TcIdNumber veya Password yanlış", HttpStatus.BAD_REQUEST),
 	INVALID_EMAIL_OR_PASSWORD(3001, "Email veya Password yanlış", HttpStatus.BAD_REQUEST),
 	

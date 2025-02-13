@@ -3,6 +3,8 @@ package org.hrmplatform.hrmplatform.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.hrmplatform.hrmplatform.dto.request.roles.UserRoleRequestDto;
+import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
+import org.hrmplatform.hrmplatform.dto.response.UserRoleResponseDto;
 import org.hrmplatform.hrmplatform.entity.UserRole;
 import org.hrmplatform.hrmplatform.enums.Role;
 import org.hrmplatform.hrmplatform.service.UserRoleService;
@@ -42,16 +44,27 @@ public class UserRoleController {
 		return userRoleService.assignRoleToUser(dto);
 		
 	}
+	
 	/**
 	 * Sistemdeki tüm kullanıcıları ve onların rollerini listeler.
 	 * @return Kullanıcı ve rollerin listesini döner
 	 */
-	//TODO:findAll detaylı bakılacak stream ile ilgili
 	@GetMapping(FINDALL)
-	public List<UserRole> findAll() {
-		return userRoleService.findAll();
+	public ResponseEntity<BaseResponse<List<UserRoleResponseDto>>> findAll(
+			@RequestParam(defaultValue = "1") int page,
+			@RequestParam(defaultValue = "10") int size) {
+		
+		List<UserRoleResponseDto> userRoleResponseList = userRoleService.findAll(page, size);
+		
+		return ResponseEntity.ok(
+				BaseResponse.<List<UserRoleResponseDto>>builder()
+				            .message("Tüm kullanıcılar ve roller listelendi.")
+				            .code(200)
+				            .data(userRoleResponseList)
+				            .build()
+		);
 	}
-	
+
 	/**
 	 * Belirli bir kullanıcıya ait tüm rolleri döndürür.
 	 * @param userId Kullanıcının ID’si

@@ -12,6 +12,7 @@ import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
 
 @RestController
 @RequestMapping(USER)
+@CrossOrigin("*")
 public class UserController {
 	private final UserService userService;
 	

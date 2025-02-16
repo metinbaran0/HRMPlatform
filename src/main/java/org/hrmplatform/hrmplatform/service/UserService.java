@@ -28,7 +28,7 @@ public class UserService {
 	}
 	
 	
-	public String register(@Valid RegisterRequestDto dto) {
+	public void register(@Valid RegisterRequestDto dto) {
 		// Email zaten var mı kontrol et
 		if (userRepository.findByEmail(dto.email()).isPresent()) {
 			throw new HRMPlatformException(ErrorType.USER_ALREADY_EXISTS);
@@ -45,7 +45,7 @@ public class UserService {
 		                .build();
 		
 		userRepository.save(user);
-		return "Kullanıcı başarıyla kaydedildi.";
+
 	}
 	
 	public String doLogin(@Valid LoginRequestDto dto) {

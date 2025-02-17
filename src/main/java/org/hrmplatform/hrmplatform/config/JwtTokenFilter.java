@@ -1,5 +1,7 @@
 package org.hrmplatform.hrmplatform.config;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,11 +19,14 @@ import java.util.Optional;
 
 @Slf4j
 public class JwtTokenFilter extends OncePerRequestFilter {
+	
 	@Autowired
 	private JwtManager jwtManager;
 	
 	@Autowired
 	private JwtUserDetails jwtUserDetails;
+	
+	private String secretKey = "yourSecretKey";
 	
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -33,14 +38,26 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
 			String token = authorizationHeader.substring(7);
 			log.warn("Gelen Substring Yapılmış Token: " + token);
-			Optional<Long> optionalUserId = jwtManager.validateJWT(token);
 			
-			if (optionalUserId.isPresent()) {
-				UserDetails userDetails = jwtUserDetails.loadUserById(optionalUserId.get());
+			try {
+				// JWT'yi doğrulama işlemi
+				Claims claims = Jwts.parser()
+				                    .setSigningKey(secretKey)
+				                    .parseClaimsJws(token)
+				                    .getBody();
 				
-				UsernamePasswordAuthenticationToken upaToken =
-						new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-				SecurityContextHolder.getContext().setAuthentication(upaToken);
+				// JWT geçerliyse, kullanıcıyı güvenli bağlama
+				Optional<Long> optionalUserId = jwtManager.validateJWT(token);
+				
+				if (optionalUserId.isPresent()) {
+					UserDetails userDetails = jwtUserDetails.loadUserById(optionalUserId.get());
+					UsernamePasswordAuthenticationToken upaToken =
+							new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+					SecurityContextHolder.getContext().setAuthentication(upaToken);
+				}
+			} catch (Exception e) {
+				// Hata durumunda token geçersiz
+				log.warn("Geçersiz token: {}", token);
 			}
 		}
 		

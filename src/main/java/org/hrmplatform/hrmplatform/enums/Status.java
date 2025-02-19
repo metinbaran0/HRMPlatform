@@ -1,6 +1,5 @@
 package org.hrmplatform.hrmplatform.enums;
 
-public enum LeaveStatus {
+public enum Status {
     APPROVED, PENDING, REJECTED;
-
 }

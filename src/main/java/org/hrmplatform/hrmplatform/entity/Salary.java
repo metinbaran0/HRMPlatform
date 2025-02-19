@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hrmplatform.hrmplatform.enums.PaymentStatus;
+import org.hrmplatform.hrmplatform.enums.Status;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -29,6 +29,5 @@ public class Salary {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     @Enumerated(EnumType.STRING)
-    private PaymentStatus paymentStatus;
+    private Status paymentStatus;
 }
-

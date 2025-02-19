@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hrmplatform.hrmplatform.enums.LeaveStatus;
+import org.hrmplatform.hrmplatform.enums.Status;
 
 import java.time.LocalDateTime;
 
@@ -24,8 +24,7 @@ public class LeaveRequest {
     private LocalDateTime endDate;
     private String reason;
     @Enumerated(EnumType.STRING)
-    private LeaveStatus status;
+    private Status status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
-

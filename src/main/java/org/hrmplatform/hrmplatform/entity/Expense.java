@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hrmplatform.hrmplatform.enums.ExpenseStatus;
+import org.hrmplatform.hrmplatform.enums.Status;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -26,8 +26,7 @@ public class Expense {
     private LocalDateTime expenseDate;
     private String description;
     @Enumerated(EnumType.STRING)
-    private ExpenseStatus status;
+    private Status status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
-

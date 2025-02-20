@@ -30,7 +30,10 @@ public enum CustomErrorType implements ErrorTypeInterface {
 	INVALID_EMAIL_OR_PASSWORD(3001, "Email veya Password yanlış", HttpStatus.BAD_REQUEST),
 	
 	// Geçersiz rol hatası
-	INVALID_ROLE(2006, "Geçersiz bir rol değeri sağlandı.", HttpStatus.BAD_REQUEST);
+	INVALID_ROLE(2006, "Geçersiz bir rol değeri sağlandı.", HttpStatus.BAD_REQUEST),
+	//Email
+	INVALID_ACTIVATION_CODE(3002, "Geçersiz veya süresi dolmuş aktivasyon kodu.", HttpStatus.BAD_REQUEST);
+	
 	
 	private final int code;
 	private final String message;

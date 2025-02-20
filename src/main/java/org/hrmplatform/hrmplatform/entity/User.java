@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hrmplatform.hrmplatform.enums.Role;
+
+import java.time.LocalDateTime;
+
 //proje oluşturuldu
 @Data
 @NoArgsConstructor
@@ -20,5 +23,38 @@ public class User {
     private String name;
     private String email;
     private String password;
-    private boolean status;
+    private Boolean status;
+    
+    @Column(name = "is_activated", nullable = false)
+    private Boolean activated = false;
+    
+    @Column(name = "activation_code")
+    private String activationCode;
+    
+    @Column(name = "activation_code_expire_at")
+    private LocalDateTime activationCodeExpireAt;
+    
+    //reset token ve geçerlilik süresi
+    @Column(name = "reset_token")
+    private String resetToken;
+    
+    @Column(name = "reset_token_expire_at")
+    private LocalDateTime resetTokenExpireAt;
+    
+    @Temporal(TemporalType.TIMESTAMP)
+    private LocalDateTime createdAt;
+    
+    @Temporal(TemporalType.TIMESTAMP)
+    private LocalDateTime updatedAt;
+    
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+    
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }

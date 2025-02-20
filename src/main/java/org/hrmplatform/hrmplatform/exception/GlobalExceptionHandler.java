@@ -72,5 +72,10 @@ public class GlobalExceptionHandler {
 		log.error("IllegalArgumentException yakalandı: " + e.getMessage());
 		return createResponseEntity(CustomErrorType.INVALID_ROLE, List.of(e.getMessage()));
 	}
+	// InvalidActivationCodeException hatası için özel handler
+	@ExceptionHandler(InvalidActivationCodeException.class)
+	public ResponseEntity<ErrorMessage> invalidActivationCodeExceptionHandler(InvalidActivationCodeException e) {
+		return createResponseEntity(e.getErrorType(), null);
+	}
 
 }

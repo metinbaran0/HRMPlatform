@@ -1,9 +1,6 @@
 package org.hrmplatform.hrmplatform.dto.request;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 
 public record RegisterRequestDto(
@@ -16,6 +13,8 @@ public record RegisterRequestDto(
 		@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%*^&+=]).{8,20}$",
 				message = "Şifre kurallara uygun değil.")
 		String password,
-		
-		String rePassword
+		@NotBlank(message = "Şifre onayı boş olamaz.")
+		String rePassword,
+		@NotNull(message = "Activated alanı zorunludur.")
+		Boolean activated
 ) {}

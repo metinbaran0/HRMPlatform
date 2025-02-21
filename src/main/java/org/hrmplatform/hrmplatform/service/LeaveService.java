@@ -5,14 +5,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.hrmplatform.hrmplatform.dto.request.LeaveRequestDto;
 import org.hrmplatform.hrmplatform.entity.LeaveRequest;
-import org.hrmplatform.hrmplatform.enums.LeaveStatus;
+import org.hrmplatform.hrmplatform.enums.Status;
 import org.hrmplatform.hrmplatform.repository.LeaveRepository;
 import org.hrmplatform.hrmplatform.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class LeaveService {
@@ -26,7 +26,7 @@ public class LeaveService {
 		
 		// Aynı tarih aralığında onaylı izin talebi olup olmadığını kontrol et
 		List<LeaveRequest> overlappingRequests =
-				leaveRepository.findByEmployeeIdAndStatus(leaveRequestDto.employeeId(), LeaveStatus.APPROVED);
+				leaveRepository.findByEmployeeIdAndStatus(leaveRequestDto.employeeId(), Status.APPROVED);
 		
 		for (LeaveRequest existingRequest : overlappingRequests) {
 			if ((startDateTime.isBefore(existingRequest.getEndDate()) && endDateTime.isAfter(existingRequest.getStartDate()))) {
@@ -38,7 +38,7 @@ public class LeaveService {
 		                                        .startDate(startDateTime)
 		                                        .endDate(endDateTime)
 		                                        .leaveType(leaveRequestDto.leaveType())
-		                                        .status(LeaveStatus.PENDING)  // İzin talebi başlangıçta beklemede
+		                                        .status(Status.PENDING)  // İzin talebi başlangıçta beklemede
 		                                        .createdAt(LocalDateTime.now())
 		                                        .updatedAt(LocalDateTime.now())
 		                                        .build();
@@ -48,12 +48,12 @@ public class LeaveService {
 	
 	// Kullanıcıya ait izin taleplerini getirme (Sadece APPROVED)
 	public List<LeaveRequest> getLeaveRequestsByUserId(Long userId) {
-		return leaveRepository.findByEmployeeIdAndStatus(userId, LeaveStatus.APPROVED);
+		return leaveRepository.findByEmployeeIdAndStatus(userId, Status.APPROVED);
 	}
 	
 	// Yöneticinin tüm bekleyen izin taleplerini getirme
 	public List<LeaveRequest> getAllPendingLeaveRequests() {
-		return leaveRepository.findByStatus(LeaveStatus.PENDING);
+		return leaveRepository.findByStatus(Status.PENDING);
 	}
 	
 	// İzin talebini kabul etme
@@ -62,11 +62,11 @@ public class LeaveService {
 		                                           .orElseThrow(() -> new EntityNotFoundException("Hata: İzin talebi bulunamadı."));
 		
 		// Yalnızca bekleyen izin taleplerini kabul edebilir
-		if (!leaveRequest.getStatus().equals(LeaveStatus.PENDING)) {
+		if (!leaveRequest.getStatus().equals(Status.PENDING)) {
 			throw new IllegalArgumentException("Hata: Yalnızca bekleyen izin taleplerini onaylayabilirsiniz.");
 		}
 		
-		leaveRequest.setStatus(LeaveStatus.APPROVED);
+		leaveRequest.setStatus(Status.APPROVED);
 		return leaveRepository.save(leaveRequest);
 	}
 	
@@ -76,11 +76,11 @@ public class LeaveService {
 		                                           .orElseThrow(() -> new EntityNotFoundException("Hata: İzin talebi bulunamadı."));
 		
 		// Yalnızca bekleyen izin taleplerini reddedebilir
-		if (!leaveRequest.getStatus().equals(LeaveStatus.PENDING)) {
+		if (!leaveRequest.getStatus().equals(Status.PENDING)) {
 			throw new IllegalArgumentException("Hata: Yalnızca bekleyen izin taleplerini reddedebilirsiniz.");
 		}
 		
-		leaveRequest.setStatus(LeaveStatus.REJECTED);
+		leaveRequest.setStatus(Status.REJECTED);
 		return leaveRepository.save(leaveRequest);
 	}
 	

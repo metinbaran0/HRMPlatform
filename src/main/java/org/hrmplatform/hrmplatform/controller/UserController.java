@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import static org.apache.naming.ResourceRef.*;
 import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
+import static org.hrmplatform.hrmplatform.constant.EndPoints.AUTH;
 
 import org.springframework.web.bind.annotation.*;
 
@@ -72,7 +73,7 @@ public class UserController {
      * @param code Aktivasyon kodu
      * @return Aktivasyon işleminin başarılı olduğunu belirten cevap
      */
-    //@GetMapping(ACTIVATE)
+    @GetMapping(ACTIVATE)
     public ResponseEntity<BaseResponse<Boolean>> activateUser(@RequestParam String code) {
         userService.activateUser(code);
         return ResponseEntity.ok(BaseResponse.<Boolean>builder()
@@ -89,7 +90,7 @@ public class UserController {
      * @param email Kullanıcının e-posta adresi
      * @return Aktivasyon e-postasının başarıyla gönderildiğini belirten cevap
      */
-//	@PostMapping(RESENDACTIVATIONEMAIL)
+	@PostMapping(RESENDACTIVATIONEMAIL)
     public ResponseEntity<BaseResponse<Boolean>> resendActivationEmail(@RequestParam String email) {
         userService.resendActivationEmail(email);
         return ResponseEntity.ok(BaseResponse.<Boolean>builder()
@@ -106,7 +107,7 @@ public class UserController {
      * @param request Kullanıcının e-posta adresini içeren DTO
      * @return Parola sıfırlama linkinin gönderildiğini belirten cevap
      */
-    //@PostMapping(FORGOTPASSWORD)
+    @PostMapping(FORGOTPASSWORD)
     public ResponseEntity<BaseResponse<Boolean>> forgotPassword(@RequestBody @Valid ResetPasswordRequestDto request) {
         userService.resetPassword(request);
         return ResponseEntity.ok(BaseResponse.<Boolean>builder()
@@ -123,7 +124,7 @@ public class UserController {
      * @param request Yeni parolanın belirlenmesini sağlayan DTO
      * @return Parola sıfırlama işleminin başarıyla gerçekleştiğini belirten cevap
      */
-    //@PostMapping(RESETPASSWORD)
+    @PostMapping(RESETPASSWORD)
     public ResponseEntity<BaseResponse<Boolean>> resetPassword(@RequestBody ResetPasswordRequestDto request) {
         userService.resetPassword(request);
         return ResponseEntity.ok(BaseResponse.<Boolean>builder()

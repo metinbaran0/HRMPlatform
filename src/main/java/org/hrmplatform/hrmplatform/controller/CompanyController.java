@@ -141,6 +141,7 @@ public class CompanyController {
     }
 
     //üyelik planı
+
     public ResponseEntity<BaseResponse<Company>> setSubscriptionPlan(@PathVariable Long id, @RequestParam SubscriptionPlan plan) {
        Company updatedCompany= companyService.setSubscriptionPlan(id,plan);
        return ResponseEntity.ok(BaseResponse.<Company>builder()

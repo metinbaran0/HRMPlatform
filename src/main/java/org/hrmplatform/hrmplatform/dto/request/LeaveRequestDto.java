@@ -1,7 +1,6 @@
 package org.hrmplatform.hrmplatform.dto.request;
 
 import jakarta.validation.constraints.NotNull;
-import org.hrmplatform.hrmplatform.enums.LeaveStatus;
 import org.hrmplatform.hrmplatform.enums.LeaveType;
 
 import java.time.LocalDate;

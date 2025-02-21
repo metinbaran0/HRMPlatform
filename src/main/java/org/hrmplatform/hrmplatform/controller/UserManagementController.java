@@ -50,8 +50,7 @@ public class UserManagementController {
 	 * Kullanıcı bilgilerini günceller.
 	 * @param request Güncellenmiş kullanıcı bilgilerini içeren DTO
 	 * @return Güncelleme işleminin başarılı olduğunu belirten cevap
-	 */
-	@PutMapping(UPDATE)
+	 */@PutMapping(UPDATE)
 	public ResponseEntity<BaseResponse<Boolean>> updateUser(@RequestBody UpdateUserRequestDto request) {
 		userManagementService.updateUser(request);
 		return ResponseEntity.ok(BaseResponse.<Boolean>builder()

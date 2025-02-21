@@ -32,6 +32,11 @@ public class UserRoleService {
 	// veya istisna oluşursa, tüm değişiklikler geri alınır (rollback yapılır) sistem önceki güvenli duruma döner ve
 	// veritabanı tutarsızlıklarından kaçınılmış olur.
 	public void assignRoleToUser(UserRoleRequestDto dto) {
+		Optional<User> user = userService.findById(dto.userId());
+		
+		if (user.isEmpty()) {
+			throw new HRMPlatformException(ErrorType.USERID_NOTFOUND);
+		}
 		UserRole userRole = new UserRole();
 		userRole.setUserId(dto.userId());
 		userRole.setRole(Role.valueOf(dto.role()));

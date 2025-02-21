@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hrmplatform.hrmplatform.enums.Status;
+import org.hrmplatform.hrmplatform.enums.SubscriptionPlan;
 
 import java.time.LocalDateTime;
 
@@ -24,5 +26,47 @@ public class Company {
     private String email;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-}
 
+    private boolean emailVerified; // Mail doğrulama durumu
+
+    @Enumerated(EnumType.STRING)
+    private Status status; // Şirketin başvuru durumu (Onaylandı, Reddedildi, Beklemede)
+
+    @Enumerated(EnumType.STRING)
+    private SubscriptionPlan subscriptionPlan; // Aylık, Yıllık
+
+    private LocalDateTime subscriptionEndDate; // Üyelik bitiş tarihi
+
+    private boolean isDeleted = false;  // Soft delete için alan
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+        status = Status.PENDING; // Başlangıçta başvuru "Beklemede" olacak
+        // Üyelik bitiş tarihi hesaplaması
+        if (subscriptionPlan != null) {
+            if (subscriptionPlan == SubscriptionPlan.MONTHLY) {
+                subscriptionEndDate = createdAt.plusMonths(1); // 1 ay sonrasını hesapla
+            } else if (subscriptionPlan == SubscriptionPlan.YEARLY) {
+                subscriptionEndDate = createdAt.plusYears(1); // 1 yıl sonrasını hesapla
+            }
+        }
+
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+    // Üyelik planını ayarla ve bitiş tarihini güncelle
+    public void setSubscriptionPlan(SubscriptionPlan plan) {
+        this.subscriptionPlan = plan;
+        LocalDateTime now = LocalDateTime.now();
+        if (plan == SubscriptionPlan.MONTHLY) {
+            this.subscriptionEndDate = now.plusMonths(1);
+        } else if (plan == SubscriptionPlan.YEARLY) {
+            this.subscriptionEndDate = now.plusYears(1);
+        }
+    }
+}

@@ -35,7 +35,7 @@ public class UserManagementController {
 	 * @param userId Kullanıcının ID'si
 	 * @return Kullanıcının profil bilgileri
 	 */
-	@GetMapping(PROFILE)
+	//@GetMapping(PROFILE)
 	public ResponseEntity<BaseResponse<UserProfileResponseDto>> getUserProfile(@PathVariable Long userId) {
 		UserProfileResponseDto profile = userManagementService.getUserProfile(userId);
 		return ResponseEntity.ok(BaseResponse.<UserProfileResponseDto>builder()
@@ -51,7 +51,7 @@ public class UserManagementController {
 	 * @param request Güncellenmiş kullanıcı bilgilerini içeren DTO
 	 * @return Güncelleme işleminin başarılı olduğunu belirten cevap
 	 */
-	@PutMapping(UPDATE)
+//	@PutMapping(UPDATE)
 	public ResponseEntity<BaseResponse<Boolean>> updateUser(@RequestBody UpdateUserRequestDto request) {
 		userManagementService.updateUser(request);
 		return ResponseEntity.ok(BaseResponse.<Boolean>builder()
@@ -67,7 +67,7 @@ public class UserManagementController {
 	 * @return Kullanıcı listesi
 	 */
 	
-	@GetMapping(FINDALL_USERS)
+	//@GetMapping(FINDALL_USERS)
 	public ResponseEntity<BaseResponse<List<UserProfileResponseDto>>> getAllUsers() {
 		List<UserProfileResponseDto> users = userManagementService.getAllUsers();
 		return ResponseEntity.ok(BaseResponse.<List<UserProfileResponseDto>>builder()
@@ -83,7 +83,7 @@ public class UserManagementController {
 	 * @param userId Silinecek kullanıcının ID'si
 	 * @return Kullanıcı silme işleminin başarılı olduğunu belirten cevap
 	 */
-	@DeleteMapping(DELETE)
+//	@DeleteMapping(DELETE)
 	public ResponseEntity<BaseResponse<Boolean>> deleteUser(@PathVariable Long userId) {
 		userManagementService.deleteUser(userId);
 		return ResponseEntity.ok(BaseResponse.<Boolean>builder()
@@ -101,7 +101,7 @@ public class UserManagementController {
 	 * @param isActive Kullanıcının aktif olup olmadığını belirten değer
 	 * @return Kullanıcı durumu güncelleme işleminin başarılı olduğunu belirten cevap
 	 */
-	@PutMapping(STATUS)
+	//@PutMapping(STATUS)
 	public ResponseEntity<BaseResponse<Boolean>> updateUserStatus(@PathVariable Long userId, @RequestParam Boolean isActive) {
 		userManagementService.updateUserStatus(userId, isActive);
 		return ResponseEntity.ok(BaseResponse.<Boolean>builder()
@@ -119,7 +119,7 @@ public class UserManagementController {
 	 * @param email Kullanıcı e-posta adresi
 	 * @return Arama kriterlerine göre bulunan kullanıcılar
 	 */
-	@GetMapping(SEARCH)
+	//@GetMapping(SEARCH)
 	
 	
 	

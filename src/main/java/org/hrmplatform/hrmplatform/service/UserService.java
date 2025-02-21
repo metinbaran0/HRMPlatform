@@ -11,7 +11,6 @@ import org.hrmplatform.hrmplatform.repository.UserRepository;
 
 import org.hrmplatform.hrmplatform.util.JwtManager;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +21,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class UserService {
+public class UserService {	
 	private final UserRepository userRepository;
 	private final JwtManager jwtManager;
 	

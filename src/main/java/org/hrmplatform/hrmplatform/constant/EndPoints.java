@@ -18,11 +18,6 @@ public class EndPoints {
 	
 	public static final String AUTH = API + "/auth"; // Base path olarak auth eklendi
 	
-
-
-	public static final String AUTH = API + "/auth"; // Base path olarak auth eklendi
-
-
 	// USER
 	public static final String REGISTER = "/register";
 	public static final String DOLOGIN = "/dologin";
@@ -30,11 +25,6 @@ public class EndPoints {
 	public static final String RESENDACTIVATIONEMAIL = "/resend-activation-email";
 	public static final String FORGOTPASSWORD = "/forgot-password";
 	public static final String RESETPASSWORD = "/reset-password";
-
-	
-	
-
-
 
 	//USERMANAGEMENT
 	public static final String PROFILE = "/{userId}";
@@ -56,6 +46,7 @@ public class EndPoints {
 	public static final String SEARCHBYROLE = "/searchByRole";
 	public static final String DELETEUSERROLE = "/userrole/delete/{userId}";
 
+	//COMPANY
 	public static final String COMPANY = "/company";
 	public static final String FINDALLCOMPANY =COMPANY+ "/find-all-company";
 	public static final String FINDBYCOMPANYID =COMPANY+ "/find-byid-company";

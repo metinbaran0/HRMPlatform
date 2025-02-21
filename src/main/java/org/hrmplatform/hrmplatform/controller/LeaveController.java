@@ -1,17 +1,10 @@
 package org.hrmplatform.hrmplatform.controller;
 
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.hrmplatform.hrmplatform.dto.request.LeaveRequestDto;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
 import org.hrmplatform.hrmplatform.entity.LeaveRequest;
-import org.hrmplatform.hrmplatform.enums.LeaveStatus;
-import org.hrmplatform.hrmplatform.repository.LeaveRepository;
-import org.hrmplatform.hrmplatform.repository.UserRepository;
 import org.hrmplatform.hrmplatform.service.LeaveService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

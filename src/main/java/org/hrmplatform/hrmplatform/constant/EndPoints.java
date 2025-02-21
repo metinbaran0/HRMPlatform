@@ -14,7 +14,14 @@ public class EndPoints {
 	public static final String USER = ROOT + "/user";
 	public static final String USERROLE =ROOT+ "/userrole";
 
+	public static final String LEAVE =ROOT+ "/leave";
+	
 	public static final String AUTH = API + "/auth"; // Base path olarak auth eklendi
+	
+
+
+	public static final String AUTH = API + "/auth"; // Base path olarak auth eklendi
+
 
 	// USER
 	public static final String REGISTER = "/register";
@@ -24,6 +31,11 @@ public class EndPoints {
 	public static final String FORGOTPASSWORD = "/forgot-password";
 	public static final String RESETPASSWORD = "/reset-password";
 
+	
+	
+
+
+
 	//USERMANAGEMENT
 	public static final String PROFILE = "/{userId}";
 	public static final String DELETE = "/{userId}";
@@ -31,6 +43,10 @@ public class EndPoints {
 	public static final String STATUS = "/{userId}/status";
 	public static final String UPDATE = "/update";
 	public static final String FINDALL_USERS = "/findAll-users";
+
+	
+
+
 	
 	//USERROLE
 	public static final String ASSIGNROLES = "/assign-roles";

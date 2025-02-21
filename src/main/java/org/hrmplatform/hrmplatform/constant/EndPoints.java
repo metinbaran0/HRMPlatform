@@ -13,7 +13,9 @@ public class EndPoints {
 	
 	public static final String USER = ROOT + "/user";
 	public static final String USERROLE =ROOT+ "/userrole";
+
 	public static final String LEAVE =ROOT+ "/leave";
+
 	
 	//USER
 	
@@ -27,6 +29,19 @@ public class EndPoints {
 	public static final String SEARCHBYNAME = "/searchByName";
 	public static final String SEARCHBYROLE = "/searchByRole";
 	public static final String DELETEUSERROLE = "/userrole/delete/{userId}";
+
+
+	public static final String COMPANY = "/company";
+	public static final String FINDALLCOMPANY =COMPANY+ "/find-all-company";
+	public static final String FINDBYCOMPANYID =COMPANY+ "/find-byid-company";
+	public static final String ADDCOMPANY =COMPANY+ "/add-company";
+	public static final String UPDATECOMPANY =COMPANY+ "/update-company";
+	public static final String DELETECOMPANY =COMPANY+ "/delete-company";
+	public static final String PENDING =COMPANY+ "/pending-company";
+	public static final String APPROVE =COMPANY+ "/approve-company";
+	public static final String REJECT =COMPANY+ "/reject-company";
+
+
 	
 	//LEAVEREQUEST
 	
@@ -36,6 +51,7 @@ public class EndPoints {
 	public static final String ACCEPTLEAVE = "/manager/{managerId}/approve/{leaveRequestId}"; // Yönetici, izin talebini onaylar
 	public static final String REJECTLEAVE = "/manager/{managerId}/reject/{leaveRequestId}"; // Yönetici, izin talebini reddeder
 	
+
 }
 
 

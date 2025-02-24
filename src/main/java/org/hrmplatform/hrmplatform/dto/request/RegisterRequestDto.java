@@ -14,7 +14,5 @@ public record RegisterRequestDto(
 				message = "Şifre kurallara uygun değil.")
 		String password,
 		@NotBlank(message = "Şifre onayı boş olamaz.")
-		String rePassword,
-		@NotNull(message = "Activated alanı zorunludur.")
-		Boolean activated
+		String rePassword
 ) {}

@@ -9,17 +9,13 @@ public class EndPoints {
 	public static final String TEST = "/test";
 	public static final String PROD = "/prod";
 	
-	public static final String ROOT = VERSION + DEVELOPER;
+	public static final String ROOT = VERSION + API;
 	
 	public static final String USER = ROOT + "/user";
 	public static final String USERROLE =ROOT+ "/userrole";
 
 	public static final String LEAVE =ROOT+ "/leave";
 	
-	public static final String AUTH = API + "/auth"; // Base path olarak auth eklendi
-	
-
-
 	public static final String AUTH = API + "/auth"; // Base path olarak auth eklendi
 
 
@@ -30,11 +26,7 @@ public class EndPoints {
 	public static final String RESENDACTIVATIONEMAIL = "/resend-activation-email";
 	public static final String FORGOTPASSWORD = "/forgot-password";
 	public static final String RESETPASSWORD = "/reset-password";
-
 	
-	
-
-
 
 	//USERMANAGEMENT
 	public static final String PROFILE = "/{userId}";
@@ -45,8 +37,6 @@ public class EndPoints {
 	public static final String FINDALL_USERS = "/findAll-users";
 
 	
-
-
 	
 	//USERROLE
 	public static final String ASSIGNROLES = "/assign-roles";
@@ -65,8 +55,19 @@ public class EndPoints {
 	public static final String PENDING =COMPANY+ "/pending-company";
 	public static final String APPROVE =COMPANY+ "/approve-company";
 	public static final String REJECT =COMPANY+ "/reject-company";
-
+	
+	
+	//LEAVEREQUEST
+	
+	public static final String LEAVEREQUEST = "/leaverequest"; // Kullanıcı yeni izin talebi oluşturur
+	public static final String LEAVEBYUSERID = "/leavebyuserid/{employeeId}";
+	public static final String PENDINGLEAVESFORMANAGER = "/manager/{managerId}/pending-leaves"; // Yönetici, bekleyen izin taleplerini görüntüler
+	public static final String ACCEPTLEAVE = "/manager/{managerId}/approve/{employeeId}"; // Yönetici, izin talebini onaylar
+	public static final String REJECTLEAVE = "/manager/{managerId}/reject/{employeeId}"; // Yönetici, izin talebini reddeder
+	
 }
+
+
 
 
 //package com.barisd.java16_x.constant;

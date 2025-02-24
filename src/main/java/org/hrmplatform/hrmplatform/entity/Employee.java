@@ -19,6 +19,7 @@ public class Employee{
 @GeneratedValue(strategy = GenerationType.IDENTITY)
 private Long id;
     private Long companyId;
+    private String avatar;
     private String name;
     private String surname;
     private String email;
@@ -29,4 +30,3 @@ private Long id;
     private LocalDateTime updatedAt;
 
 }
-

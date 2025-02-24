@@ -57,8 +57,8 @@ public class LeaveService {
 	}
 	
 	// İzin talebini kabul etme
-	public LeaveRequest acceptLeaveRequest(Long managerId, Long leaveRequestId) {
-		LeaveRequest leaveRequest = leaveRepository.findById(leaveRequestId)
+	public LeaveRequest acceptLeaveRequest(Long managerId, Long employeeId) {
+		LeaveRequest leaveRequest = leaveRepository.findById(employeeId)
 		                                           .orElseThrow(() -> new EntityNotFoundException("Hata: İzin talebi bulunamadı."));
 		
 		// Yalnızca bekleyen izin taleplerini kabul edebilir
@@ -71,8 +71,8 @@ public class LeaveService {
 	}
 	
 	// İzin talebini reddetme
-	public LeaveRequest rejectLeaveRequest(Long managerId, Long leaveRequestId) {
-		LeaveRequest leaveRequest = leaveRepository.findById(leaveRequestId)
+	public LeaveRequest rejectLeaveRequest(Long managerId, Long employeeId) {
+		LeaveRequest leaveRequest = leaveRepository.findById(employeeId)
 		                                           .orElseThrow(() -> new EntityNotFoundException("Hata: İzin talebi bulunamadı."));
 		
 		// Yalnızca bekleyen izin taleplerini reddedebilir

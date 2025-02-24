@@ -42,6 +42,7 @@ public class LeaveController {
 	}
 	
 	// Kullanıcıya ait izin taleplerini getirme
+	@GetMapping(LEAVEBYUSERID)
 	public ResponseEntity<BaseResponse<List<LeaveRequest>>> getUserLeaves(@PathVariable Long employeeId) {
 		if (!leaveService.isUserExists(employeeId)) {
 			return ResponseEntity.ok(BaseResponse.<List<LeaveRequest>>builder()
@@ -74,8 +75,8 @@ public class LeaveController {
 	
 	// İzin talebini kabul etme (Yönetici tarafından)
 	@PutMapping(ACCEPTLEAVE)
-	public ResponseEntity<BaseResponse<LeaveRequest>> acceptLeaveRequest(@PathVariable Long managerId, @PathVariable Long leaveRequestId) {
-		LeaveRequest acceptedLeaveRequest = leaveService.acceptLeaveRequest(managerId, leaveRequestId);
+	public ResponseEntity<BaseResponse<LeaveRequest>> acceptLeaveRequest(@PathVariable Long managerId,  @PathVariable Long employeeId) {
+		LeaveRequest acceptedLeaveRequest = leaveService.acceptLeaveRequest(managerId, employeeId);
 		return ResponseEntity.ok(BaseResponse.<LeaveRequest>builder()
 		                                     .code(200)
 		                                     .success(true)
@@ -86,8 +87,8 @@ public class LeaveController {
 	
 	// İzin talebini reddetme (Yönetici tarafından)
 	@PutMapping(REJECTLEAVE)
-	public ResponseEntity<BaseResponse<LeaveRequest>> rejectLeaveRequest(@PathVariable Long managerId, @PathVariable Long leaveRequestId) {
-		LeaveRequest rejectedLeaveRequest = leaveService.rejectLeaveRequest(managerId, leaveRequestId);
+	public ResponseEntity<BaseResponse<LeaveRequest>> rejectLeaveRequest(@PathVariable Long managerId,  @PathVariable Long employeeId) {
+		LeaveRequest rejectedLeaveRequest = leaveService.rejectLeaveRequest(managerId, employeeId);
 		return ResponseEntity.ok(BaseResponse.<LeaveRequest>builder()
 		                                     .code(200)
 		                                     .success(true)

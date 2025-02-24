@@ -1,6 +1,7 @@
 package org.hrmplatform.hrmplatform.constant;
 
 public class EndPoints {
+
 	
 	public static final String VERSION = "/v1";
 	
@@ -63,6 +64,7 @@ public class EndPoints {
 	public static final String PENDINGLEAVESFORMANAGER = "/manager/{managerId}/pending-leaves"; // Yönetici, bekleyen izin taleplerini görüntüler
 	public static final String ACCEPTLEAVE = "/manager/{managerId}/approve/{leaveRequestId}"; // Yönetici, izin talebini onaylar
 	public static final String REJECTLEAVE = "/manager/{managerId}/reject/{leaveRequestId}"; // Yönetici, izin talebini reddeder
+
 
 }
 

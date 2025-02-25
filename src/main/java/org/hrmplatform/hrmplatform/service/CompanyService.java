@@ -87,7 +87,8 @@ public class CompanyService {
            // Güncellenmiş şirketi kaydet ve döndür
            return companyRepository.save(existingCompany);
        }*/
-//şirket güncelleme
+
+        //şirket güncelleme
     public Company updateCompany(Long id, CompanyDto dto) {
         // Mevcut şirketi bul
         Company existingCompany = companyRepository.findById(id)
@@ -137,6 +138,7 @@ public class CompanyService {
 
 
     }
+
     @Transactional
     public Company rejectCompany(Long id) {
         Company company = companyRepository.findById(id)
@@ -156,6 +158,7 @@ public class CompanyService {
         company.setStatus(Status.REJECTED);
         return companyRepository.save(company);
     }
+
     @Transactional
     public Company setSubscriptionPlan(Long id, SubscriptionPlan plan) {
         Company company = companyRepository.findById(id)
@@ -167,7 +170,7 @@ public class CompanyService {
     // Üyelik süresi dolan şirketleri otomatik olarak devre dışı bırak
     @Scheduled(cron = "0 0 0 * * ?") // Her gece çalışır
     @Transactional
-    public void checkExpiredMembership(){
+    public void checkExpiredMembership() {
         List<Company> expiredCompanies = companyRepository.findBySubscriptionEndDateBeforeAndIsDeletedFalse(LocalDateTime.now());
 
         for (Company company : expiredCompanies) {

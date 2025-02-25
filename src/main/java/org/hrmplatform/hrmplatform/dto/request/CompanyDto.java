@@ -19,5 +19,11 @@ public record CompanyDto(
         @Email
         String email,
 
-        SubscriptionPlan subscriptionPlan) {
+        SubscriptionPlan subscriptionPlan,
+        String contactPerson,
+
+        String sector,
+        Integer employeeCount
+
+) {
 }

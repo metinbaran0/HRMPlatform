@@ -24,6 +24,7 @@ import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 @RestController
 @RequestMapping(COMPANY)
 @RequiredArgsConstructor
+@CrossOrigin("*")
 public class CompanyController {
     private final CompanyService companyService;
 

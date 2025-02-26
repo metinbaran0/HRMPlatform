@@ -3,12 +3,7 @@ package org.hrmplatform.hrmplatform.util;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-
-import org.hrmplatform.hrmplatform.exception.CustomErrorType;
-import org.hrmplatform.hrmplatform.exception.InvalidArgumentException;
-import org.hrmplatform.hrmplatform.exception.InvalidJWTException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -16,60 +11,60 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 
-/**
- * -> com.auth0.jwt.JWT: JWT oluşturma ve doğrulama işlemleri için kullanılan Auth0 JWT kütüphanesinin JWT sınıfını
- * dahil eder.
- *-> JWTVerifier: JWT token'ını doğrulamak için kullanılan sınıf.
- * -> Algorithm: JWT token'ını imzalamak için kullanılan algoritmalar (HMAC, RSA, vb.) sınıfıdır.
- * -> DecodedJWT: JWT token'ını çözmek (decode etmek) için kullanılan sınıf.
- */
 @Service
 public class JwtManager {
+	/**
+	 * Token oluşturmak için gerekli parametreler
+	 * SecretKey -> token imzalamak için gerekli şifre
+	 * Issuer -> jwt token sahibine ait bilgi
+	 * IssuerAt -> token üretilme zamanı
+	 * ExpiresAt -> token geçerlilik son zamanı, bitiş anı
+	 * Claim -> içerisinde KEY-VALUE şeklinde değer saklayan nesneler.
+	 * NOT!!!
+	 * claim nesneleri içerisinde bulunan değerler açık olarak tutulur bu nedenle
+	 * gizli kalması gereken değerleri buraya eklemeyiniz.
+	 * Sign -> imzalama için kullanılır mutlaka bir şifreleme algoritması vermek gerekir.
+	 *
+	 * []  [] -> sadece rakam ->
+	 * 10  10 -> 100
+	 * 50  50 -> 2.500
+	 * [] [] [] [] [] [] [] [] -> 50^8 -> 1_953_125_000_000_000
+	 * 50^7 -> 1sn
+	 * 50^43 sn
+	 */
+	@Value("${hrmplatform.jwt.secret-key}")
+	private String SecretKey;
+	@Value("${hrmplatform.jwt.issuer}")
+	private String Issuer;
+	private final Long ExDate = 1000L * 60 * 5; // 5dk sonra iptal olsun
 	
-	@Value("${HRM_JWT_SECRETKEY}")
-	private String SECRETKEY;
-	@Value("${HRM_JWT_ISSUER}")
-	private String ISSUER;
-	private final Long EXPIRATION_TIME = 1000L * 60 * 60;
-	
-	
-	
-	public String createJWT(Long hrmplatformId) {
-		Algorithm algorithm = Algorithm.HMAC512(SECRETKEY);
-		Date creationDate = new Date(System.currentTimeMillis());
-		Date expirationDate = new Date(System.currentTimeMillis() + EXPIRATION_TIME);
-		String token =
-				JWT.create().withAudience()
-				   .withIssuer(ISSUER)
-				   .withIssuedAt(creationDate)
-				   .withExpiresAt(expirationDate)
-				   .withClaim("hrmplatformId", hrmplatformId)
-				   .withClaim("key", "value123")
-				   .sign(algorithm);
+	public String createToken(Long authId){
+		Date createdDate = new Date(System.currentTimeMillis());
+		Date expirationDate = new Date(System.currentTimeMillis() + ExDate);
+		Algorithm algorithm = Algorithm.HMAC512(SecretKey);
+		String token = JWT.create()
+		                  .withAudience()
+		                  .withIssuer(Issuer)
+		                  .withIssuedAt(createdDate)
+		                  .withExpiresAt(expirationDate)
+		                  .withClaim("authId", authId)
+		                  .withClaim("key", "JX_15_TJJJ")
+		                  .sign(algorithm);
 		return token;
 	}
 	
-	public Optional<Long> validateJWT(String token) {
-		try {
-			Algorithm algorithm = Algorithm.HMAC512(SECRETKEY);
-			JWTVerifier verifier = JWT.require(algorithm).withIssuer(ISSUER).build();
-			DecodedJWT decodedJWT = verifier.verify(token);
-			
-			
-			Long hrmplatformId = decodedJWT.getClaim("hrmplatformId").asLong();
-			
-			if (Objects.isNull(hrmplatformId)) {
-				throw new InvalidJWTException(CustomErrorType.HRMPLATFORM_ID_MISSING);
-			}
-			
-			return Optional.of(hrmplatformId);
+	public Optional<Long> validateToken(String token){
+		try{
+			Algorithm algorithm = Algorithm.HMAC512(SecretKey);
+			JWTVerifier verifier = JWT.require(algorithm).build();
+			DecodedJWT decodedJWT = verifier.verify(token); // Bu token bize mi ait
+			if(Objects.isNull(decodedJWT)) // Eğer Token doğrulanamaz ise null döner bizde empty olarak return ederiz.
+				return Optional.empty();
+			Long authId =  decodedJWT.getClaim("authId").asLong();
+			return Optional.of(authId);
+		}catch (Exception exception){
+			return Optional.empty();
 		}
-		catch (IllegalArgumentException e) {
-			throw new InvalidArgumentException(CustomErrorType.INVALID_ARGUMENT);
-		}
-		catch (JWTVerificationException e) {
-			throw new InvalidJWTException(CustomErrorType.INVALID_JWT);
-		}
-		
 	}
+	
 }

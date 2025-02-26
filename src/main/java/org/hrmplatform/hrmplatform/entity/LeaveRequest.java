@@ -28,5 +28,7 @@ public class LeaveRequest {
     private Status status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "leave_type", nullable = false)
     private LeaveType leaveType;
 }

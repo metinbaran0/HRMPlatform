@@ -1,12 +1,11 @@
 package org.hrmplatform.hrmplatform.config;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+
 import org.hrmplatform.hrmplatform.util.JwtManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,52 +14,37 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
 public class JwtTokenFilter extends OncePerRequestFilter {
-	
-	@Autowired
+	@Autowired // ilgili değişken için nesne(bean) yaratmak için kullanırız.
 	private JwtManager jwtManager;
-	
 	@Autowired
 	private JwtUserDetails jwtUserDetails;
-	
-	private String secretKey = "yourSecretKey";
-	
 	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-			throws ServletException, IOException {
-		log.info("JwtTokenFilter doFilterInternal çalıştı...");
-		String authorizationHeader = request.getHeader("Authorization");
-		log.warn("Gelen Token: " + authorizationHeader);
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 		
-		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+		/**
+		 *Bu kısım gelen tüm isteklerin üzerinden geçtiği kısım. Burada isteklerin içerisinde bulunan TOKEN- JWT
+		 * bilgisini okuyup, doğrulamasını ve kişinin kimliğini tespit ederek oturum açmasını
+		 * sağlayacağız.
+		 */
+		final String authorizationHeader = request.getHeader("Authorization");
+		if(Objects.nonNull(authorizationHeader) && authorizationHeader.startsWith("Bearer ")) {
 			String token = authorizationHeader.substring(7);
-			log.warn("Gelen Substring Yapılmış Token: " + token);
-			
-			try {
-				// JWT'yi doğrulama işlemi
-				Claims claims = Jwts.parser()
-				                    .setSigningKey(secretKey)
-				                    .parseClaimsJws(token)
-				                    .getBody();
-				
-				// JWT geçerliyse, kullanıcıyı güvenli bağlama
-				Optional<Long> optionalUserId = jwtManager.validateJWT(token);
-				
-				if (optionalUserId.isPresent()) {
-					UserDetails userDetails = jwtUserDetails.loadUserById(optionalUserId.get());
-					UsernamePasswordAuthenticationToken upaToken =
-							new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-					SecurityContextHolder.getContext().setAuthentication(upaToken);
-				}
-			} catch (Exception e) {
-				// Hata durumunda token geçersiz
-				log.warn("Geçersiz token: {}", token);
+			Optional<Long> userId = jwtManager.validateToken(token);
+			if(userId.isPresent()) {
+				UserDetails userDetails = jwtUserDetails.getUserById(userId.get());
+				// spring in bizim kimliğimizi doğrulayabileceği kendi içerisinde yetkileri yönetebileceği token
+				UsernamePasswordAuthenticationToken authenticationToken
+						= new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+				// geçerli güvenlik çemberinin içerisinde oturum açan kullanıcıya ait token bilgisini geçtiğimiz kısım.
+				SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 			}
 		}
-		
-		filterChain.doFilter(request, response);
+		filterChain.doFilter(request,response);
 	}
 }

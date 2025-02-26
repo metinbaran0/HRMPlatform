@@ -25,6 +25,10 @@ public class User {
     private String password;
     private Boolean status;
     
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private Role role;
+    
     @Column(name = "is_activated", nullable = false)
     private Boolean activated = false;
     

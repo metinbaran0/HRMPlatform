@@ -15,5 +15,4 @@ public record RegisterRequestDto(
 		String password,
 		@NotBlank(message = "Şifre onayı boş olamaz.")
 		String rePassword
-	
 ) {}

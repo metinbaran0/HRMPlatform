@@ -20,7 +20,8 @@ public enum ErrorType implements ErrorTypeInterface {
 	EMAIL_NOT_VERIFIED(402,"Mail onaylanmamış" , HttpStatus.BAD_REQUEST),
 	EMAIL_SENDING_FAILED(789,"Mail gönderirken hata oluştu" ,HttpStatus.BAD_REQUEST ),
 	ACTIVATION_CODE_EXPIRED(456,"Activation code expired" , HttpStatus.BAD_REQUEST ),
-	USER_ALREADY_ACTIVATED(123, "", HttpStatus.BAD_REQUEST);
+	USER_ALREADY_ACTIVATED(123, "", HttpStatus.BAD_REQUEST),
+	UNAUTHORIZED_OPERATION(403, "Bu işlemi yapmak için yetkiniz yok.", HttpStatus.FORBIDDEN);
 
 
 	private final int code;

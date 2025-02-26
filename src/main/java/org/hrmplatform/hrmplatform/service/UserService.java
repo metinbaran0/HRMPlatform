@@ -70,6 +70,7 @@ public class UserService {
 		}
 	}
 	
+	
 	public String doLogin(@Valid LoginRequestDto dto) {
 		User user = userRepository.findByEmail(dto.email())
 		                          .orElseThrow(() -> new InvalidArgumentException(CustomErrorType.INVALID_EMAIL_OR_PASSWORD));
@@ -78,8 +79,15 @@ public class UserService {
 			throw new InvalidArgumentException(CustomErrorType.INVALID_EMAIL_OR_PASSWORD);
 		}
 		
-		return jwtManager.createJWT(user.getId());
+		// JWT oluşturma ve döndürme
+		String token = jwtManager.createToken(user.getId());
+		
+		// Loglama işlemi
+		log.info("Generated token for user ID {}: {}", user.getId(), token);
+		
+		return token;
 	}
+	
 	
 	public void activateUser(String activationCode) {
 		User user = userRepository.findByActivationCode(activationCode)
@@ -94,7 +102,7 @@ public class UserService {
 		user.setActivationCode("USED");
 		userRepository.save(user);
 		
-		jwtManager.createJWT(user.getId());
+		jwtManager.createToken(user.getId());
 	}
 	
 	public void resendActivationEmail(String email) {
@@ -148,6 +156,10 @@ public class UserService {
 	
 	public Optional<User> findByEmail(String email) {
 		return userRepository.findByEmail(email);
+	}
+	
+	public Optional<User> findByName(String name) {
+		return userRepository.findByName(name);
 	}
 	
 	

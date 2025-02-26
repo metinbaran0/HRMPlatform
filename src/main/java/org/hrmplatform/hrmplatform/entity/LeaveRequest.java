@@ -28,6 +28,5 @@ public class LeaveRequest {
     private Status status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    @Enumerated(EnumType.STRING)
     private LeaveType leaveType;
 }

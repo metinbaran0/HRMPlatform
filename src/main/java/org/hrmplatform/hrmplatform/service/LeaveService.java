@@ -5,6 +5,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.hrmplatform.hrmplatform.dto.request.LeaveRequestDto;
 import org.hrmplatform.hrmplatform.entity.LeaveRequest;
+import org.hrmplatform.hrmplatform.entity.User;
+import org.hrmplatform.hrmplatform.enums.Role;
 import org.hrmplatform.hrmplatform.enums.Status;
 import org.hrmplatform.hrmplatform.repository.LeaveRepository;
 import org.hrmplatform.hrmplatform.repository.UserRepository;
@@ -38,7 +40,7 @@ public class LeaveService {
 		                                        .startDate(startDateTime)
 		                                        .endDate(endDateTime)
 		                                        .leaveType(leaveRequestDto.leaveType())
-		                                        .status(Status.PENDING)  // İzin talebi başlangıçta beklemede
+		                                        .status(Status.PENDING) // İzin talebi başlangıçta beklemede
 		                                        .createdAt(LocalDateTime.now())
 		                                        .updatedAt(LocalDateTime.now())
 		                                        .build();
@@ -56,33 +58,48 @@ public class LeaveService {
 		return leaveRepository.findByStatus(Status.PENDING);
 	}
 	
-	// İzin talebini kabul etme
-	public LeaveRequest acceptLeaveRequest(Long managerId, Long leaveRequestId) {
-		LeaveRequest leaveRequest = leaveRepository.findById(leaveRequestId)
-		                                           .orElseThrow(() -> new EntityNotFoundException("Hata: İzin talebi bulunamadı."));
+	// İzin talebini kabul etme (Yönetici tarafından)
+	public LeaveRequest acceptLeaveRequest(Long managerId, Long employeeId) {
+		User manager = userRepository.findById(managerId)
+		                             .orElseThrow(() -> new EntityNotFoundException("Yönetici bulunamadı."));
 		
-		// Yalnızca bekleyen izin taleplerini kabul edebilir
-		if (!leaveRequest.getStatus().equals(Status.PENDING)) {
-			throw new IllegalArgumentException("Hata: Yalnızca bekleyen izin taleplerini onaylayabilirsiniz.");
+		if (manager.getRole() == null || !manager.getRole().equals(Role.COMPANY_ADMIN)) {
+			throw new SecurityException("Yalnızca şirket yöneticileri izin taleplerini onaylayabilir.");
 		}
 		
+		// Bekleyen izin talebini al
+		LeaveRequest leaveRequest = leaveRepository.findByEmployeeIdAndStatus(employeeId, Status.PENDING)
+		                                           .stream()
+		                                           .findFirst()
+		                                           .orElseThrow(() -> new EntityNotFoundException("Bekleyen izin talebi bulunamadı."));
+		
 		leaveRequest.setStatus(Status.APPROVED);
+		leaveRequest.setUpdatedAt(LocalDateTime.now());
 		return leaveRepository.save(leaveRequest);
 	}
 	
-	// İzin talebini reddetme
-	public LeaveRequest rejectLeaveRequest(Long managerId, Long leaveRequestId) {
-		LeaveRequest leaveRequest = leaveRepository.findById(leaveRequestId)
-		                                           .orElseThrow(() -> new EntityNotFoundException("Hata: İzin talebi bulunamadı."));
+	// İzin talebini reddetme (Yönetici tarafından)
+	public LeaveRequest rejectLeaveRequest(Long managerId, Long employeeId) {
+		User manager = userRepository.findById(managerId)
+		                             .orElseThrow(() -> new EntityNotFoundException("Yönetici bulunamadı."));
 		
-		// Yalnızca bekleyen izin taleplerini reddedebilir
-		if (!leaveRequest.getStatus().equals(Status.PENDING)) {
-			throw new IllegalArgumentException("Hata: Yalnızca bekleyen izin taleplerini reddedebilirsiniz.");
+		if (manager.getRole() == null || !manager.getRole().equals(Role.COMPANY_ADMIN)) {
+			throw new SecurityException("Yalnızca şirket yöneticileri izin taleplerini reddedebilir.");
 		}
 		
+		// Bekleyen izin talebini al
+		LeaveRequest leaveRequest = leaveRepository.findByEmployeeIdAndStatus(employeeId, Status.PENDING)
+		                                           .stream()
+		                                           .findFirst()
+		                                           .orElseThrow(() -> new EntityNotFoundException("Bekleyen izin talebi bulunamadı."));
+		
 		leaveRequest.setStatus(Status.REJECTED);
+		leaveRequest.setUpdatedAt(LocalDateTime.now());
 		return leaveRepository.save(leaveRequest);
 	}
+	
+	
+	
 	
 	// Kullanıcı var mı?
 	public boolean isUserExists(Long employeeId) {

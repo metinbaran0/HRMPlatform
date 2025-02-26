@@ -57,6 +57,22 @@ public class EndPoints {
 	public static final String APPROVE =COMPANY+ "/approve-company";
 	public static final String REJECT =COMPANY+ "/reject-company";
 
+	// EMPLOYEE
+	public static final String EMPLOYEE = ROOT + "/employee";
+	public static final String GET_ALL_EMPLOYEES = "/get-all-employees";
+	public static final String CREATE_EMPLOYEE = "/create-employee";
+	public static final String UPDATE_EMPLOYEE = "update-employee/{id}";
+	public static final String DELETE_EMPLOYEE =  "delete-employee/{id}";
+	public static final String CHANGE_EMPLOYEE_STATUS =  "change-/{id}/status";
+
+	//LEAVEREQUEST
+
+	public static final String LEAVEREQUEST = "/leaverequest"; // Kullanıcı yeni izin talebi oluşturur
+	public static final String LEAVEBYUSERID = "/leavebyuserid/{employeeId}";
+	public static final String PENDINGLEAVESFORMANAGER = "/manager/{managerId}/pending-leaves"; // Yönetici, bekleyen izin taleplerini görüntüler
+	public static final String ACCEPTLEAVE = "/manager/{managerId}/approve/{leaveRequestId}"; // Yönetici, izin talebini onaylar
+	public static final String REJECTLEAVE = "/manager/{managerId}/reject/{leaveRequestId}"; // Yönetici, izin talebini reddeder
+
 }
 
 

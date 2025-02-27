@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.hrmplatform.hrmplatform.dto.request.CompanyDto;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
+import org.hrmplatform.hrmplatform.dto.response.SubscriptionResponse;
 import org.hrmplatform.hrmplatform.entity.Company;
 import org.hrmplatform.hrmplatform.enums.Status;
 import org.hrmplatform.hrmplatform.enums.SubscriptionPlan;
@@ -160,6 +161,12 @@ public class CompanyService {
     public Company setSubscriptionPlan(Long id, SubscriptionPlan plan) {
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new HRMPlatformException(ErrorType.COMPANY_NOT_FOUND));
+
+        // Eğer üyelik planı zaten aynı ise güncellemeye gerek yok
+        if (company.getSubscriptionPlan() == plan) {
+            throw new HRMPlatformException(ErrorType.ALREADY_SUBSCRIBED);
+        }
+
         company.setSubscriptionPlan(plan);
         return companyRepository.save(company);
     }
@@ -174,6 +181,29 @@ public class CompanyService {
             company.setDeleted(false); // Şirketi devre dışı bırak
             companyRepository.save(company);
         }
+    }
+
+    public SubscriptionResponse getSubscriptionPlan(Long id) {
+        Company company = companyRepository.findById(id)
+                .orElseThrow(() -> new HRMPlatformException(ErrorType.COMPANY_NOT_FOUND));
+
+        return new SubscriptionResponse(company.getSubscriptionPlan(), company.getSubscriptionEndDate());
+    }
+
+    @Transactional
+    public void expireSubscription(Long id) {
+        Company company = companyRepository.findById(id)
+                .orElseThrow(() -> new HRMPlatformException(ErrorType.COMPANY_NOT_FOUND));
+
+        // Üyelik süresi kontrolü
+        if (company.getSubscriptionEndDate() == null || company.getSubscriptionEndDate().isAfter(LocalDateTime.now())) {
+            throw new HRMPlatformException(ErrorType.SUBSCRIPTION_NOT_EXPIRED);
+        }
+
+        // Şirketin erişimini kısıtla
+        company.setActive(false);
+        companyRepository.save(company);
+
     }
 
     //  Mail Gönderme Metodu

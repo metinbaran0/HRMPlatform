@@ -44,6 +44,9 @@ public class Company {
 
     private boolean isDeleted = false;  // Soft delete için alan
 
+    @Column(name = "is_active")
+    private boolean isActive = true;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -64,14 +67,20 @@ public class Company {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
     // Üyelik planını ayarla ve bitiş tarihini güncelle
     public void setSubscriptionPlan(SubscriptionPlan plan) {
         this.subscriptionPlan = plan;
         LocalDateTime now = LocalDateTime.now();
+
         if (plan == SubscriptionPlan.MONTHLY) {
             this.subscriptionEndDate = now.plusMonths(1);
         } else if (plan == SubscriptionPlan.YEARLY) {
             this.subscriptionEndDate = now.plusYears(1);
         }
     }
+
+
+
+
 }

@@ -84,6 +84,18 @@ public class CompanyController {
                         .build());
     }
 
+   /* @GetMapping("/verify-email")
+    public ResponseEntity<BaseResponse<String>> verifyEmail(@RequestParam String token) {
+        System.out.println("Token received: " + token);  // Log ekle
+        companyService.verifyEmail(token);
+        return ResponseEntity.ok(BaseResponse.<String>builder()
+                .code(200)
+                .message("E-posta başarıyla doğrulandı")
+                .success(true)
+                .data("Hesabınız onaylandı. Artık giriş yapabilirsiniz.")
+                .build());
+    }*/
+
     //şirket güncelleme
     @PutMapping(UPDATECOMPANY + "/{id}")
     public ResponseEntity<BaseResponse<Void>> updateCompany(@PathVariable Long id, @RequestBody @Valid CompanyDto companyDto) {

@@ -34,6 +34,9 @@ public class Company {
 
     private boolean emailVerified; // Mail doğrulama durumu
 
+   /* private String emailVerificationToken; //  Doğrulama tokeni
+    private LocalDateTime tokenExpirationTime; // Token geçerlilik süresi*/
+
     @Enumerated(EnumType.STRING)
     private Status status; // Şirketin başvuru durumu (Onaylandı, Reddedildi, Beklemede)
 

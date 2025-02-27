@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public class Employee{
 @Id
 @GeneratedValue(strategy = GenerationType.IDENTITY)
-private Long id;
+    private Long id;
     private Long companyId;
     private String avatar;
     private String name;
@@ -25,7 +25,7 @@ private Long id;
     private String email;
     private String phone;
     private String position;
-    private boolean status;
+    private boolean isActive;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

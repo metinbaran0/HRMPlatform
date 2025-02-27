@@ -2,16 +2,16 @@ package org.hrmplatform.hrmplatform.config;
 
 import lombok.RequiredArgsConstructor;
 import org.hrmplatform.hrmplatform.entity.User;
+import org.hrmplatform.hrmplatform.entity.UserRole;
 import org.hrmplatform.hrmplatform.service.UserRoleService;
 import org.hrmplatform.hrmplatform.service.UserService;
-import org.springframework.stereotype.Service;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -26,24 +26,22 @@ public class JwtUserDetails implements UserDetailsService {
 	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 		return null;
 	}
-	public UserDetails loadUserById(Long userId){
-		Optional<User> optionalUser = userService.findById(userId);
-		if(optionalUser.isEmpty()) return null;
+	public UserDetails getUserById(Long userId){
+		Optional<User> userOptional = userService.findById(userId);
+		if(userOptional.isEmpty()) return null;
 		
-		User user = optionalUser.get();
-		List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-		userRoleService.findAllByUserId(user.getId()).forEach(userRole -> {
-			grantedAuthorities.add(new SimpleGrantedAuthority(userRole.getRole().name()));
-		});
+		List<GrantedAuthority> authorities = new ArrayList<>();
+		List<UserRole> userRoles = userRoleService.getAllUserRoleByUserId(userId);
+		userRoles.forEach(userRole -> authorities.add(new SimpleGrantedAuthority(userRole.getRole().name())));
 		
 		return org.springframework.security.core.userdetails.User.builder()
-		                                                         .username(user.getEmail())
-		                                                         .password(user.getPassword())
-		                                                         .authorities(grantedAuthorities)
+		                                                         .username(userOptional.get().getEmail())
+		                                                         .password(userOptional.get().getPassword())
 		                                                         .accountExpired(false)
 		                                                         .accountLocked(false)
 		                                                         .credentialsExpired(false)
 		                                                         .disabled(false)
+		                                                         .authorities(authorities)
 		                                                         .build();
 	}
 }

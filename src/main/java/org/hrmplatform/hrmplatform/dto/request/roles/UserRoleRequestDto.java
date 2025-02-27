@@ -8,5 +8,5 @@ import org.hrmplatform.hrmplatform.enums.Role;
 
 public record UserRoleRequestDto(Long userId,
                                  @NotNull(message = "Role is required")
-                                 String role) {
+                                 Role  role) {
 }

@@ -1,5 +1,11 @@
 server:
   port: 9090
+#  tomcat:
+#    basedir: C:/temp
+#    accesslog:
+#      enabled: false
+#    uri-encoding: UTF-8
+#    max-http-header-size: 8192
 
 spring:
   mail:
@@ -22,16 +28,11 @@ spring:
     url: ${HRM_POSTGRE_URL}
     username: ${HRM_POSTGRE_USERNAME}
     password: ${HRM_POSTGRE_PASSWORD}
-
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
 
-#security:
-#  jwt:
-#    secret:
-#    expiration:
 hrmplatform:
   jwt:
     secret-key: ${HRM_JWT_SECRETKEY}

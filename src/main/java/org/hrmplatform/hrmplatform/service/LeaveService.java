@@ -6,10 +6,12 @@ import lombok.RequiredArgsConstructor;
 import org.hrmplatform.hrmplatform.dto.request.LeaveRequestDto;
 import org.hrmplatform.hrmplatform.entity.LeaveRequest;
 import org.hrmplatform.hrmplatform.entity.User;
+import org.hrmplatform.hrmplatform.entity.UserRole;
 import org.hrmplatform.hrmplatform.enums.Role;
 import org.hrmplatform.hrmplatform.enums.Status;
 import org.hrmplatform.hrmplatform.repository.LeaveRepository;
 import org.hrmplatform.hrmplatform.repository.UserRepository;
+import org.hrmplatform.hrmplatform.repository.UserRoleRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,6 +22,7 @@ import java.util.List;
 public class LeaveService {
 	private final LeaveRepository leaveRepository;
 	private final UserRepository userRepository;
+	private final UserRoleRepository userRoleRepository;
 	
 	// Yeni izin talebi oluşturma
 	public LeaveRequest requestLeave(@Valid LeaveRequestDto leaveRequestDto) {
@@ -60,8 +63,8 @@ public class LeaveService {
 	
 	// İzin talebini kabul etme (Yönetici tarafından)
 	public LeaveRequest acceptLeaveRequest(Long managerId, Long employeeId) {
-		User manager = userRepository.findById(managerId)
-		                             .orElseThrow(() -> new EntityNotFoundException("Yönetici bulunamadı."));
+		UserRole manager = userRoleRepository.findById(managerId)
+		                                 .orElseThrow(() -> new EntityNotFoundException("Yönetici bulunamadı."));
 		
 		if (manager.getRole() == null || !manager.getRole().equals(Role.COMPANY_ADMIN)) {
 			throw new SecurityException("Yalnızca şirket yöneticileri izin taleplerini onaylayabilir.");
@@ -80,7 +83,7 @@ public class LeaveService {
 	
 	// İzin talebini reddetme (Yönetici tarafından)
 	public LeaveRequest rejectLeaveRequest(Long managerId, Long employeeId) {
-		User manager = userRepository.findById(managerId)
+		UserRole manager = userRoleRepository.findById(managerId)
 		                             .orElseThrow(() -> new EntityNotFoundException("Yönetici bulunamadı."));
 		
 		if (manager.getRole() == null || !manager.getRole().equals(Role.COMPANY_ADMIN)) {

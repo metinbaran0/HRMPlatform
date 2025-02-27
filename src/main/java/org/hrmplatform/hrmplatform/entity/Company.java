@@ -26,6 +26,11 @@ public class Company {
     private String email;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String contactPerson;
+
+    private String sector;
+    private Integer employeeCount;
+
 
     private boolean emailVerified; // Mail doğrulama durumu
 

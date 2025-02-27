@@ -22,7 +22,7 @@ public enum ErrorType implements ErrorTypeInterface {
 	ACTIVATION_CODE_EXPIRED(456,"Activation code expired" , HttpStatus.BAD_REQUEST ),
 	USER_ALREADY_ACTIVATED(123, "", HttpStatus.BAD_REQUEST),
 
-	UNAUTHORIZED_OPERATION(403, "Bu işlemi yapmak için yetkiniz yok.", HttpStatus.FORBIDDEN);
+	UNAUTHORIZED_OPERATION(403, "Bu işlemi yapmak için yetkiniz yok.", HttpStatus.FORBIDDEN),
 
 	EMPLOYEE_NOT_FOUND(404, "Çalışan bulunamadı", HttpStatus.NOT_FOUND);
 

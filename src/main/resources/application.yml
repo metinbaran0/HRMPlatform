@@ -1,11 +1,11 @@
 server:
   port: 9090
-#  tomcat:
-#    basedir: C:/temp
-#    accesslog:
-#      enabled: false
-#    uri-encoding: UTF-8
-#    max-http-header-size: 8192
+  tomcat:
+    basedir: C:/temp
+    accesslog:
+      enabled: false
+    uri-encoding: UTF-8
+    max-http-header-size: 8192
 
 spring:
   mail:

@@ -31,6 +31,7 @@ public class Company {
     private String sector;
     private Integer employeeCount;
 
+
     private boolean emailVerified; // Mail doğrulama durumu
 
     @Enumerated(EnumType.STRING)

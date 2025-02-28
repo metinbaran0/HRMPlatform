@@ -176,6 +176,10 @@ public class CompanyService {
         }
     }
 
+    public String findCompanyNameById(Long companyId) {
+       return companyRepository.findCompanyNameById(companyId);
+    }
+
     //  Mail Gönderme Metodu
 //    private void sendMail(String to, String subject, String text) {
 //        SimpleMailMessage message = new SimpleMailMessage();

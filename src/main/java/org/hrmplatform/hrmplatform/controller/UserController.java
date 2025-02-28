@@ -5,6 +5,7 @@ import org.hrmplatform.hrmplatform.dto.request.LoginRequestDto;
 import org.hrmplatform.hrmplatform.dto.request.RegisterRequestDto;
 import org.hrmplatform.hrmplatform.dto.request.ResetPasswordRequestDto;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
+import org.hrmplatform.hrmplatform.dto.response.DoLoginResponseDto;
 import org.hrmplatform.hrmplatform.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,8 @@ import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
 import static org.hrmplatform.hrmplatform.constant.EndPoints.AUTH;
 
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 /**
  * Kullanıcı kimlik doğrulama işlemlerini yöneten REST API Controller sınıfıdır.
@@ -62,9 +65,14 @@ public class UserController {
      * @return JWT token
      */
     @PostMapping(DOLOGIN)
-    public ResponseEntity<String> doLogin(@RequestBody @Valid LoginRequestDto request) {
-        String token = userService.doLogin(request);
-        return ResponseEntity.ok(token);
+    public ResponseEntity<BaseResponse<DoLoginResponseDto>> doLogin(@RequestBody @Valid LoginRequestDto request) {
+        DoLoginResponseDto response = userService.doLogin(request);
+        return ResponseEntity.ok(BaseResponse.<DoLoginResponseDto>builder()
+                        .code(200)
+                        .data(response)
+                        .message("Giriş başarılı")
+                        .success(true)
+                .build());
     }
 
     /**

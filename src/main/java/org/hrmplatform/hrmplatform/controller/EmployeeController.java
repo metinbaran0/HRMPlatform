@@ -2,8 +2,11 @@ package org.hrmplatform.hrmplatform.controller;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.hrmplatform.hrmplatform.dto.request.CompanyDto;
 import org.hrmplatform.hrmplatform.dto.request.EmployeeRequestDto;
+import org.hrmplatform.hrmplatform.dto.request.EmployeeUpdateDto;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
+import org.hrmplatform.hrmplatform.dto.response.EmployeeResponseDto;
 import org.hrmplatform.hrmplatform.entity.Employee;
 import org.hrmplatform.hrmplatform.service.EmployeeService;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +28,7 @@ public class EmployeeController {
      * Tüm çalışanları getirir. (Sadece ADMIN)
      */
     @GetMapping(GET_ALL_EMPLOYEES)
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('SITE_ADMIN')")
     public ResponseEntity<BaseResponse<List<Employee>>> getAllEmployees(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -42,9 +45,9 @@ public class EmployeeController {
      * Yeni bir çalışan ekler. (Sadece ADMIN)
      */
     @PostMapping(CREATE_EMPLOYEE)
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<BaseResponse<Employee>> createEmployee(@RequestBody @Valid EmployeeRequestDto dto) {
-        Employee createdEmployee = employeeService.createEmployee(dto);
+    @PreAuthorize("hasAuthority('SITE_ADMIN')")
+    public ResponseEntity<BaseResponse<EmployeeResponseDto>> createEmployee(@RequestBody @Valid EmployeeRequestDto dto) {
+        EmployeeResponseDto createdEmployee = employeeService.createEmployee(dto);
         return ResponseEntity.ok(new BaseResponse<>(
                 true,
                 "Employee created successfully",
@@ -52,21 +55,33 @@ public class EmployeeController {
                 createdEmployee));
     }
 
+
     /**
      * Var olan bir çalışanı günceller. (Sadece ADMIN)
      */
     @PutMapping(UPDATE_EMPLOYEE)
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<BaseResponse<Employee>> updateEmployee(@PathVariable Long id, @RequestBody Employee employee) {
-        Employee updatedEmployee = employeeService.updateEmployee(id, employee);
-        return ResponseEntity.ok(new BaseResponse<>(true, "Employee updated successfully", 200, updatedEmployee));
+    @PreAuthorize("hasAuthority('SITE_ADMIN')")
+    public ResponseEntity<BaseResponse<Boolean>> updateEmployee(
+            @PathVariable Long id,
+            @Valid @RequestBody EmployeeUpdateDto employee) {
+
+        employeeService.updateEmployee(id, employee);
+        return ResponseEntity.ok(BaseResponse.<Boolean>builder()
+                .code(200)
+                .message("personel başarıyla güncellendi")
+                .success(true)
+                .data(true)
+                .build());
+
+
     }
+
 
     /**
      * Çalışanı siler. (Sadece ADMIN)
      */
     @DeleteMapping(DELETE_EMPLOYEE)
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('SITE_ADMIN')")
     public ResponseEntity<BaseResponse<Void>> deleteEmployee(@PathVariable Long id) {
         employeeService.deleteEmployee(id);
         return ResponseEntity.ok(new BaseResponse<>(true, "Employee deleted successfully", 200, null));
@@ -76,7 +91,7 @@ public class EmployeeController {
      * Çalışanın aktif/pasif durumunu değiştirir. (Sadece ADMIN)
      */
     @PutMapping(CHANGE_EMPLOYEE_STATUS)
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('SITE_ADMIN')")
     public ResponseEntity<BaseResponse<Employee>> changeEmployeeStatus(@PathVariable Long id) {
         Employee employee = employeeService.changeEmployeeStatus(id);
         return ResponseEntity.ok(new BaseResponse<>(true, "Employee status updated successfully", 200, employee));

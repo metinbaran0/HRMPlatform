@@ -17,7 +17,7 @@ public class EndPoints {
 
 	public static final String LEAVE =ROOT+ "/leave";
 	
-	public static final String AUTH = API + "/auth"; // Base path olarak auth eklendi
+	public static final String AUTH = ROOT + "/auth"; // Base path olarak auth eklendi
 	
 	// USER
 	public static final String REGISTER = "/register";
@@ -46,15 +46,15 @@ public class EndPoints {
 	public static final String DELETEUSERROLE = "/userrole/delete/{userId}";
 
 	//COMPANY
-	public static final String COMPANY = "/company";
-	public static final String FINDALLCOMPANY =COMPANY+ "/find-all-company";
-	public static final String FINDBYCOMPANYID =COMPANY+ "/find-byid-company";
-	public static final String ADDCOMPANY =COMPANY+ "/add-company";
-	public static final String UPDATECOMPANY =COMPANY+ "/update-company";
-	public static final String DELETECOMPANY =COMPANY+ "/delete-company";
-	public static final String PENDING =COMPANY+ "/pending-company";
-	public static final String APPROVE =COMPANY+ "/approve-company";
-	public static final String REJECT =COMPANY+ "/reject-company";
+	public static final String COMPANY = ROOT+"/company";
+	public static final String FINDALLCOMPANY ="/find-all-company";
+	public static final String FINDBYCOMPANYID ="/find-byid-company";
+	public static final String ADDCOMPANY ="/add-company";
+	public static final String UPDATECOMPANY ="/update-company";
+	public static final String DELETECOMPANY ="/delete-company";
+	public static final String PENDING ="/pending-company";
+	public static final String APPROVE ="/approve-company";
+	public static final String REJECT ="/reject-company";
 	
 		//LEAVEREQUEST
 	
@@ -72,15 +72,3 @@ public class EndPoints {
 	public static final String CHANGE_EMPLOYEE_STATUS =  "change-/{id}/status";
 
 }
-
-
-	
-
-
-
-
-
-
-
-
-

@@ -37,3 +37,4 @@ hrmplatform:
   jwt:
     secret-key: ${HRM_JWT_SECRETKEY}
     issuer: ${HRM_JWT_ISSUER}
+  siteAdminEmail: hrmplatform00@gmail.com

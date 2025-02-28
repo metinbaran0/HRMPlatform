@@ -25,7 +25,6 @@ public class EmployeeController {
      * Tüm çalışanları getirir. (Sadece ADMIN)
      */
     @GetMapping(GET_ALL_EMPLOYEES)
-    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<BaseResponse<List<Employee>>> getAllEmployees(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -42,7 +41,6 @@ public class EmployeeController {
      * Yeni bir çalışan ekler. (Sadece ADMIN)
      */
     @PostMapping(CREATE_EMPLOYEE)
-    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<BaseResponse<Employee>> createEmployee(@RequestBody @Valid EmployeeRequestDto dto) {
         Employee createdEmployee = employeeService.createEmployee(dto);
         return ResponseEntity.ok(new BaseResponse<>(
@@ -56,7 +54,6 @@ public class EmployeeController {
      * Var olan bir çalışanı günceller. (Sadece ADMIN)
      */
     @PutMapping(UPDATE_EMPLOYEE)
-    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<BaseResponse<Employee>> updateEmployee(@PathVariable Long id, @RequestBody Employee employee) {
         Employee updatedEmployee = employeeService.updateEmployee(id, employee);
         return ResponseEntity.ok(new BaseResponse<>(true, "Employee updated successfully", 200, updatedEmployee));
@@ -66,7 +63,6 @@ public class EmployeeController {
      * Çalışanı siler. (Sadece ADMIN)
      */
     @DeleteMapping(DELETE_EMPLOYEE)
-    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<BaseResponse<Void>> deleteEmployee(@PathVariable Long id) {
         employeeService.deleteEmployee(id);
         return ResponseEntity.ok(new BaseResponse<>(true, "Employee deleted successfully", 200, null));
@@ -76,7 +72,6 @@ public class EmployeeController {
      * Çalışanın aktif/pasif durumunu değiştirir. (Sadece ADMIN)
      */
     @PutMapping(CHANGE_EMPLOYEE_STATUS)
-    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<BaseResponse<Employee>> changeEmployeeStatus(@PathVariable Long id) {
         Employee employee = employeeService.changeEmployeeStatus(id);
         return ResponseEntity.ok(new BaseResponse<>(true, "Employee status updated successfully", 200, employee));

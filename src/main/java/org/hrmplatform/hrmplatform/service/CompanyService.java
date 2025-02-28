@@ -12,16 +12,20 @@ import org.hrmplatform.hrmplatform.exception.ErrorType;
 import org.hrmplatform.hrmplatform.exception.HRMPlatformException;
 import org.hrmplatform.hrmplatform.mapper.CompanyMapper;
 import org.hrmplatform.hrmplatform.repository.CompanyRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +34,12 @@ public class CompanyService {
 
     private final CompanyRepository companyRepository;
     private final CompanyMapper companyMapper;
-
+    
+    @Autowired
+    private EmailService emailService;
+    
+    @Value("${hrmplatform.siteAdminEmail}")
+    private String siteAdminEmail;
     //tüm şirketleri getirme
     public List<Company> findAllCompanies() {
         return companyRepository.findAll();
@@ -44,8 +53,23 @@ public class CompanyService {
     //şirket ekleme
     public void addCompany(@Valid CompanyDto companyDto) {
         Company company = companyMapper.fromCompanyDto(companyDto);
+        
+        // Benzersiz bir doğrulama tokeni oluştur
+        company.setEmailVerificationToken(UUID.randomUUID().toString());
+        company.setTokenExpirationTime(LocalDateTime.now().plusHours(24)); // 24 saat geçerli
+        
+        
         companyRepository.save(company);
+        
+        //  E-posta doğrulama bağlantısını gönder
+        String verificationLink = "http://localhost:9090/api/company/verify-email?token=" + company.getEmailVerificationToken();
+        emailService.sendEmail(
+                company.getEmail(),
+                "E-posta Doğrulama",
+                "Lütfen e-posta adresinizi doğrulamak için aşağıdaki bağlantıya tıklayın:\n" + verificationLink
+        );
     }
+
 
 //    public void updateCompany(Long id, @Valid CompanyDto companyDto) {
 //        Company company = companyRepository.findById(id)

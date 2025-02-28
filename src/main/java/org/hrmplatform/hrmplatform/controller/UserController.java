@@ -64,7 +64,7 @@ public class UserController {
     @PostMapping(DOLOGIN)
     public ResponseEntity<String> doLogin(@RequestBody @Valid LoginRequestDto request) {
         String token = userService.doLogin(request);
-        return ResponseEntity.ok(token);
+        return ResponseEntity.ok(token);//baseResponse dönecek //logindto response dto kullanılacak
     }
 
     /**

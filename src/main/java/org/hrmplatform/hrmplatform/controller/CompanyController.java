@@ -28,9 +28,10 @@ import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 @RequestMapping(COMPANY)
 @RequiredArgsConstructor
 @CrossOrigin("*")
+
 public class CompanyController {
     private final CompanyService companyService;
-
+//findbyname ve token işemleri yapılacak
     //bütün şirketleri görme
     @GetMapping(FINDALLCOMPANY)
     public ResponseEntity<BaseResponse<List<Company>>> findAllCompanies() {
@@ -41,7 +42,7 @@ public class CompanyController {
                         .data(companies) // Listeyi buraya ekliyoruz
                         .message("Şirketler başarıyla getirildi")
                         .success(true)
-                        .build()
+                        .build()//state içerisine kaydedererek
         );
     }
 
@@ -71,6 +72,7 @@ public class CompanyController {
     }
 
     //Şirket ekleme
+    @PreAuthorize("hasAnyRole('SITE_ADMIN', 'COMPANY_ADMIN')")
     @PostMapping(ADDCOMPANY)
     public ResponseEntity<BaseResponse<Boolean>> addCompany(@RequestBody @Valid CompanyDto companyDto) {
         companyService.addCompany(companyDto);
@@ -84,7 +86,7 @@ public class CompanyController {
                         .build());
     }
 
-   /* @GetMapping("/verify-email")
+    @GetMapping("/verify-email")
     public ResponseEntity<BaseResponse<String>> verifyEmail(@RequestParam String token) {
         System.out.println("Token received: " + token);  // Log ekle
         companyService.verifyEmail(token);
@@ -94,7 +96,7 @@ public class CompanyController {
                 .success(true)
                 .data("Hesabınız onaylandı. Artık giriş yapabilirsiniz.")
                 .build());
-    }*/
+    }
 
     //şirket güncelleme
     @PutMapping(UPDATECOMPANY + "/{id}")

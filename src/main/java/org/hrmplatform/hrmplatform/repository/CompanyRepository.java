@@ -20,5 +20,5 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 
     List<Company> findBySubscriptionEndDateBeforeAndIsDeletedFalse(LocalDateTime date);
 
-   // Optional<Company> findByEmailVerificationToken(String token);
+    Optional<Company> findByEmailVerificationToken(String token);
 }

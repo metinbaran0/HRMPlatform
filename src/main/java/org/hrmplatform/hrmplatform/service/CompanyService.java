@@ -47,21 +47,21 @@ public class CompanyService {
     //şirket ekleme
     public void addCompany(@Valid CompanyDto companyDto) {
         Company company = companyMapper.fromCompanyDto(companyDto);
-/*
+
         // Benzersiz bir doğrulama tokeni oluştur
         company.setEmailVerificationToken(UUID.randomUUID().toString());
         company.setTokenExpirationTime(LocalDateTime.now().plusHours(24)); // 24 saat geçerli
-*/
+
 
         companyRepository.save(company);
 
         //  E-posta doğrulama bağlantısını gönder
-       /* String verificationLink = "http://localhost:8080/api/company/verify-email?token=" + company.getEmailVerificationToken();
+        String verificationLink = "http://localhost:9090/api/company/verify-email?token=" + company.getEmailVerificationToken();
         emailService.sendEmail(
                 company.getEmail(),
                 "E-posta Doğrulama",
                 "Lütfen e-posta adresinizi doğrulamak için aşağıdaki bağlantıya tıklayın:\n" + verificationLink
-        );*/
+        );
     }
 
 //     Bu kod ne yapıyor?
@@ -230,7 +230,7 @@ public class CompanyService {
 
     }
 
-   /* @Transactional
+    @Transactional
     public void verifyEmail(String token) {
         Company company = companyRepository.findByEmailVerificationToken(token)
                 .orElseThrow(() -> new HRMPlatformException(ErrorType.TOKEN_NOT_FOUND));
@@ -244,5 +244,5 @@ public class CompanyService {
         company.setTokenExpirationTime(null);
 
         companyRepository.save(company);
-    }*/
+    }
 }

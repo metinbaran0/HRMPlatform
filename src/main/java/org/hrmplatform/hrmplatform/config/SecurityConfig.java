@@ -31,6 +31,7 @@ public class SecurityConfig {
 					// Rol kontrolüne dayalı endpointler
 					.requestMatchers(EndPoints.ROOT + EndPoints.DEVELOPER + "/**")
 					.hasAnyAuthority("SITE_ADMIN", "COMPANY_ADMIN")  // Sadece SITE_ADMIN ve COMPANY_ADMIN erişebilir
+					//.requestMatchers("/v1/api/company/**").hasAnyRole("SITE_ADMIN", "COMPANY_ADMIN")
 					.anyRequest().authenticated();  // Diğer tüm istekler için oturum açma zorunluluğu
 		});
 		

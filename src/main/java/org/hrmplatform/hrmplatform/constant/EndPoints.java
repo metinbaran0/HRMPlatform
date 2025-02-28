@@ -16,6 +16,7 @@ public class EndPoints {
     public static final String USERROLE = ROOT + "/userrole";
 
     public static final String LEAVE = ROOT + "/leave";
+    public static final String COMPANY = ROOT + "/company";
 
     public static final String AUTH = API + "/auth"; // Base path olarak auth eklendi
 
@@ -45,7 +46,6 @@ public class EndPoints {
     public static final String DELETEUSERROLE = "/userrole/delete/{userId}";
 
     //COMPANY
-    public static final String COMPANY = "/company";
     public static final String FINDALLCOMPANY = "/find-all-company";
     public static final String FINDBYCOMPANYID = "/find-byid-company";
     public static final String ADDCOMPANY = "/add-company";

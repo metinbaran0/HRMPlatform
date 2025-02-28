@@ -23,10 +23,13 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     List<Company> findBySubscriptionEndDateBeforeAndIsDeletedFalse(LocalDateTime date);
 
 
+    Optional<Company> findByEmailVerificationToken(String token);
+
+
 
     @Query("SELECT c.name FROM Company c WHERE c.id = :companyId")
     String findCompanyNameById(@Param("companyId") Long companyId);
 
-   // Optional<Company> findByEmailVerificationToken(String token);
+
 
 }

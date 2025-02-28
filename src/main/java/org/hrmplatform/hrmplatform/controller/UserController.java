@@ -68,14 +68,15 @@ public class UserController {
     public ResponseEntity<BaseResponse<DoLoginResponseDto>> doLogin(@RequestBody @Valid LoginRequestDto request) {
         DoLoginResponseDto response = userService.doLogin(request);
         return ResponseEntity.ok(BaseResponse.<DoLoginResponseDto>builder()
-                        .code(200)
-                        .data(response)
-                        .message("Giriş başarılı")
-                        .success(true)
-                .build());
 
+                                             .code(200)
+                                             .data(response)
+                                             .message("Giriş başarılı")
+                                             .success(true)
+                                             .build());
     }
-
+    
+    
     /**
      * Kullanıcıyı aktivasyon kodu ile aktifleştirir.
      *

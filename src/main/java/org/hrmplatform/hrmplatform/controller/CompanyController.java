@@ -190,6 +190,9 @@ public class CompanyController {
         );
     }
 
+
+}
+
     //Üyelik Süresi Dolan Şirketin Erişimini Kısıtlama
     @PatchMapping(SUBSCRIPTION + "/{id}/expire")
     public ResponseEntity<BaseResponse<String>> expireSubscription(@PathVariable Long id) {
@@ -206,3 +209,4 @@ public class CompanyController {
 
 
 }
+

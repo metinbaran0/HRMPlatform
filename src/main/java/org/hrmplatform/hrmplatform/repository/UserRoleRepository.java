@@ -2,12 +2,14 @@ package org.hrmplatform.hrmplatform.repository;
 
 
 import org.hrmplatform.hrmplatform.dto.response.UserRoleResponseDto;
+import org.hrmplatform.hrmplatform.entity.User;
 import org.hrmplatform.hrmplatform.entity.UserRole;
 import org.hrmplatform.hrmplatform.enums.Role;
 import org.hrmplatform.hrmplatform.view.VwUserRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +39,7 @@ public interface UserRoleRepository extends JpaRepository<UserRole,Long> {
 
 
 	
-
 	
 	
+	UserRole findUserRoleById(Long userId);
 }

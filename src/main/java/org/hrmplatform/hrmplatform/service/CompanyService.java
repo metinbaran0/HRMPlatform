@@ -13,11 +13,14 @@ import org.hrmplatform.hrmplatform.exception.ErrorType;
 import org.hrmplatform.hrmplatform.exception.HRMPlatformException;
 import org.hrmplatform.hrmplatform.mapper.CompanyMapper;
 import org.hrmplatform.hrmplatform.repository.CompanyRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -32,7 +35,16 @@ public class CompanyService {
 
     private final CompanyRepository companyRepository;
     private final CompanyMapper companyMapper;
+
+    
+    @Autowired
+    private EmailService emailService;
+    
+    @Value("${hrmplatform.siteAdminEmail}")
+    private String siteAdminEmail;
+
     private final EmailService emailService; // EmailService enjekte edildi
+
 
     //tüm şirketleri getirme
     public List<Company> findAllCompanies() {
@@ -48,12 +60,23 @@ public class CompanyService {
     public void addCompany(@Valid CompanyDto companyDto) {
         Company company = companyMapper.fromCompanyDto(companyDto);
 
+        
+        // Benzersiz bir doğrulama tokeni oluştur
+        company.setEmailVerificationToken(UUID.randomUUID().toString());
+        company.setTokenExpirationTime(LocalDateTime.now().plusHours(24)); // 24 saat geçerli
+        
+        
+        companyRepository.save(company);
+        
+
+
         // Benzersiz bir doğrulama tokeni oluştur
         company.setEmailVerificationToken(UUID.randomUUID().toString());
         company.setTokenExpirationTime(LocalDateTime.now().plusHours(24)); // 24 saat geçerli
 
 
         companyRepository.save(company);
+
 
         //  E-posta doğrulama bağlantısını gönder
         String verificationLink = "http://localhost:9090/api/company/verify-email?token=" + company.getEmailVerificationToken();
@@ -64,10 +87,22 @@ public class CompanyService {
         );
     }
 
+
+
+//    public void updateCompany(Long id, @Valid CompanyDto companyDto) {
+//        Company company = companyRepository.findById(id)
+//                .orElseThrow(() -> new RuntimeException("Şirket bulunamadı"));
+//        // Mevcut company nesnesini güncelle
+//        companyMapper.updateCompanyFromDto(companyDto, company);
+//
+//        companyRepository.save(company);
+//    }
+
 //     Bu kod ne yapıyor?
 //     UUID.randomUUID().toString() ile rastgele bir doğrulama kodu üretiyoruz.
 //    tokenExpirationTime ile 24 saatlik süre veriyoruz.
 //    Kullanıcının e-posta adresine doğrulama linki gönderiyoruz.
+
 
     /* public void updateCompany(Long id, @Valid CompanyDto companyDto) {
          Company company = companyRepository.findById(id)

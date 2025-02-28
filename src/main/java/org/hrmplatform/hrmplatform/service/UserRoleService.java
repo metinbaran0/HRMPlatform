@@ -114,4 +114,10 @@ public class UserRoleService {
 		return userRoleRepository.findUserRoleById(userId);
 	}
 	
+	
+	
+	
+	public UserRole findUserRoleById(Long userId) {
+		return userRoleRepository.findUserRoleById(userId);
+	}
 }

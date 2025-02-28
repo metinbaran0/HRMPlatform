@@ -22,5 +22,6 @@ public record EmployeeRequestDto (
     String phone,
 
     @NotBlank(message = "Position cannot be empty")
-    String position
+    String position,
+    boolean isActive
 ){}

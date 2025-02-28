@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.hrmplatform.hrmplatform.dto.request.LoginRequestDto;
 import org.hrmplatform.hrmplatform.dto.request.RegisterRequestDto;
 import org.hrmplatform.hrmplatform.dto.request.ResetPasswordRequestDto;
@@ -12,6 +13,7 @@ import org.hrmplatform.hrmplatform.entity.User;
 import org.hrmplatform.hrmplatform.entity.UserRole;
 import org.hrmplatform.hrmplatform.exception.*;
 import org.hrmplatform.hrmplatform.repository.UserRepository;
+import org.springframework.context.annotation.Lazy;
 
 import org.hrmplatform.hrmplatform.util.JwtManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,7 +82,6 @@ public class UserService {
 		}
 	}
 
-
 	public DoLoginResponseDto doLogin(@Valid LoginRequestDto dto) {
 		User user = userRepository.findByEmail(dto.email())
 				.orElseThrow(() -> new InvalidArgumentException(CustomErrorType.INVALID_EMAIL_OR_PASSWORD));
@@ -88,6 +89,17 @@ public class UserService {
 		if (!passwordEncoder.matches(dto.password(), user.getPassword())) {
 			throw new InvalidArgumentException(CustomErrorType.INVALID_EMAIL_OR_PASSWORD);
 		}
+
+		
+		// JWT oluşturma
+		String token = jwtManager.createToken(user.getId());
+		
+		UserRole role = userRoleService.findUserRoleById(user.getId());
+		// Loglama işlemi
+		log.info("Generated token for user ID {}: {}", user.getId(), token);
+		
+		return new DoLoginResponseDto(role, token);
+
 
 		// JWT oluşturma
 		String token = jwtManager.createToken(user.getId());
@@ -97,6 +109,7 @@ public class UserService {
 		log.info("Generated token for user ID {}: {}", user.getId(), token);
 
 		return new DoLoginResponseDto(role,token);
+
 	}
 	
 	

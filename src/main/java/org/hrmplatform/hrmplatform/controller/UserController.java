@@ -16,6 +16,8 @@ import static org.hrmplatform.hrmplatform.constant.EndPoints.AUTH;
 
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 /**
  * Kullanıcı kimlik doğrulama işlemlerini yöneten REST API Controller sınıfıdır.
  * Güvenlik işlemleri için sorumlu sınıf.
@@ -66,12 +68,12 @@ public class UserController {
     public ResponseEntity<BaseResponse<DoLoginResponseDto>> doLogin(@RequestBody @Valid LoginRequestDto request) {
         DoLoginResponseDto response = userService.doLogin(request);
         return ResponseEntity.ok(BaseResponse.<DoLoginResponseDto>builder()
+
                                              .code(200)
                                              .data(response)
                                              .message("Giriş başarılı")
                                              .success(true)
                                              .build());
-        
     }
     
     

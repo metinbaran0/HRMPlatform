@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.hrmplatform.hrmplatform.dto.request.CompanyDto;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
+import org.hrmplatform.hrmplatform.dto.response.SubscriptionResponse;
 import org.hrmplatform.hrmplatform.entity.Company;
 import org.hrmplatform.hrmplatform.enums.Status;
 import org.hrmplatform.hrmplatform.enums.SubscriptionPlan;
@@ -34,12 +35,17 @@ public class CompanyService {
 
     private final CompanyRepository companyRepository;
     private final CompanyMapper companyMapper;
+
     
     @Autowired
     private EmailService emailService;
     
     @Value("${hrmplatform.siteAdminEmail}")
     private String siteAdminEmail;
+
+    private final EmailService emailService; // EmailService enjekte edildi
+
+
     //tüm şirketleri getirme
     public List<Company> findAllCompanies() {
         return companyRepository.findAll();
@@ -53,6 +59,7 @@ public class CompanyService {
     //şirket ekleme
     public void addCompany(@Valid CompanyDto companyDto) {
         Company company = companyMapper.fromCompanyDto(companyDto);
+
         
         // Benzersiz bir doğrulama tokeni oluştur
         company.setEmailVerificationToken(UUID.randomUUID().toString());
@@ -61,6 +68,16 @@ public class CompanyService {
         
         companyRepository.save(company);
         
+
+
+        // Benzersiz bir doğrulama tokeni oluştur
+        company.setEmailVerificationToken(UUID.randomUUID().toString());
+        company.setTokenExpirationTime(LocalDateTime.now().plusHours(24)); // 24 saat geçerli
+
+
+        companyRepository.save(company);
+
+
         //  E-posta doğrulama bağlantısını gönder
         String verificationLink = "http://localhost:9090/api/company/verify-email?token=" + company.getEmailVerificationToken();
         emailService.sendEmail(
@@ -69,6 +86,7 @@ public class CompanyService {
                 "Lütfen e-posta adresinizi doğrulamak için aşağıdaki bağlantıya tıklayın:\n" + verificationLink
         );
     }
+
 
 
 //    public void updateCompany(Long id, @Valid CompanyDto companyDto) {
@@ -80,7 +98,20 @@ public class CompanyService {
 //        companyRepository.save(company);
 //    }
 
+//     Bu kod ne yapıyor?
+//     UUID.randomUUID().toString() ile rastgele bir doğrulama kodu üretiyoruz.
+//    tokenExpirationTime ile 24 saatlik süre veriyoruz.
+//    Kullanıcının e-posta adresine doğrulama linki gönderiyoruz.
 
+
+    /* public void updateCompany(Long id, @Valid CompanyDto companyDto) {
+         Company company = companyRepository.findById(id)
+                 .orElseThrow(() -> new RuntimeException("Şirket bulunamadı"));
+         // Mevcut company nesnesini güncelle
+         companyMapper.updateCompanyFromDto(companyDto, company);
+
+         companyRepository.save(company);
+     }*/
     /*
     public Company updateCompany(Long id, CompanyDto dto) {
            // Mevcut şirketi bul
@@ -152,15 +183,15 @@ public class CompanyService {
         company.setStatus(Status.APPROVED);
 
 
-        //email ile bildirim alınabilir onaylandı olarak..
-//        sendMail(company.getEmail(), "Şirket Başvurunuz Onaylandı",
-//                "Tebrikler, şirket başvurunuz onaylandı! Platformumuza giriş yapabilirsiniz.");
-
+        emailService.sendEmail(
+                company.getEmail(), "Şirket Başvurunuz Onaylandı",
+                "Tebrikler, " + company.getName() + " şirketinizin başvurusu onaylandı!" +
+                        "Platformumuza giriş yaparak yönetim işlemlerini gerçekleştirebilirsiniz.");
 
         return companyRepository.save(company);
 
-
     }
+
     @Transactional
     public Company rejectCompany(Long id) {
         Company company = companyRepository.findById(id)
@@ -171,19 +202,30 @@ public class CompanyService {
         }
         //  Soft Delete işlemi
         company.setDeleted(true);
-        companyRepository.save(company);
-
-        //  Reddetme maili gönder
-//        sendMail(company.getEmail(), "Şirket Başvurunuz Reddedildi",
-//                "Üzgünüz, başvurunuz reddedildi. Sebep: " + reason);
-
         company.setStatus(Status.REJECTED);
+
+
+        // Şirket sahibine red maili gönder
+
+        emailService.sendEmail(
+                company.getEmail(),
+                "Şirket Başvurunuz Reddedildi",
+                "Üzgünüz, " + company.getName() + " şirketinizin başvurusu reddedildi." +
+                        "Detaylı bilgi için destek ekibimizle iletişime geçebilirsiniz."
+        );
         return companyRepository.save(company);
     }
+
     @Transactional
     public Company setSubscriptionPlan(Long id, SubscriptionPlan plan) {
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new HRMPlatformException(ErrorType.COMPANY_NOT_FOUND));
+
+        // Eğer üyelik planı zaten aynı ise güncellemeye gerek yok
+        if (company.getSubscriptionPlan() == plan) {
+            throw new HRMPlatformException(ErrorType.ALREADY_SUBSCRIBED);
+        }
+
         company.setSubscriptionPlan(plan);
         return companyRepository.save(company);
     }
@@ -191,13 +233,18 @@ public class CompanyService {
     // Üyelik süresi dolan şirketleri otomatik olarak devre dışı bırak
     @Scheduled(cron = "0 0 0 * * ?") // Her gece çalışır
     @Transactional
-    public void checkExpiredMembership(){
+    public void checkExpiredMembership() {
         List<Company> expiredCompanies = companyRepository.findBySubscriptionEndDateBeforeAndIsDeletedFalse(LocalDateTime.now());
 
         for (Company company : expiredCompanies) {
             company.setDeleted(false); // Şirketi devre dışı bırak
             companyRepository.save(company);
         }
+    }
+
+
+    public String findCompanyNameById(Long companyId) {
+       return companyRepository.findCompanyNameById(companyId);
     }
 
     //  Mail Gönderme Metodu
@@ -207,4 +254,46 @@ public class CompanyService {
 //        message.setSubject(subject);
 //        message.setText(text);
 //        mailSender.send(message);
+
+    public SubscriptionResponse getSubscriptionPlan(Long id) {
+        Company company = companyRepository.findById(id)
+                .orElseThrow(() -> new HRMPlatformException(ErrorType.COMPANY_NOT_FOUND));
+
+        return new SubscriptionResponse(company.getSubscriptionPlan(), company.getSubscriptionEndDate());
+    }
+
+    @Transactional
+    public void expireSubscription(Long id) {
+        Company company = companyRepository.findById(id)
+                .orElseThrow(() -> new HRMPlatformException(ErrorType.COMPANY_NOT_FOUND));
+
+        // Üyelik süresi kontrolü
+        if (company.getSubscriptionEndDate() == null || company.getSubscriptionEndDate().isAfter(LocalDateTime.now())) {
+            throw new HRMPlatformException(ErrorType.SUBSCRIPTION_NOT_EXPIRED);
+        }
+
+        // Şirketin erişimini kısıtla
+        company.setActive(false);
+        companyRepository.save(company);
+
+    }
+
+    @Transactional
+    public void verifyEmail(String token) {
+        Company company = companyRepository.findByEmailVerificationToken(token)
+                .orElseThrow(() -> new HRMPlatformException(ErrorType.TOKEN_NOT_FOUND));
+
+        if (company.getTokenExpirationTime().isBefore(LocalDateTime.now())) {
+            throw new HRMPlatformException(ErrorType.TOKEN_EXPIRED);
+        }
+
+        company.setEmailVerified(true);
+        company.setEmailVerificationToken(null); //  Tokeni temizliyoruz
+        company.setTokenExpirationTime(null);
+
+        companyRepository.save(company);
+
+    }
+
+
 }

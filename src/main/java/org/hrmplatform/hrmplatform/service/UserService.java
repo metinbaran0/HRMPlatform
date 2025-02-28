@@ -1,6 +1,8 @@
 package org.hrmplatform.hrmplatform.service;
 
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.hrmplatform.hrmplatform.dto.request.LoginRequestDto;
@@ -15,21 +17,24 @@ import org.springframework.context.annotation.Lazy;
 
 import org.hrmplatform.hrmplatform.util.JwtManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class UserService {	
 	private final UserRepository userRepository;
 	private final JwtManager jwtManager;
+
 	@Lazy
 	private UserRoleService userRoleService;
+
 	
 	@Autowired
 	private PasswordEncoder passwordEncoder;
@@ -76,15 +81,15 @@ public class UserService {
 			throw new HRMPlatformException(ErrorType.EMAIL_SENDING_FAILED);
 		}
 	}
-	
-	
+
 	public DoLoginResponseDto doLogin(@Valid LoginRequestDto dto) {
 		User user = userRepository.findByEmail(dto.email())
-		                          .orElseThrow(() -> new InvalidArgumentException(CustomErrorType.INVALID_EMAIL_OR_PASSWORD));
-		
+				.orElseThrow(() -> new InvalidArgumentException(CustomErrorType.INVALID_EMAIL_OR_PASSWORD));
+
 		if (!passwordEncoder.matches(dto.password(), user.getPassword())) {
 			throw new InvalidArgumentException(CustomErrorType.INVALID_EMAIL_OR_PASSWORD);
 		}
+
 		
 		// JWT oluşturma
 		String token = jwtManager.createToken(user.getId());
@@ -94,6 +99,17 @@ public class UserService {
 		log.info("Generated token for user ID {}: {}", user.getId(), token);
 		
 		return new DoLoginResponseDto(role, token);
+
+
+		// JWT oluşturma
+		String token = jwtManager.createToken(user.getId());
+
+		UserRole role = userRoleService.findUserRoleById(user.getId());
+		// Loglama işlemi
+		log.info("Generated token for user ID {}: {}", user.getId(), token);
+
+		return new DoLoginResponseDto(role,token);
+
 	}
 	
 	

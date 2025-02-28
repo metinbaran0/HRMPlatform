@@ -4,7 +4,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.datafaker.providers.base.Bool;
 import org.hrmplatform.hrmplatform.dto.request.CompanyDto;
+import org.hrmplatform.hrmplatform.dto.request.SubscriptionPlanRequest;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
+import org.hrmplatform.hrmplatform.dto.response.SubscriptionResponse;
 import org.hrmplatform.hrmplatform.entity.Company;
 import org.hrmplatform.hrmplatform.enums.SubscriptionPlan;
 import org.hrmplatform.hrmplatform.exception.ErrorType;
@@ -26,9 +28,10 @@ import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 @RequestMapping(COMPANY)
 @RequiredArgsConstructor
 @CrossOrigin("*")
+
 public class CompanyController {
     private final CompanyService companyService;
-
+//findbyname ve token işemleri yapılacak
     //bütün şirketleri görme
     @GetMapping(FINDALLCOMPANY)
     public ResponseEntity<BaseResponse<List<Company>>> findAllCompanies() {
@@ -39,7 +42,7 @@ public class CompanyController {
                         .data(companies) // Listeyi buraya ekliyoruz
                         .message("Şirketler başarıyla getirildi")
                         .success(true)
-                        .build()
+                        .build()//state içerisine kaydedererek
         );
     }
 
@@ -69,6 +72,7 @@ public class CompanyController {
     }
 
     //Şirket ekleme
+    @PreAuthorize("hasAnyRole('SITE_ADMIN', 'COMPANY_ADMIN')")
     @PostMapping(ADDCOMPANY)
     public ResponseEntity<BaseResponse<Boolean>> addCompany(@RequestBody @Valid CompanyDto companyDto) {
         companyService.addCompany(companyDto);
@@ -80,6 +84,18 @@ public class CompanyController {
                         .success(true)
                         .data(true)
                         .build());
+    }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<BaseResponse<String>> verifyEmail(@RequestParam String token) {
+        System.out.println("Token received: " + token);  // Log ekle
+        companyService.verifyEmail(token);
+        return ResponseEntity.ok(BaseResponse.<String>builder()
+                .code(200)
+                .message("E-posta başarıyla doğrulandı")
+                .success(true)
+                .data("Hesabınız onaylandı. Artık giriş yapabilirsiniz.")
+                .build());
     }
 
     //şirket güncelleme
@@ -142,16 +158,55 @@ public class CompanyController {
                 .build());
     }
 
-    //üyelik planı
-
-    public ResponseEntity<BaseResponse<Company>> setSubscriptionPlan(@PathVariable Long id, @RequestParam SubscriptionPlan plan) {
-       Company updatedCompany= companyService.setSubscriptionPlan(id,plan);
-       return ResponseEntity.ok(BaseResponse.<Company>builder()
-               .code(200)
-               .message("Şirket üyelik planı güncellendi")
-               .success(true)
-               .data(updatedCompany)
-               .build());
+    //üyelik planı gğncelleme
+    @PostMapping(SUBSCRIPTION + "/{id}")
+    public ResponseEntity<BaseResponse<Company>> setSubscriptionPlan(
+            @PathVariable Long id,
+            @RequestBody SubscriptionPlanRequest request
+    ) {
+        Company updatedCompany = companyService.setSubscriptionPlan(id, request.getPlan());
+        return ResponseEntity.ok(
+                BaseResponse.<Company>builder()
+                        .code(200)
+                        .message("Şirket üyelik planı güncellendi")
+                        .success(true)
+                        .data(updatedCompany)
+                        .build()
+        );
     }
 
+    //bir şirketin üyelik planlanını getirir
+    @PreAuthorize("hasAnyAuthority('SITE_ADMIN', 'COMPANY_ADMIN')")
+    @GetMapping(SUBSCRIPTION + "/{id}")
+    public ResponseEntity<BaseResponse<SubscriptionResponse>> getSubscriptionPlan(@PathVariable Long id) {
+        SubscriptionResponse subscription = companyService.getSubscriptionPlan(id);
+        return ResponseEntity.ok(
+                BaseResponse.<SubscriptionResponse>builder()
+                        .code(200)
+                        .message("Şirket üyelik planı getirildi")
+                        .success(true)
+                        .data(subscription)
+                        .build()
+        );
+    }
+
+
 }
+
+    //Üyelik Süresi Dolan Şirketin Erişimini Kısıtlama
+    @PatchMapping(SUBSCRIPTION + "/{id}/expire")
+    public ResponseEntity<BaseResponse<String>> expireSubscription(@PathVariable Long id) {
+        companyService.expireSubscription(id);
+        return ResponseEntity.ok(
+                BaseResponse.<String>builder()
+                        .code(200)
+                        .message("Şirketin üyeliği sona erdirildi")
+                        .success(true)
+                        .data("Şirketin erişimi kısıtlandı")
+                        .build()
+        );
+    }
+
+
+}
+

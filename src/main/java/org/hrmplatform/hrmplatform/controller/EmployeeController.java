@@ -2,8 +2,11 @@ package org.hrmplatform.hrmplatform.controller;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.hrmplatform.hrmplatform.dto.request.CompanyDto;
 import org.hrmplatform.hrmplatform.dto.request.EmployeeRequestDto;
+import org.hrmplatform.hrmplatform.dto.request.EmployeeUpdateDto;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
+import org.hrmplatform.hrmplatform.dto.response.EmployeeResponseDto;
 import org.hrmplatform.hrmplatform.entity.Employee;
 import org.hrmplatform.hrmplatform.service.EmployeeService;
 import org.springframework.http.ResponseEntity;
@@ -41,8 +44,9 @@ public class EmployeeController {
      * Yeni bir çalışan ekler. (Sadece ADMIN)
      */
     @PostMapping(CREATE_EMPLOYEE)
-    public ResponseEntity<BaseResponse<Employee>> createEmployee(@RequestBody @Valid EmployeeRequestDto dto) {
-        Employee createdEmployee = employeeService.createEmployee(dto);
+    public ResponseEntity<BaseResponse<EmployeeResponseDto>> createEmployee(@RequestBody @Valid EmployeeRequestDto dto) {
+        EmployeeResponseDto createdEmployee = employeeService.createEmployee(dto);
+
         return ResponseEntity.ok(new BaseResponse<>(
                 true,
                 "Employee created successfully",
@@ -50,14 +54,27 @@ public class EmployeeController {
                 createdEmployee));
     }
 
+
     /**
      * Var olan bir çalışanı günceller. (Sadece ADMIN)
      */
     @PutMapping(UPDATE_EMPLOYEE)
-    public ResponseEntity<BaseResponse<Employee>> updateEmployee(@PathVariable Long id, @RequestBody Employee employee) {
-        Employee updatedEmployee = employeeService.updateEmployee(id, employee);
-        return ResponseEntity.ok(new BaseResponse<>(true, "Employee updated successfully", 200, updatedEmployee));
+    public ResponseEntity<BaseResponse<Boolean>> updateEmployee(
+            @PathVariable Long id,
+            @Valid @RequestBody EmployeeUpdateDto employee) {
+
+        employeeService.updateEmployee(id, employee);
+        return ResponseEntity.ok(BaseResponse.<Boolean>builder()
+                .code(200)
+                .message("personel başarıyla güncellendi")
+                .success(true)
+                .data(true)
+                .build());
+
+
+
     }
+
 
     /**
      * Çalışanı siler. (Sadece ADMIN)

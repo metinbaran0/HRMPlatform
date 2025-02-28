@@ -26,8 +26,16 @@ public class Company {
     private String email;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String contactPerson;
+
+    private String sector;
+    private Integer employeeCount;
+
 
     private boolean emailVerified; // Mail doğrulama durumu
+
+   /* private String emailVerificationToken; //  Doğrulama tokeni
+    private LocalDateTime tokenExpirationTime; // Token geçerlilik süresi*/
 
     @Enumerated(EnumType.STRING)
     private Status status; // Şirketin başvuru durumu (Onaylandı, Reddedildi, Beklemede)
@@ -38,6 +46,9 @@ public class Company {
     private LocalDateTime subscriptionEndDate; // Üyelik bitiş tarihi
 
     private boolean isDeleted = false;  // Soft delete için alan
+
+    @Column(name = "is_active")
+    private boolean isActive = true;
 
     @PrePersist
     protected void onCreate() {
@@ -59,14 +70,20 @@ public class Company {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
     // Üyelik planını ayarla ve bitiş tarihini güncelle
     public void setSubscriptionPlan(SubscriptionPlan plan) {
         this.subscriptionPlan = plan;
         LocalDateTime now = LocalDateTime.now();
+
         if (plan == SubscriptionPlan.MONTHLY) {
             this.subscriptionEndDate = now.plusMonths(1);
         } else if (plan == SubscriptionPlan.YEARLY) {
             this.subscriptionEndDate = now.plusYears(1);
         }
     }
+
+
+
+
 }

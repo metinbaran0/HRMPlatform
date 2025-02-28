@@ -207,6 +207,19 @@ public class CompanyService {
         }
     }
 
+
+    public String findCompanyNameById(Long companyId) {
+       return companyRepository.findCompanyNameById(companyId);
+    }
+
+    //  Mail Gönderme Metodu
+//    private void sendMail(String to, String subject, String text) {
+//        SimpleMailMessage message = new SimpleMailMessage();
+//        message.setTo(to);
+//        message.setSubject(subject);
+//        message.setText(text);
+//        mailSender.send(message);
+
     public SubscriptionResponse getSubscriptionPlan(Long id) {
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new HRMPlatformException(ErrorType.COMPANY_NOT_FOUND));
@@ -245,4 +258,5 @@ public class CompanyService {
 
         companyRepository.save(company);
     }*/
+
 }

@@ -1,29 +1,38 @@
 package org.hrmplatform.hrmplatform.service;
 
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hrmplatform.hrmplatform.dto.request.LoginRequestDto;
 import org.hrmplatform.hrmplatform.dto.request.RegisterRequestDto;
 import org.hrmplatform.hrmplatform.dto.request.ResetPasswordRequestDto;
+import org.hrmplatform.hrmplatform.dto.response.DoLoginResponseDto;
 import org.hrmplatform.hrmplatform.entity.User;
+import org.hrmplatform.hrmplatform.entity.UserRole;
 import org.hrmplatform.hrmplatform.exception.*;
 import org.hrmplatform.hrmplatform.repository.UserRepository;
 
 import org.hrmplatform.hrmplatform.util.JwtManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class UserService {	
 	private final UserRepository userRepository;
 	private final JwtManager jwtManager;
+
+	@Lazy
+	private UserRoleService userRoleService;
+
 	
 	@Autowired
 	private PasswordEncoder passwordEncoder;
@@ -31,9 +40,10 @@ public class UserService {
 	@Autowired
 	private EmailService emailService;
 	
-	public UserService(UserRepository userRepository, JwtManager jwtManager) {
+	public UserService(UserRepository userRepository, JwtManager jwtManager, @Lazy UserRoleService userRoleService) {
 		this.userRepository = userRepository;
 		this.jwtManager = jwtManager;
+		this.userRoleService = userRoleService;
 	}
 	
 	public void register(@Valid RegisterRequestDto dto) {
@@ -69,23 +79,24 @@ public class UserService {
 			throw new HRMPlatformException(ErrorType.EMAIL_SENDING_FAILED);
 		}
 	}
-	
-	
-	public String doLogin(@Valid LoginRequestDto dto) {
+
+
+	public DoLoginResponseDto doLogin(@Valid LoginRequestDto dto) {
 		User user = userRepository.findByEmail(dto.email())
-		                          .orElseThrow(() -> new InvalidArgumentException(CustomErrorType.INVALID_EMAIL_OR_PASSWORD));
-		
+				.orElseThrow(() -> new InvalidArgumentException(CustomErrorType.INVALID_EMAIL_OR_PASSWORD));
+
 		if (!passwordEncoder.matches(dto.password(), user.getPassword())) {
 			throw new InvalidArgumentException(CustomErrorType.INVALID_EMAIL_OR_PASSWORD);
 		}
-		
-		// JWT oluşturma ve döndürme
+
+		// JWT oluşturma
 		String token = jwtManager.createToken(user.getId());
-		
+
+		UserRole role = userRoleService.findUserRoleById(user.getId());
 		// Loglama işlemi
 		log.info("Generated token for user ID {}: {}", user.getId(), token);
-		
-		return token;
+
+		return new DoLoginResponseDto(role,token);
 	}
 	
 	

@@ -21,15 +21,17 @@ public enum ErrorType implements ErrorTypeInterface {
 	EMAIL_SENDING_FAILED(789,"Mail gönderirken hata oluştu" ,HttpStatus.BAD_REQUEST ),
 
 
+	UNAUTHORIZED_OPERATION(403, "Bu işlemi yapmak için yetkiniz yok.", HttpStatus.FORBIDDEN),
 
 	ACTIVATION_CODE_EXPIRED(456,"Etkinleştirme kodunun süresi doldu" , HttpStatus.BAD_REQUEST ),
 	USER_ALREADY_ACTIVATED(123, "Kullanıcı zaten aktif", HttpStatus.BAD_REQUEST),
 	USER_EMAIL_NOT_VERIFIED(753 ,"Kullanıcı mail onaylanmamış",HttpStatus.BAD_REQUEST ),
 
-
-	UNAUTHORIZED_OPERATION(403, "Bu işlemi yapmak için yetkiniz yok.", HttpStatus.FORBIDDEN),
-
-	EMPLOYEE_NOT_FOUND(404, "Çalışan bulunamadı", HttpStatus.NOT_FOUND);
+	EMPLOYEE_NOT_FOUND(404, "Çalışan bulunamadı", HttpStatus.NOT_FOUND),
+	ALREADY_SUBSCRIBED(202, "Üyelik zaten güncel ",HttpStatus.BAD_REQUEST ),
+	SUBSCRIPTION_NOT_EXPIRED(101, "Abonelik sona ermedi",HttpStatus.BAD_REQUEST ),
+	TOKEN_EXPIRED(789,"token expired" ,HttpStatus.BAD_REQUEST ),
+	TOKEN_NOT_FOUND(456,"Token bulunamadı" ,HttpStatus.BAD_REQUEST );
 
    //kklkk
 

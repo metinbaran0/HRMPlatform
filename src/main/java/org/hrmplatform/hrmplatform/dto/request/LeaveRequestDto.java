@@ -12,6 +12,8 @@ public record LeaveRequestDto(
 		LocalDate endDate,
 		LeaveType leaveType,
 		@NotNull(message = "Çalışan ID boş olamaz.")
-		Long employeeId
+		Long employeeId,
+		String reason
+		
 ) {
 }

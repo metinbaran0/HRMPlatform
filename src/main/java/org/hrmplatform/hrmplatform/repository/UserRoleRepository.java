@@ -31,9 +31,15 @@ public interface UserRoleRepository extends JpaRepository<UserRole,Long> {
 			"FROM User u JOIN UserRole r ON u.id = r.userId " +
 			"WHERE r.role = :role ")
 	List<VwUserRole> findByRole(@Param("role") Role role);
+
 	List<UserRole> findByUserId(Long userId);
-	
-	
-	
+
+
 	UserRole findUserRoleById(Long userId);
+
+
+	
+	
+	
+	
 }

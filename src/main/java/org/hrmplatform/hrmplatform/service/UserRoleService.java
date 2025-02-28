@@ -109,11 +109,13 @@ public class UserRoleService {
 	public List<UserRole> getAllUserRoleByUserId(Long userId) {
 		return userRoleRepository.findByUserId(userId);
 	}
-	
-	
-	
-	
+
 	public UserRole findUserRoleById(Long userId) {
 		return userRoleRepository.findUserRoleById(userId);
 	}
+	
+	
+	
+	
+	
 }

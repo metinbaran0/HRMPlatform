@@ -6,6 +6,7 @@ import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
 import org.hrmplatform.hrmplatform.entity.LeaveRequest;
 import org.hrmplatform.hrmplatform.service.LeaveService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -62,7 +63,9 @@ public class LeaveController {
 	}
 	
 	// Yöneticinin tüm bekleyen izin taleplerini getirme
+	
 	@GetMapping(PENDINGLEAVESFORMANAGER)
+	@PreAuthorize("hasAnyAuthority('SITE_ADMIN', 'COMPANY_ADMIN')")
 	public ResponseEntity<BaseResponse<List<LeaveRequest>>> getPendingLeavesForManager(@PathVariable Long managerId) {
 		// Yönetici sadece bekleyen izin taleplerini görmeli
 		List<LeaveRequest> leaveRequests = leaveService.getAllPendingLeaveRequests();

@@ -7,12 +7,17 @@ import org.hrmplatform.hrmplatform.dto.request.CompanyDto;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
 import org.hrmplatform.hrmplatform.dto.response.SubscriptionResponse;
 import org.hrmplatform.hrmplatform.entity.Company;
+import org.hrmplatform.hrmplatform.entity.Employee;
+import org.hrmplatform.hrmplatform.entity.User;
+import org.hrmplatform.hrmplatform.entity.UserRole;
+import org.hrmplatform.hrmplatform.enums.Role;
 import org.hrmplatform.hrmplatform.enums.Status;
 import org.hrmplatform.hrmplatform.enums.SubscriptionPlan;
 import org.hrmplatform.hrmplatform.exception.ErrorType;
 import org.hrmplatform.hrmplatform.exception.HRMPlatformException;
 import org.hrmplatform.hrmplatform.mapper.CompanyMapper;
 import org.hrmplatform.hrmplatform.repository.CompanyRepository;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -26,15 +31,30 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
+
 public class CompanyService {
     private static final Logger log = LoggerFactory.getLogger(CompanyService.class);
     
     private final CompanyRepository companyRepository;
     private final CompanyMapper companyMapper;
     private final EmailService emailService; // EmailService enjekte edildi
+    private final UserRoleService userRoleService;
     
-    //tüm şirketleri getirme
+    @Lazy
+    private final EmployeeService employeeService;
+    private final UserService userService;
+	
+	public CompanyService(CompanyRepository companyRepository, CompanyMapper companyMapper, EmailService emailService, UserRoleService userRoleService, @Lazy EmployeeService employeeService, UserService userService) {
+		this.companyRepository = companyRepository;
+		this.companyMapper = companyMapper;
+		this.emailService = emailService;
+		this.userRoleService = userRoleService;
+		this.employeeService = employeeService;
+		this.userService = userService;
+	}
+	
+	
+	//tüm şirketleri getirme
     public List<Company> findAllCompanies() {
         return companyRepository.findAll();
     }
@@ -261,4 +281,62 @@ public class CompanyService {
     }
     
     
+                   //     METIN
+    
+    
+    public int getTotalCompanyCount() {
+        return (int) companyRepository.count();
+    }
+    
+    @Transactional
+    public List<Company> getExpiringSoonCompanies() {
+        LocalDateTime currentDate = LocalDateTime.now();
+        LocalDateTime soonExpireDate = currentDate.plusDays(7);  // 7 gün içerisinde üyelik süresi dolacak şirketler
+        
+        return companyRepository.findCompaniesBySubscriptionDateRange(currentDate, soonExpireDate);
+    }
+    
+    
+    // Kullanıcıyı pasif hale getirme işlemi
+    @Transactional
+    public void deactivateUser(Long userId) throws Exception {
+       
+        UserRole userRole = userRoleService.findById(userId)
+                                           .orElseThrow(() -> new Exception("Kullanıcı bulunamadı"));
+        
+       
+        if (userRole.getRole().equals(Role.COMPANY_ADMIN)) {
+            // 3. Kullanıcının ait olduğu şirketteki tüm çalışanları pasif hale getir
+            Long companyId = employeeService.findByUserId(userId)
+                                            .orElseThrow(() -> new Exception("Çalışan bilgisi bulunamadı"))
+                                            .getCompanyId();
+            
+            employeeService.deactivateEmployeesByCompanyId(companyId);
+        }
+        
+        User user = userService.findById(userRole.getUserId())
+                               .orElseThrow(() -> new Exception("Kullanıcı bilgisi bulunamadı"));
+        user.setActivated(false);
+        userService.save(user);
+        userRoleService.save(userRole);
+    }
+    
+    
+    
+    // companyId'ye göre şirketi bulma
+    public Optional<Company> findById(Long companyId) {
+        // Verilen companyId'ye göre şirketi bulur
+        return companyRepository.findById(companyId);
+    }
+    
+    // Company'i bulma ve hata fırlatma
+    public Company getCompanyById(Long companyId) {
+        // findById metodunu çağırarak şirketi arar
+        return findById(companyId)
+                .orElseThrow(() -> new HRMPlatformException(ErrorType.COMPANY_NOT_FOUND));
+    }
+    
+    public Optional<Employee> findByUserId(Long userId) {
+        return companyRepository.findByUserId(userId);
+    }
 }

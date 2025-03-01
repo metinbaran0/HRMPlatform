@@ -1,11 +1,13 @@
 package org.hrmplatform.hrmplatform.repository;
 
 import org.hrmplatform.hrmplatform.entity.Company;
+import org.hrmplatform.hrmplatform.entity.Employee;
 import org.hrmplatform.hrmplatform.enums.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +31,11 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 
     @Query("SELECT c.name FROM Company c WHERE c.id = :companyId")
     String findCompanyNameById(@Param("companyId") Long companyId);
-
-
-
+    
+    @Query("SELECT c FROM Company c WHERE c.subscriptionEndDate BETWEEN :startDate AND :endDate")
+    List<Company> findCompaniesBySubscriptionDateRange(@Param("startDate") LocalDateTime startDate,
+                                                       @Param("endDate") LocalDateTime endDate);
+    
+    
+    Optional<Employee> findByUserId(Long userId);
 }

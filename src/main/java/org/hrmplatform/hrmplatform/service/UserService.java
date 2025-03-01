@@ -10,6 +10,7 @@ import org.hrmplatform.hrmplatform.dto.request.ResetPasswordRequestDto;
 import org.hrmplatform.hrmplatform.dto.response.DoLoginResponseDto;
 import org.hrmplatform.hrmplatform.entity.User;
 import org.hrmplatform.hrmplatform.entity.UserRole;
+import org.hrmplatform.hrmplatform.enums.Role;
 import org.hrmplatform.hrmplatform.exception.*;
 import org.hrmplatform.hrmplatform.repository.UserRepository;
 
@@ -174,4 +175,17 @@ public class UserService {
 	}
 	
 	
+	//           METIN
+	
+	public int getTotalAdminCount() {
+		return userRoleService.countByRole(Role.valueOf("COMPANY_ADMIN"));
+	}
+	
+	public int getTotalEmployeeCount() {
+		return userRoleService.countByRole(Role.valueOf("EMPLOYEE"));
+	}
+	
+	public void save(User user) {
+		userRepository.save(user);
+	}
 }

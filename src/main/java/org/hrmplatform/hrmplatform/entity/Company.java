@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hrmplatform.hrmplatform.enums.Status;
 import org.hrmplatform.hrmplatform.enums.SubscriptionPlan;
+import org.hrmplatform.hrmplatform.entity.User;
 
 import java.time.LocalDateTime;
 
@@ -31,6 +32,8 @@ public class Company {
     private String sector;
     private Integer employeeCount;
     
+    
+    private Long userId;
     
     private boolean emailVerified; // Mail doğrulama durumu
     

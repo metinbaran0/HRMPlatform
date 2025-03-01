@@ -15,6 +15,7 @@ import org.hrmplatform.hrmplatform.service.UserRoleService;
 import org.hrmplatform.hrmplatform.service.UserService;
 import org.hrmplatform.hrmplatform.util.JwtManager;
 import org.hrmplatform.hrmplatform.view.VwUserRole;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -137,6 +138,7 @@ public class UserRoleController {
 	public List<VwUserRole> searchByRole(@RequestParam Role role) {
 		return userRoleService.searchByRole(role);
 	}
+	
 	
 	
 	

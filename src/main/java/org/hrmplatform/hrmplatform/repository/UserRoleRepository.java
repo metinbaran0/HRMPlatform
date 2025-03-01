@@ -36,10 +36,13 @@ public interface UserRoleRepository extends JpaRepository<UserRole,Long> {
 
 
 	UserRole findUserRoleById(Long userId);
-
-
 	
 	
 	
-	UserRole findUserRoleById(Long userId);
+	
+	@Query("SELECT COUNT(u) FROM UserRole u WHERE u.role = :role")
+	int countByUserRoleRole(@Param("role") Role role);
+	
+	
+	
 }

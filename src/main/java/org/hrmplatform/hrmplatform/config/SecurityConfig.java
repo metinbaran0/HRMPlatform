@@ -32,12 +32,7 @@ public class SecurityConfig {
 					// herkese açık
 					.requestMatchers(EndPoints.ROOT + EndPoints.DEVELOPER + "/**")
 					.hasAnyAuthority("SITE_ADMIN", "COMPANY_ADMIN")  // Sadece SITE_ADMIN ve COMPANY_ADMIN erişebilir
-
 					.anyRequest().authenticated();  // Diğer tüm istekler için kimlik doğrulama gereksinimi olacak
-
-					//.requestMatchers("/v1/api/company/**").hasAnyRole("SITE_ADMIN", "COMPANY_ADMIN")
-					.anyRequest().authenticated();  // Diğer tüm istekler için oturum açma zorunluluğu
-
 		});
 		
 		// CSRF'yi devre dışı bırak

@@ -4,16 +4,15 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.hrmplatform.hrmplatform.dto.request.LoginRequestDto;
 import org.hrmplatform.hrmplatform.dto.request.RegisterRequestDto;
 import org.hrmplatform.hrmplatform.dto.request.ResetPasswordRequestDto;
 import org.hrmplatform.hrmplatform.dto.response.DoLoginResponseDto;
 import org.hrmplatform.hrmplatform.entity.User;
 import org.hrmplatform.hrmplatform.entity.UserRole;
+import org.hrmplatform.hrmplatform.enums.Role;
 import org.hrmplatform.hrmplatform.exception.*;
 import org.hrmplatform.hrmplatform.repository.UserRepository;
-import org.springframework.context.annotation.Lazy;
 
 import org.hrmplatform.hrmplatform.util.JwtManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,13 +27,13 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class UserService {	
+public class UserService {
 	private final UserRepository userRepository;
 	private final JwtManager jwtManager;
-
+	
 	@Lazy
 	private UserRoleService userRoleService;
-
+	
 	
 	@Autowired
 	private PasswordEncoder passwordEncoder;
@@ -81,15 +80,15 @@ public class UserService {
 			throw new HRMPlatformException(ErrorType.EMAIL_SENDING_FAILED);
 		}
 	}
-
+	
+	
 	public DoLoginResponseDto doLogin(@Valid LoginRequestDto dto) {
 		User user = userRepository.findByEmail(dto.email())
-				.orElseThrow(() -> new InvalidArgumentException(CustomErrorType.INVALID_EMAIL_OR_PASSWORD));
-
+		                          .orElseThrow(() -> new InvalidArgumentException(CustomErrorType.INVALID_EMAIL_OR_PASSWORD));
+		
 		if (!passwordEncoder.matches(dto.password(), user.getPassword())) {
 			throw new InvalidArgumentException(CustomErrorType.INVALID_EMAIL_OR_PASSWORD);
 		}
-
 		
 		// JWT oluşturma
 		String token = jwtManager.createToken(user.getId());
@@ -98,18 +97,7 @@ public class UserService {
 		// Loglama işlemi
 		log.info("Generated token for user ID {}: {}", user.getId(), token);
 		
-		return new DoLoginResponseDto(role, token);
-
-
-		// JWT oluşturma
-		String token = jwtManager.createToken(user.getId());
-
-		UserRole role = userRoleService.findUserRoleById(user.getId());
-		// Loglama işlemi
-		log.info("Generated token for user ID {}: {}", user.getId(), token);
-
 		return new DoLoginResponseDto(role,token);
-
 	}
 	
 	
@@ -187,4 +175,17 @@ public class UserService {
 	}
 	
 	
+	//           METIN
+	
+	public int getTotalAdminCount() {
+		return userRoleService.countByRole(Role.valueOf("COMPANY_ADMIN"));
+	}
+	
+	public int getTotalEmployeeCount() {
+		return userRoleService.countByRole(Role.valueOf("EMPLOYEE"));
+	}
+	
+	public void save(User user) {
+		userRepository.save(user);
+	}
 }

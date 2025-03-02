@@ -31,7 +31,8 @@ import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 public class CompanyController {
     private final CompanyService companyService;
-//findbyname ve token işemleri yapılacak
+
+    //findbyname ve token işemleri yapılacak
     //bütün şirketleri görme
     @GetMapping(FINDALLCOMPANY)
     public ResponseEntity<BaseResponse<List<Company>>> findAllCompanies() {
@@ -69,6 +70,29 @@ public class CompanyController {
                             .build());
         }
 
+    }
+
+    // Şirket ismine göre arama
+    @GetMapping(FINDBYCOMPANYNAME + "/{name}")
+    public ResponseEntity<BaseResponse<List<Company>>> findByCompanyName(@PathVariable String name) {
+        List<Company> companies = companyService.findByCompanyName(name);
+        if (!companies.isEmpty()) {
+            return ResponseEntity.ok(
+                    BaseResponse.<List<Company>>builder()
+                            .code(200)
+                            .data(companies)
+                            .message("Şirket başarıyla getirildi")
+                            .success(true)
+                            .build()
+            );
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(BaseResponse.<List<Company>>builder()
+                            .code(ErrorType.DATA_NOT_FOUND.getCode())
+                            .message(ErrorType.COMPANY_NOT_FOUND.getMessage())
+                            .success(false)
+                            .build());
+        }
     }
 
     //Şirket ekleme
@@ -134,9 +158,9 @@ public class CompanyController {
     }
 
     //şirket başvurusu onaylama
-    @PutMapping(APPROVE+"/{id}")
+    @PutMapping(APPROVE + "/{id}")
     public ResponseEntity<BaseResponse<Company>> approveCompany(@PathVariable Long id) {
-        Company approvedCompany =companyService.approveCompany(id);
+        Company approvedCompany = companyService.approveCompany(id);
 
         return ResponseEntity.ok(BaseResponse.<Company>builder()
                 .code(200)
@@ -145,10 +169,11 @@ public class CompanyController {
                 .data(approvedCompany)
                 .build());
     }
+
     //şirket başvurusu reddetme
-    @PutMapping(REJECT+"/{id}")
+    @PutMapping(REJECT + "/{id}")
     public ResponseEntity<BaseResponse<Company>> rejectCompany(@PathVariable Long id) {
-        Company rejectedCompany =companyService.rejectCompany(id);
+        Company rejectedCompany = companyService.rejectCompany(id);
 
         return ResponseEntity.ok(BaseResponse.<Company>builder()
                 .code(200)

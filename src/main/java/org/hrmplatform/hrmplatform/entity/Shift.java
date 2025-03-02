@@ -24,5 +24,22 @@ public class Shift {
     private LocalDateTime endTime;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    private Integer durationInMinutes; //vardiya süresini hesaplamak için ayrı bir alan
+    private boolean deleted = false; // Soft delete
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+        this.durationInMinutes = (int) java.time.Duration.between(startTime, endTime).toMinutes();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+
 }
 

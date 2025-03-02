@@ -44,10 +44,11 @@ public class Company {
     private SubscriptionPlan subscriptionPlan; // Aylık, Yıllık
 
     private LocalDateTime subscriptionEndDate; // Üyelik bitiş tarihi
-
+    @Builder.Default
     private boolean isDeleted = false;  // Soft delete için alan
 
     @Column(name = "is_active")
+    @Builder.Default
     private boolean isActive = true;
 
     @PrePersist
@@ -82,7 +83,10 @@ public class Company {
             this.subscriptionEndDate = now.plusYears(1);
         }
     }
-
+    // Yeni Constructor: sadece ID ile Company oluşturuyor
+    public Company(Long id) {
+        this.id = id;
+    }
 
 
 

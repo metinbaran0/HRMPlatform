@@ -31,5 +31,7 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     String findCompanyNameById(@Param("companyId") Long companyId);
 
 
-
+    // Büyük/küçük harfe duyarsız ve iki kelimeyi de içeren arama
+    @Query("SELECT c FROM Company c WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    List<Company> findByNameIgnoreCase(@Param("name") String name);
 }

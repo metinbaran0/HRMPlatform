@@ -18,6 +18,7 @@ public class EndPoints {
 
     public static final String LEAVE = ROOT + "/leave";
     public static final String COMPANY = ROOT + "/company";
+    public static final String SHIFT = ROOT + "/shift";
 
     public static final String AUTH = API + "/auth"; // Base path olarak auth eklendi
 
@@ -56,6 +57,7 @@ public class EndPoints {
     public static final String APPROVE = "/approve-company";
     public static final String REJECT = "/reject-company";
     public static final String SUBSCRIPTION = "/subscription";
+    public static final String FINDBYCOMPANYNAME = "/find-byname-company";
 
     //LEAVEREQUEST
 
@@ -73,6 +75,14 @@ public class EndPoints {
     public static final String CHANGE_EMPLOYEE_STATUS = "change-/{id}/status";
 
 
+    //SHIFT
+    public static final String CREATE_SHIFT= "/create-shift";
+    public static final String GETALL_SHIFT = "/getall-shift";
+    public static final String GETSHIFTBY_COMPANYID ="getshift-by-company-id/{companyId}" ;
+    public static final String GETSHIF_BYID = "/getshift-by-id/{id}";
+    public static final String ACTIVE_SHIFT ="active-shift" ;
+    public static final String DELETE_SHIFT = "/delete-shift";
+    public static final String UPDATE_SHIFT = "update-shift/{id}";
 }
 
 

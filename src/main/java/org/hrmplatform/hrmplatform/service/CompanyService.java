@@ -261,4 +261,7 @@ public class CompanyService {
     }
 
 
+    public List<Company> findByCompanyName(String name) {
+        return companyRepository.findByNameIgnoreCase(name);
+    }
 }

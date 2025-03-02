@@ -22,4 +22,18 @@ public class EmployeeShift {
     private Long shiftId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    private LocalDateTime assignedDate;
+    private Boolean isActive;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

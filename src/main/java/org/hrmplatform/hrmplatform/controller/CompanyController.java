@@ -36,6 +36,7 @@ import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 public class CompanyController {
 
     private final CompanyService companyService;
+    private final UserService userService;
 
     //findbyname ve token işemleri yapılacak
     //bütün şirketleri görme

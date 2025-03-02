@@ -143,8 +143,8 @@ public class CompanyController {
 
     //şirket başvurusu onaylama
     @PutMapping(APPROVE + "/{id}")
-    public ResponseEntity<BaseResponse<Company>> approveCompany(@PathVariable Long id) {
-        Company approvedCompany = companyService.approveCompany(id);
+    public ResponseEntity<BaseResponse<Company>> approveCompany(@PathVariable Long id, String token) {
+        Company approvedCompany = companyService.approveCompany(id,token);
 
         return ResponseEntity.ok(BaseResponse.<Company>builder()
                 .code(200)

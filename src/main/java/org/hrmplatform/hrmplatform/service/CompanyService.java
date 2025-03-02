@@ -339,4 +339,12 @@ public class CompanyService {
     public Optional<Employee> findByUserId(Long userId) {
         return companyRepository.findByUserId(userId);
     }
+
+
+
+    public List<Company> findByCompanyName(String name) {
+        return companyRepository.findByNameIgnoreCase(name);
+    }
+
+
 }

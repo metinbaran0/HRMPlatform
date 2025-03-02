@@ -31,6 +31,14 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 
     @Query("SELECT c.name FROM Company c WHERE c.id = :companyId")
     String findCompanyNameById(@Param("companyId") Long companyId);
+
+
+
+    // Büyük/küçük harfe duyarsız ve iki kelimeyi de içeren arama
+    @Query("SELECT c FROM Company c WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    List<Company> findByNameIgnoreCase(@Param("name") String name);
+}
+
     
     @Query("SELECT c FROM Company c WHERE c.subscriptionEndDate BETWEEN :startDate AND :endDate")
     List<Company> findCompaniesBySubscriptionDateRange(@Param("startDate") LocalDateTime startDate,
@@ -39,3 +47,4 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     
     Optional<Employee> findByUserId(Long userId);
 }
+

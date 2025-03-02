@@ -96,6 +96,8 @@ public class UserService {
 		String token = jwtManager.createToken(user.getId());
 		
 		UserRole role = userRoleService.findUserRoleById(user.getId());
+
+
 		// Loglama işlemi
 		log.info("Generated token for user ID {}: {}", user.getId(), token);
 		

@@ -6,21 +6,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.hrmplatform.hrmplatform.dto.request.roles.UserRoleRequestDto;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
 import org.hrmplatform.hrmplatform.dto.response.UserRoleResponseDto;
-import org.hrmplatform.hrmplatform.entity.Company;
-import org.hrmplatform.hrmplatform.entity.Employee;
 import org.hrmplatform.hrmplatform.entity.User;
 import org.hrmplatform.hrmplatform.entity.UserRole;
 import org.hrmplatform.hrmplatform.enums.Role;
-import org.hrmplatform.hrmplatform.exception.ErrorType;
-import org.hrmplatform.hrmplatform.exception.HRMPlatformException;
 import org.hrmplatform.hrmplatform.repository.UserRoleRepository;
 import org.hrmplatform.hrmplatform.view.VwUserRole;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -103,8 +96,8 @@ public class UserRoleService {
 		return userRoleRepository.findByUserId(userId);
 	}
 	
-	public UserRole findUserRoleById(Long userId) {
-		return userRoleRepository.findUserRoleById(userId);
+	public Optional<UserRole> findUserRoleByUserId(Long userId) {
+		return userRoleRepository.findUserRoleByUserId(userId);
 	}
 	
 	

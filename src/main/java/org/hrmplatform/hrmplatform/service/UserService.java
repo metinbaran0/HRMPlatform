@@ -95,14 +95,25 @@ public class UserService {
 		// JWT oluşturma
 		String token = jwtManager.createToken(user.getId());
 		
+
+		// Kullanıcının rolünü çek
+		UserRole userRole = userRoleService.findUserRoleByUserId(user.getId())
+		                                   .orElseThrow(() -> new HRMPlatformException(ErrorType.USER_ROLE_NOT_FOUND));
+		
+		Role role = userRole.getRole();  // UserRole içindeki Role enum'unu al
+		
+
 		UserRole role = userRoleService.findUserRoleById(user.getId());
 
 
+
 		// Loglama işlemi
-		log.info("Generated token for user ID {}: {}", user.getId(), token);
+		log.info("Generated token for user ID {}: {}, Role: {}", user.getId(), token, role);
 		
-		return new DoLoginResponseDto(role,token);
+		return new DoLoginResponseDto(role, token);
 	}
+
+	
 	
 	
 	public void activateUser(String activationCode) {

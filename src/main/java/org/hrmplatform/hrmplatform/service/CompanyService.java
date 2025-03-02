@@ -17,6 +17,7 @@ import org.hrmplatform.hrmplatform.exception.ErrorType;
 import org.hrmplatform.hrmplatform.exception.HRMPlatformException;
 import org.hrmplatform.hrmplatform.mapper.CompanyMapper;
 import org.hrmplatform.hrmplatform.repository.CompanyRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -31,7 +32,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-
 public class CompanyService {
     private static final Logger log = LoggerFactory.getLogger(CompanyService.class);
     
@@ -39,18 +39,29 @@ public class CompanyService {
     private final CompanyMapper companyMapper;
     private final EmailService emailService; // EmailService enjekte edildi
     private final UserRoleService userRoleService;
+    private final EmailNotificationService emailNotificationService;
     
     @Lazy
     private final EmployeeService employeeService;
     private final UserService userService;
+    
+    @Value("${hrmplatform.siteAdminEmail}")
+    private String siteAdminEmail; // siteAdminEmail değerini application.yml'den al
 	
-	public CompanyService(CompanyRepository companyRepository, CompanyMapper companyMapper, EmailService emailService, UserRoleService userRoleService, @Lazy EmployeeService employeeService, UserService userService) {
+	public CompanyService(CompanyRepository companyRepository,
+                          CompanyMapper companyMapper,
+                          EmailService emailService,
+                          UserRoleService userRoleService,
+                          @Lazy EmployeeService employeeService,
+                          UserService userService,
+                          EmailNotificationService emailNotificationService) {
 		this.companyRepository = companyRepository;
 		this.companyMapper = companyMapper;
 		this.emailService = emailService;
 		this.userRoleService = userRoleService;
 		this.employeeService = employeeService;
 		this.userService = userService;
+        this.emailNotificationService= emailNotificationService;
 	}
 	
 	
@@ -75,13 +86,9 @@ public class CompanyService {
         
         companyRepository.save(company);
         
-        //  E-posta doğrulama bağlantısını gönder
-        String verificationLink = "http://localhost:9090/api/company/verify-email?token=" + company.getEmailVerificationToken();
-        emailService.sendEmail(
-                company.getEmail(),
-                "E-posta Doğrulama",
-                "Lütfen e-posta adresinizi doğrulamak için aşağıdaki bağlantıya tıklayın:\n" + verificationLink
-        );
+        
+        // SITE_ADMIN'e ve başvuran şirkete e-posta gönder
+        emailNotificationService.notifyAdminAndApplicant(company);
     }
 
 //     Bu kod ne yapıyor?
@@ -154,28 +161,43 @@ public class CompanyService {
     }
     
     @Transactional
-    public Company approveCompany(Long id) {
+    public Company approveCompany(Long id, String token) {
+        // Şirketi ID ile bul
         Company company = companyRepository.findById(id)
-                                           .orElseThrow((() -> new HRMPlatformException(ErrorType.COMPANY_NOT_FOUND)));
+                                           .orElseThrow(() -> new HRMPlatformException(ErrorType.COMPANY_NOT_FOUND));
+        
         // Soft delete olan şirketler onaylanamaz!
         if (company.isDeleted()) {
             throw new HRMPlatformException(ErrorType.COMPANY_ALREADY_DELETED);
         }
+        
+        // Eğer token sağlanmışsa, token ile e-posta doğrulaması yap
+        if (token != null && !token.isEmpty()) {
+            company = companyRepository.findByEmailVerificationToken(token)
+                                       .orElseThrow(() -> new HRMPlatformException(ErrorType.TOKEN_NOT_FOUND));
+            
+            company.setEmailVerified(true);  // E-posta doğrulandı
+            company.setEmailVerificationToken(null);  // Tokeni sıfırla
+            company.setTokenExpirationTime(null);  // Token süresi geçersiz
+        }
+        
         // Mail doğrulaması yapılmamış şirketler onaylanamaz!
         if (!company.isEmailVerified()) {
             throw new HRMPlatformException(ErrorType.EMAIL_NOT_VERIFIED);
         }
+        
+        // Şirketin durumunu onaylı olarak güncelle
         company.setStatus(Status.APPROVED);
         
-        
+        // Onay mailini başvuran şirkete gönder
         emailService.sendEmail(
                 company.getEmail(), "Şirket Başvurunuz Onaylandı",
-                "Tebrikler, " + company.getName() + " şirketinizin başvurusu onaylandı!" +
+                "Tebrikler, " + company.getName() + " şirketinizin başvurusu onaylandı! " +
                         "Platformumuza giriş yaparak yönetim işlemlerini gerçekleştirebilirsiniz.");
         
         return companyRepository.save(company);
-        
     }
+    
     
     @Transactional
     public Company rejectCompany(Long id) {
@@ -273,14 +295,16 @@ public class CompanyService {
         }
         
         company.setEmailVerified(true);
-        company.setEmailVerificationToken(null); //  Tokeni temizliyoruz
+        company.setEmailVerificationToken(null);
         company.setTokenExpirationTime(null);
-        
         companyRepository.save(company);
         
+        // Yönlendirme işlemi frontend tarafından yapılabilir, backend sadece durumu günceller
+        // Örneğin: Redirect to company profile page
     }
+
     
-    
+      
                    //     METIN
     
     
@@ -340,11 +364,72 @@ public class CompanyService {
         return companyRepository.findByUserId(userId);
     }
 
+    
+    
+    //-----------
+    // SITE_ADMIN ve başvuran şirkete e-posta bildirimlerini gönderen yardımcı metod
+//    public void notifyAdminAndApplicant(Company company) {
+//        try {
+//            // Site Admin'in e-posta adresini al
+//            if (siteAdminEmail == null || siteAdminEmail.isEmpty()) {
+//                log.warn("Site Admin e-posta adresi tanımlı değil. Başvuru bildirimi gönderilemedi.");
+//            } else {
+//                String verificationLink = appConfig.getBaseUrl() + "/api/company/verify-email?token=" + company.getEmailVerificationToken();
+//                emailService.sendEmail(siteAdminEmail,
+//                                       "Yeni Şirket Başvurusu",
+//                                       "Yeni bir şirket başvurusu var. Onaylamak için linki tıklayın: " + verificationLink);
+//                log.info("Site Admin'e başvuru bildirimi başarıyla gönderildi.");
+//            }
+//
+//            // Başvuran kişinin e-posta adresini al
+//            String applicantEmail = company.getEmail();
+//            if (applicantEmail == null || applicantEmail.isEmpty()) {
+//                log.warn("Şirketin e-posta adresi tanımlı değil. Başvuru onay e-postası gönderilemedi.");
+//            } else {
+//                emailService.sendEmail(applicantEmail,
+//                                       "Başvurunuz alındı",
+//                                       "Başvurunuz alındı. Onaylandıktan sonra hesabınızı aktif edebilmeniz için linke tıklayın.");
+//                log.info("Başvuran şirkete bilgilendirme e-postası başarıyla gönderildi.");
+//            }
+//        } catch (Exception e) {
+//            log.error("Admin ve başvuran kişiye e-posta gönderirken hata oluştu: " + e.getMessage(), e);
+//        }
+//    }
+
+
+
+//    // 1️⃣ SITE_ADMIN → Tüm şirketleri getirebilir
+//    public Optional<Company> findByCompanyId(Long companyId) {
+//        return companyRepository.findById(companyId);
+//    }
+//
+//    // 2️⃣ COMPANY_ADMIN → Kullanıcının yönettiği şirketi getir
+//    public Optional<Company> findCompanyByUserEmail(String email) {
+//        Optional<User> user = userRepository.findByEmail(email);
+//
+//        if (user.isPresent() && user.get().getCompany() != null) {
+//            return Optional.of(user.get().getCompany());
+//        }
+//        return Optional.empty();
+//    }
+//
+//    // 3️⃣ EMPLOYEE → Kullanıcının çalıştığı şirketi getir
+//    public Optional<Company> findCompanyByEmployeeEmail(String email) {
+//        Optional<User> user = userRepository.findByEmail(email);
+//
+//        if (user.isPresent() && user.get().getCompany() != null) {
+//            return Optional.of(user.get().getCompany());
+//        }
+//        return Optional.empty();
+//    }
+
+
 
 
     public List<Company> findByCompanyName(String name) {
         return companyRepository.findByNameIgnoreCase(name);
     }
+
 
 
 }

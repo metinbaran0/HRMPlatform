@@ -7,7 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.hrmplatform.hrmplatform.dto.request.LoginRequestDto;
 import org.hrmplatform.hrmplatform.dto.request.RegisterRequestDto;
 import org.hrmplatform.hrmplatform.dto.request.ResetPasswordRequestDto;
+import org.hrmplatform.hrmplatform.dto.request.UpdateUserRequestDto;
 import org.hrmplatform.hrmplatform.dto.response.DoLoginResponseDto;
+import org.hrmplatform.hrmplatform.dto.response.UserProfileResponseDto;
 import org.hrmplatform.hrmplatform.entity.User;
 import org.hrmplatform.hrmplatform.entity.UserRole;
 import org.hrmplatform.hrmplatform.exception.*;
@@ -172,6 +174,32 @@ public class UserService {
 	public Optional<User> findByName(String name) {
 		return userRepository.findByName(name);
 	}
+	
+	public UserProfileResponseDto getUserById(Long userId) {
+		User user = userRepository.findById(userId)
+		                          .orElseThrow(() -> new HRMPlatformException(ErrorType.USERID_NOTFOUND));
+		
+		return new UserProfileResponseDto(
+				user.getName(),
+				user.getEmail(),
+				user.getActivated(),
+				user.getCreatedAt(),
+				user.getUpdatedAt()
+		);
+	}
+	
+	public boolean updateUser(UpdateUserRequestDto request) {
+		User user = userRepository.findByEmail(request.email())
+		                          .orElseThrow(() -> new HRMPlatformException(ErrorType.USER_NOTFOUND));
+		
+		user.setName(request.name());
+		user.setUpdatedAt(LocalDateTime.now());
+		
+		userRepository.save(user);
+		return true;
+	}
+
+	
 	
 	
 }

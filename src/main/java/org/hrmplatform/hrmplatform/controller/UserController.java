@@ -4,8 +4,10 @@ import jakarta.validation.Valid;
 import org.hrmplatform.hrmplatform.dto.request.LoginRequestDto;
 import org.hrmplatform.hrmplatform.dto.request.RegisterRequestDto;
 import org.hrmplatform.hrmplatform.dto.request.ResetPasswordRequestDto;
+import org.hrmplatform.hrmplatform.dto.request.UpdateUserRequestDto;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
 import org.hrmplatform.hrmplatform.dto.response.DoLoginResponseDto;
+import org.hrmplatform.hrmplatform.dto.response.UserProfileResponseDto;
 import org.hrmplatform.hrmplatform.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -143,4 +145,35 @@ public class UserController {
                 .success(true)
                 .build());
     }
+    
+    
+//    //Kendi profil bilgilerini alabilmeli ve Profil bilgilerini güncelleyebilmeli (ad, e-posta, şifre vs.)
+//
+//    // Yeni eklenen endpointler
+@GetMapping("/getprofile")
+public ResponseEntity<BaseResponse<UserProfileResponseDto>> getUserProfile(@RequestParam Long userId) {
+    UserProfileResponseDto userResponse = userService.getUserById(userId);
+    
+    return ResponseEntity.ok(BaseResponse.<UserProfileResponseDto>builder()
+                                         .code(200)
+                                         .data(userResponse)
+                                         .message("Kullanıcı bilgileri getirildi.")
+                                         .success(true)
+                                         .build());
+}
+    
+    @PutMapping("/updateprofile")
+    public ResponseEntity<BaseResponse<Boolean>> updateUserProfile(
+            @RequestBody @Valid UpdateUserRequestDto request) {
+        
+        userService.updateUser(request);
+        
+        return ResponseEntity.ok(BaseResponse.<Boolean>builder()
+                                             .code(200)
+                                             .data(true)
+                                             .message("Kullanıcı bilgileri güncellendi.")
+                                             .success(true)
+                                             .build());
+    }
+    
 }

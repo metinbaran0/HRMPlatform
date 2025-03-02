@@ -16,11 +16,14 @@ import org.hrmplatform.hrmplatform.service.CompanyService;
 import org.hrmplatform.hrmplatform.service.EmailService;
 import org.hrmplatform.hrmplatform.service.UserRoleService;
 import org.hrmplatform.hrmplatform.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,7 +35,7 @@ import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 @RequestMapping(COMPANY)
 @RequiredArgsConstructor
 @CrossOrigin("*")
-
+@PreAuthorize("isAuthenticated()")
 public class CompanyController {
 	private final CompanyService companyService;
 	private final UserService userService;
@@ -78,7 +81,7 @@ public class CompanyController {
 	}
 	
 	//Şirket ekleme
-	@PreAuthorize("hasAnyRole('SITE_ADMIN', 'COMPANY_ADMIN')")
+	@PreAuthorize("isAuthenticated()")
 	@PostMapping(ADDCOMPANY)
 	public ResponseEntity<BaseResponse<Boolean>> addCompany(@RequestBody @Valid CompanyDto companyDto) {
 		companyService.addCompany(companyDto);
@@ -93,9 +96,20 @@ public class CompanyController {
 	}
 	
 	@GetMapping("/verify-email")
-	public ResponseEntity<BaseResponse<String>> verifyEmail(@RequestParam String token) {
-		System.out.println("Token received: " + token);  // Log ekle
+	@PreAuthorize("hasAnyRole('SITE_ADMIN', 'COMPANY_ADMIN')")
+	public ResponseEntity<BaseResponse<String>> verifyEmail(@RequestParam String token,
+	                                                        @RequestParam(required = false, defaultValue = "false") boolean redirect) {
+		System.out.println("Token received: " + token);
 		companyService.verifyEmail(token);
+		
+		// Eğer yönlendirme isteniyorsa, HTTP 302 Redirect yap
+		if (redirect) {
+			return ResponseEntity.status(HttpStatus.FOUND)
+			                     .header(HttpHeaders.LOCATION, "http://localhost:9090/v1/api/company/company/profile?companyId")
+			                     .build();
+		}
+		
+		// JSON yanıt döndür
 		return ResponseEntity.ok(BaseResponse.<String>builder()
 		                                     .code(200)
 		                                     .message("E-posta başarıyla doğrulandı")
@@ -103,6 +117,7 @@ public class CompanyController {
 		                                     .data("Hesabınız onaylandı. Artık giriş yapabilirsiniz.")
 		                                     .build());
 	}
+	
 	
 	//şirket güncelleme
 	@PutMapping(UPDATECOMPANY + "/{id}")
@@ -141,8 +156,9 @@ public class CompanyController {
 	
 	//şirket başvurusu onaylama
 	@PutMapping(APPROVE+"/{id}")
-	public ResponseEntity<BaseResponse<Company>> approveCompany(@PathVariable Long id) {
-		Company approvedCompany =companyService.approveCompany(id);
+	@PreAuthorize("isAuthenticated()")
+	public ResponseEntity<BaseResponse<Company>> approveCompany(@PathVariable Long id, String token) {
+		Company approvedCompany =companyService.approveCompany(id,token);
 		
 		return ResponseEntity.ok(BaseResponse.<Company>builder()
 		                                     .code(200)
@@ -279,5 +295,74 @@ public class CompanyController {
 			                                       .build());
 		}
 	}
+	
+	
+		
+		// 1️⃣ SITE_ADMIN → Tüm şirket profillerine erişebilir
+		@GetMapping("/profile/admin")
+		@PreAuthorize("hasRole('SITE_ADMIN')")
+		public ResponseEntity<BaseResponse<Company>> getAnyCompanyProfile(@RequestParam Long companyId) {
+			Optional<Company> company = companyService.findByCompanyId(companyId);
+			return company.map(value -> ResponseEntity.ok(
+					              BaseResponse.<Company>builder()
+					                          .code(200)
+					                          .data(value)
+					                          .message("Şirket profili başarıyla getirildi")
+					                          .success(true)
+					                          .build()))
+			              .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+			                                             .body(BaseResponse.<Company>builder()
+			                                                               .code(ErrorType.DATA_NOT_FOUND.getCode())
+			                                                               .message(ErrorType.DATA_NOT_FOUND.getMessage())
+			                                                               .success(false)
+			                                                               .build()));
+		}
+		
+//		// 2️⃣ COMPANY_ADMIN → Sadece kendi şirketinin profiline erişebilir
+//		@GetMapping("/profile/company-admin")
+//		@PreAuthorize("hasRole('COMPANY_ADMIN')")
+//		public ResponseEntity<BaseResponse<Company>> getCompanyAdminProfile() {
+//			String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+//			Optional<Company> company = companyService.findCompanyByUserEmail(currentUsername);
+//
+//			return company.map(value -> ResponseEntity.ok(
+//					              BaseResponse.<Company>builder()
+//					                          .code(200)
+//					                          .data(value)
+//					                          .message("Şirket profili başarıyla getirildi")
+//					                          .success(true)
+//					                          .build()))
+//			              .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+//			                                             .body(BaseResponse.<Company>builder()
+//			                                                               .code(ErrorType.DATA_NOT_FOUND.getCode())
+//			                                                               .message("Şirket bulunamadı veya yetkiniz yok.")
+//			                                                               .success(false)
+//			                                                               .build()));
+//		}
+
+//		// 3️⃣ EMPLOYEE → Sadece çalıştığı şirketin profiline erişebilir
+//		@GetMapping("/profile/employee")
+//		@PreAuthorize("hasRole('EMPLOYEE')")
+//		public ResponseEntity<BaseResponse<Company>> getEmployeeProfile() {
+//			String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+//			Optional<Company> company = companyService.findCompanyByEmployeeEmail(currentUsername);
+//
+//			return company.map(value -> ResponseEntity.ok(
+//					              BaseResponse.<Company>builder()
+//					                          .code(200)
+//					                          .data(value)
+//					                          .message("Şirket profili başarıyla getirildi")
+//					                          .success(true)
+//					                          .build()))
+//			              .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+//			                                             .body(BaseResponse.<Company>builder()
+//			                                                               .code(ErrorType.DATA_NOT_FOUND.getCode())
+//			                                                               .message("Çalıştığınız şirket bulunamadı veya yetkiniz yok.")
+//			                                                               .success(false)
+//			                                                               .build()));
+//		}
+//	}
+
+	
 	
 }

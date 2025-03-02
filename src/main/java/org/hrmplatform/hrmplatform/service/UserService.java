@@ -101,11 +101,6 @@ public class UserService {
 		                                   .orElseThrow(() -> new HRMPlatformException(ErrorType.USER_ROLE_NOT_FOUND));
 		
 		Role role = userRole.getRole();  // UserRole içindeki Role enum'unu al
-		
-
-		UserRole role = userRoleService.findUserRoleById(user.getId());
-
-
 
 		// Loglama işlemi
 		log.info("Generated token for user ID {}: {}, Role: {}", user.getId(), token, role);

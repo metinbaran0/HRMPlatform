@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.hrmplatform.hrmplatform.dto.request.roles.UserRoleRequestDto;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
 import org.hrmplatform.hrmplatform.dto.response.UserRoleResponseDto;
+import org.hrmplatform.hrmplatform.entity.Company;
+import org.hrmplatform.hrmplatform.entity.Employee;
 import org.hrmplatform.hrmplatform.entity.User;
 import org.hrmplatform.hrmplatform.entity.UserRole;
 import org.hrmplatform.hrmplatform.enums.Role;
@@ -32,7 +34,6 @@ public class UserRoleService {
 	private final UserService userService;
 	
 	
-	
 	//sadece veri üzerinde değişiklik yapıldığında (insert, update, delete) gereklidir. Eğer işlem sırasında bir hata
 	// veya istisna oluşursa, tüm değişiklikler geri alınır (rollback yapılır) sistem önceki güvenli duruma döner ve
 	// veritabanı tutarsızlıklarından kaçınılmış olur.
@@ -41,21 +42,19 @@ public class UserRoleService {
 		Optional<User> userOptional = userService.findById(dto.userId());
 		
 		if (userOptional.isEmpty()) {
-			return ResponseEntity.badRequest().body(new BaseResponse<>(false, "User not found",400,null));
+			return ResponseEntity.badRequest().body(new BaseResponse<>(false, "User not found", 400, null));
 		}
 		
 		User user = userOptional.get();
 		
 		// Yeni rol ataması yap
-		UserRole userRole = UserRole.builder()
-		                            .userId(user.getId())
-		                            .role(dto.role())
-		                            .build();
+		UserRole userRole = UserRole.builder().userId(user.getId()).role(dto.role()).build();
 		
 		userRoleRepository.save(userRole);
 		
-		return ResponseEntity.ok(new BaseResponse<>(true, "Role assigned successfully",200,true));
+		return ResponseEntity.ok(new BaseResponse<>(true, "Role assigned successfully", 200, true));
 	}
+	
 	public List<UserRoleResponseDto> findAll(int page, int size) {
 		Pageable pageable = PageRequest.of(page - 1, size);
 		List<User> allUsers = userService.findAllUsers();
@@ -64,20 +63,16 @@ public class UserRoleService {
 		// Kullanıcı rollerini eşleştirmek için bir harita oluşturuyoruz
 		Map<Long, List<String>> userRolesMap = new HashMap<>();
 		allUserRoles.forEach(role -> {
-			userRolesMap
-					.computeIfAbsent(role.getUserId(), k -> new ArrayList<>())
-					.add(role.getRole().toString());
+			userRolesMap.computeIfAbsent(role.getUserId(), k -> new ArrayList<>()).add(role.getRole().toString());
 		});
-		List<UserRoleResponseDto> userRoleResponseList = allUsers.stream()
-		                                                         .map(user -> {
-			                                                         // Kullanıcının rollerini al, yoksa "No Role" ekle
-			                                                         List<String> roles = userRolesMap.getOrDefault(user.getId(), new ArrayList<>());
-			                                                         if (roles.isEmpty()) {
-				                                                         roles.add("No Role");
-			                                                         }
-			                                                         return new UserRoleResponseDto(user.getName(), roles);
-		                                                         })
-		                                                         .collect(Collectors.toList());
+		List<UserRoleResponseDto> userRoleResponseList = allUsers.stream().map(user -> {
+			// Kullanıcının rollerini al, yoksa "No Role" ekle
+			List<String> roles = userRolesMap.getOrDefault(user.getId(), new ArrayList<>());
+			if (roles.isEmpty()) {
+				roles.add("No Role");
+			}
+			return new UserRoleResponseDto(user.getName(), roles);
+		}).collect(Collectors.toList());
 		
 		return userRoleResponseList;
 	}
@@ -85,6 +80,7 @@ public class UserRoleService {
 	public List<UserRole> findAllByUserId(Long userId) {
 		return userRoleRepository.findAllByUserId(userId);
 	}
+	
 	@Transactional
 	public void deleteUserRole(UserRoleRequestDto dto) {
 		userRoleRepository.deleteByUserIdAndRole(dto.userId(), Role.valueOf(String.valueOf(dto.role())));
@@ -102,16 +98,26 @@ public class UserRoleService {
 		return userRoleRepository.findByRole(role);
 	}
 	
-	public List<UserRole> findByUserId(Long userId){
-		return userRoleRepository.findByUserId(userId);
-	}
 	
 	public List<UserRole> getAllUserRoleByUserId(Long userId) {
 		return userRoleRepository.findByUserId(userId);
 	}
-
+	
 	public UserRole findUserRoleById(Long userId) {
 		return userRoleRepository.findUserRoleById(userId);
+	}
+	
+	
+	// Role'a göre kullanıcı sayısını döndüren metot
+	public int countByRole(Role role) {
+		return userRoleRepository.countByUserRoleRole(role);
+	}
+	
+	// userId'ye göre UserRole'ü bulma
+	public Optional<UserRole> findById(Long userId) throws Exception {
+		return userRoleRepository.findById(userId);
+		
+		
 	}
 	
 }

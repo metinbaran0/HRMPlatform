@@ -6,11 +6,16 @@ import net.datafaker.providers.base.Bool;
 import org.hrmplatform.hrmplatform.dto.request.CompanyDto;
 import org.hrmplatform.hrmplatform.dto.request.SubscriptionPlanRequest;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
+import org.hrmplatform.hrmplatform.dto.response.CompanySummaryResponseDto;
 import org.hrmplatform.hrmplatform.dto.response.SubscriptionResponse;
 import org.hrmplatform.hrmplatform.entity.Company;
 import org.hrmplatform.hrmplatform.enums.SubscriptionPlan;
 import org.hrmplatform.hrmplatform.exception.ErrorType;
+import org.hrmplatform.hrmplatform.exception.HRMPlatformException;
 import org.hrmplatform.hrmplatform.service.CompanyService;
+import org.hrmplatform.hrmplatform.service.EmailService;
+import org.hrmplatform.hrmplatform.service.UserRoleService;
+import org.hrmplatform.hrmplatform.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -23,13 +28,13 @@ import java.util.Optional;
 
 import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
 import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
-
 @RestController
 @RequestMapping(COMPANY)
 @RequiredArgsConstructor
 @CrossOrigin("*")
 
 public class CompanyController {
+
     private final CompanyService companyService;
 
     //findbyname ve token işemleri yapılacak
@@ -230,4 +235,65 @@ public class CompanyController {
     }
 
 
+
+
+
+	                //     METIN
+	
+	
+	
+	//Şirket, yöneticiler ve çalışan sayısını döner
+	@GetMapping("/summary")
+	public ResponseEntity<BaseResponse<CompanySummaryResponseDto>> getDashboardSummary() {
+		CompanySummaryResponseDto summary = new CompanySummaryResponseDto(
+				companyService.getTotalCompanyCount(),
+				userService.getTotalAdminCount(),
+				userService.getTotalEmployeeCount()
+		);
+		
+		return ResponseEntity.ok(
+				BaseResponse.<CompanySummaryResponseDto>builder()
+				            .code(200)
+				            .message("Dashboard summary retrieved successfully")
+				            .success(true)
+				            .data(summary)
+				            .build()
+		);
+	}
+	
+	//Yaklaşan üyelik sonlandırma listesini döner
+	@GetMapping("/subscriptions/expiring-soon")
+	public ResponseEntity<BaseResponse<List<Company>>> getExpiringSoonCompanies() {
+		List<Company> expiringSoonCompanies = companyService.getExpiringSoonCompanies();
+		
+		return ResponseEntity.ok(BaseResponse.<List<Company>>builder()
+		                                     .code(200)
+		                                     .message("Yaklaşan üyelik sonlandırma listesi başarıyla getirildi")
+		                                     .success(true)
+		                                     .data(expiringSoonCompanies)
+		                                     .build());
+	}
+	
+	//Kullanıcı hesabını pasif hale getirir
+	@PatchMapping("/users/deactivate")
+	public ResponseEntity<BaseResponse<String>> deactivateUser(@RequestParam Long userId) {
+		try {
+			companyService.deactivateUser(userId);
+			return ResponseEntity.ok(BaseResponse.<String>builder()
+			                                     .code(200)
+			                                     .message("Kullanıcı başarıyla pasif hale getirildi")
+			                                     .success(true)
+			                                     .data("Kullanıcı hesabı pasif hale getirildi")
+			                                     .build());
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+			                     .body(BaseResponse.<String>builder()
+			                                       .code(500)
+			                                       .message("Hata oluştu: " + e.getMessage())
+			                                       .success(false)
+			                                       .data(null)
+			                                       .build());
+		}
+	}
+	
 }

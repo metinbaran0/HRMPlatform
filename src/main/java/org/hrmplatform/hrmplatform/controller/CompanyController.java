@@ -291,8 +291,8 @@ public class CompanyController {
 		                                       .build());
 	}
 	
-	@GetMapping("/verify-email")
-	@PreAuthorize("hasAnyRole('SITE_ADMIN', 'COMPANY_ADMIN')")
+	@GetMapping("/v1/api/company/verify-email")
+	@PreAuthorize("isAuthenticated()")
 	public ResponseEntity<BaseResponse<String>> verifyEmail(@RequestParam String token,
 	                                                        @RequestParam(required = false, defaultValue = "false") boolean redirect) {
 		System.out.println("Token received: " + token);
@@ -335,7 +335,8 @@ public class CompanyController {
 			                                                               .success(false)
 			                                                               .build()));
 		}
-		
+
+
 //		// 2️⃣ COMPANY_ADMIN → Sadece kendi şirketinin profiline erişebilir
 //		@GetMapping("/profile/company-admin")
 //		@PreAuthorize("hasRole('COMPANY_ADMIN')")

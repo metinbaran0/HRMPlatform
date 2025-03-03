@@ -7,9 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.hrmplatform.hrmplatform.dto.request.LoginRequestDto;
 import org.hrmplatform.hrmplatform.dto.request.RegisterRequestDto;
 import org.hrmplatform.hrmplatform.dto.request.ResetPasswordRequestDto;
+import org.hrmplatform.hrmplatform.dto.request.UpdateUserRequestDto;
 import org.hrmplatform.hrmplatform.dto.response.DoLoginResponseDto;
+import org.hrmplatform.hrmplatform.dto.response.UserProfileResponseDto;
 import org.hrmplatform.hrmplatform.entity.User;
 import org.hrmplatform.hrmplatform.entity.UserRole;
+import org.hrmplatform.hrmplatform.enums.Role;
 import org.hrmplatform.hrmplatform.exception.*;
 import org.hrmplatform.hrmplatform.repository.UserRepository;
 
@@ -26,13 +29,13 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class UserService {	
+public class UserService {
 	private final UserRepository userRepository;
 	private final JwtManager jwtManager;
-
+	
 	@Lazy
 	private UserRoleService userRoleService;
-
+	
 	
 	@Autowired
 	private PasswordEncoder passwordEncoder;
@@ -79,25 +82,33 @@ public class UserService {
 			throw new HRMPlatformException(ErrorType.EMAIL_SENDING_FAILED);
 		}
 	}
-
-
+	
+	
 	public DoLoginResponseDto doLogin(@Valid LoginRequestDto dto) {
 		User user = userRepository.findByEmail(dto.email())
-				.orElseThrow(() -> new InvalidArgumentException(CustomErrorType.INVALID_EMAIL_OR_PASSWORD));
-
+		                          .orElseThrow(() -> new InvalidArgumentException(CustomErrorType.INVALID_EMAIL_OR_PASSWORD));
+		
 		if (!passwordEncoder.matches(dto.password(), user.getPassword())) {
 			throw new InvalidArgumentException(CustomErrorType.INVALID_EMAIL_OR_PASSWORD);
 		}
-
+		
 		// JWT oluşturma
 		String token = jwtManager.createToken(user.getId());
+		
 
-		UserRole role = userRoleService.findUserRoleById(user.getId());
+		// Kullanıcının rolünü çek
+		UserRole userRole = userRoleService.findUserRoleByUserId(user.getId())
+		                                   .orElseThrow(() -> new HRMPlatformException(ErrorType.USER_ROLE_NOT_FOUND));
+		
+		Role role = userRole.getRole();  // UserRole içindeki Role enum'unu al
+
 		// Loglama işlemi
-		log.info("Generated token for user ID {}: {}", user.getId(), token);
-
-		return new DoLoginResponseDto(role,token);
+		log.info("Generated token for user ID {}: {}, Role: {}", user.getId(), token, role);
+		
+		return new DoLoginResponseDto(role, token);
 	}
+
+	
 	
 	
 	public void activateUser(String activationCode) {
@@ -173,5 +184,44 @@ public class UserService {
 		return userRepository.findByName(name);
 	}
 	
+	public UserProfileResponseDto getUserById(Long userId) {
+		User user = userRepository.findById(userId)
+		                          .orElseThrow(() -> new HRMPlatformException(ErrorType.USERID_NOTFOUND));
+		
+		return new UserProfileResponseDto(
+				user.getName(),
+				user.getEmail(),
+				user.getActivated(),
+				user.getCreatedAt(),
+				user.getUpdatedAt()
+		);
+	}
 	
+	public boolean updateUser(UpdateUserRequestDto request) {
+		User user = userRepository.findByEmail(request.email())
+		                          .orElseThrow(() -> new HRMPlatformException(ErrorType.USER_NOTFOUND));
+		
+		user.setName(request.name());
+		user.setUpdatedAt(LocalDateTime.now());
+		
+		userRepository.save(user);
+		return true;
+	}
+
+	
+	
+	
+	//           METIN
+	
+	public int getTotalAdminCount() {
+		return userRoleService.countByRole(Role.valueOf("COMPANY_ADMIN"));
+	}
+	
+	public int getTotalEmployeeCount() {
+		return userRoleService.countByRole(Role.valueOf("EMPLOYEE"));
+	}
+	
+	public void save(User user) {
+		userRepository.save(user);
+	}
 }

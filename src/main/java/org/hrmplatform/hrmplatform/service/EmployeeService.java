@@ -11,20 +11,25 @@ import org.hrmplatform.hrmplatform.exception.ErrorType;
 import org.hrmplatform.hrmplatform.mapper.EmployeeMapper;
 import org.hrmplatform.hrmplatform.repository.EmployeeRepository;
 import org.hrmplatform.hrmplatform.util.PaginationUtil;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
+@Lazy
 @AllArgsConstructor
 public class EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final EmailService emailService;
+    @Lazy
     private final CompanyService companyService;
     private final EmployeeMapper employeeMapper;
+   
 
     /**
      * Tüm çalışanları getirir (sayfalama eklenmiştir).
@@ -112,5 +117,42 @@ public class EmployeeService {
         emailService.sendEmail(employee.getEmail(), subject, message);
 
         return employeeRepository.save(employee);
+    }
+    
+    
+              //  METIN
+    
+    
+    // companyId'ye göre çalışanları bulma
+    public Employee findEmployeeById(Long employeeId) {
+        return employeeRepository.findById(employeeId)
+                                 .orElseThrow(() -> new RuntimeException("Çalışan bulunamadı"));
+    }
+    
+    // companyId ile şirkete ait çalışanları pasif hale getirme
+    public void deactivateEmployeesByCompanyId(Long companyId) {
+        // Şirketin çalışanlarını bul ve pasif hale getir
+        List<Employee> employees = employeeRepository.findByCompanyId(companyId);
+        for (Employee employee : employees) {
+            employee.setActive(false);
+            employeeRepository.save(employee);
+        }
+    }
+    
+    // Employee üzerinden isActive ve company bilgilerini alma
+    public boolean isEmployeeActive(Long employeeId) {
+        Employee employee = findEmployeeById(employeeId);
+        return employee.isActive();
+    }
+    
+    public Company getCompanyByEmployeeId(Long employeeId) {
+        Employee employee = findEmployeeById(employeeId);
+        Long companyId = employee.getCompanyId();
+        return companyService.findById(companyId)
+                                .orElseThrow(() -> new RuntimeException("Şirket bulunamadı"));
+    }
+    
+    public Optional<Employee> findByUserId(Long userId) {
+        return companyService.findByUserId(userId);
     }
 }

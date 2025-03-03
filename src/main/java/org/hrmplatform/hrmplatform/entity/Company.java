@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hrmplatform.hrmplatform.enums.Status;
 import org.hrmplatform.hrmplatform.enums.SubscriptionPlan;
+import org.hrmplatform.hrmplatform.entity.User;
 
 import java.time.LocalDateTime;
 
@@ -27,29 +28,33 @@ public class Company {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String contactPerson;
-
+    
     private String sector;
     private Integer employeeCount;
-
-
+    
+    
+    private Long userId;
+    
     private boolean emailVerified; // Mail doğrulama durumu
-
+    
     private String emailVerificationToken; //  Doğrulama tokeni
     private LocalDateTime tokenExpirationTime; // Token geçerlilik süresi
-
+    
     @Enumerated(EnumType.STRING)
     private Status status; // Şirketin başvuru durumu (Onaylandı, Reddedildi, Beklemede)
-
+    
     @Enumerated(EnumType.STRING)
     private SubscriptionPlan subscriptionPlan; // Aylık, Yıllık
-
+    
     private LocalDateTime subscriptionEndDate; // Üyelik bitiş tarihi
 
+    @Builder.Default
     private boolean isDeleted = false;  // Soft delete için alan
-
+    
     @Column(name = "is_active")
+    @Builder.Default
     private boolean isActive = true;
-
+    
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -63,19 +68,19 @@ public class Company {
                 subscriptionEndDate = createdAt.plusYears(1); // 1 yıl sonrasını hesapla
             }
         }
-
+        
     }
-
+    
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-
+    
     // Üyelik planını ayarla ve bitiş tarihini güncelle
     public void setSubscriptionPlan(SubscriptionPlan plan) {
         this.subscriptionPlan = plan;
         LocalDateTime now = LocalDateTime.now();
-
+        
         if (plan == SubscriptionPlan.MONTHLY) {
             this.subscriptionEndDate = now.plusMonths(1);
         } else if (plan == SubscriptionPlan.YEARLY) {
@@ -83,7 +88,12 @@ public class Company {
         }
     }
 
-
-
+    // Yeni Constructor: sadece ID ile Company oluşturuyor
+    public Company(Long id) {
+        this.id = id;
+    }
 
 }
+   
+
+

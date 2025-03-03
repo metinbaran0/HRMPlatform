@@ -26,7 +26,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 	private JwtUserDetails jwtUserDetails;
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-		
+
 		/**
 		 *Bu kısım gelen tüm isteklerin üzerinden geçtiği kısım. Burada isteklerin içerisinde bulunan TOKEN- JWT
 		 * bilgisini okuyup, doğrulamasını ve kişinin kimliğini tespit ederek oturum açmasını
@@ -48,3 +48,5 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 		filterChain.doFilter(request,response);
 	}
 }
+
+

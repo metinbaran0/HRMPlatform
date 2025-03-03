@@ -5,6 +5,7 @@ import org.hrmplatform.hrmplatform.enums.Role;
 
 public record DoLoginResponseDto(
 		Role role,
+		Long userId,
 		String token
 
 ) {

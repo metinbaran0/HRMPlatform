@@ -8,6 +8,7 @@ import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
 import org.hrmplatform.hrmplatform.dto.response.EmployeeResponseDto;
 import org.hrmplatform.hrmplatform.entity.Employee;
 import org.hrmplatform.hrmplatform.service.EmployeeService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -28,18 +29,17 @@ public class EmployeeController {
      */
     @GetMapping(GET_ALL_EMPLOYEES)
     @PreAuthorize("hasAuthority('COMPANY_ADMIN')")
-    public ResponseEntity<BaseResponse<List<Employee>>> getAllEmployees(
+    public ResponseEntity<BaseResponse<Page<Employee>>> getAllEmployees(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        List<Employee> employees = employeeService.getAllEmployees(page, size);
-        
+        Page<Employee> employees = employeeService.getAllEmployees(page, size);
+
         if (employees.isEmpty()) {
             return ResponseEntity.ok(new BaseResponse<>(false, "No employees found", 404, employees));
         }
-        
+
         return ResponseEntity.ok(new BaseResponse<>(true, "Employees retrieved successfully", 200, employees));
     }
-    
     /**
      * Yeni bir çalışan ekler. (Sadece ADMIN)
      */

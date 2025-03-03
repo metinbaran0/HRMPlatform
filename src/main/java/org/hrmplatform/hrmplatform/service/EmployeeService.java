@@ -14,6 +14,7 @@ import org.hrmplatform.hrmplatform.util.PaginationUtil;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -35,9 +36,9 @@ public class EmployeeService {
      * Tüm çalışanları getirir (sayfalama eklenmiştir).
      * Veritabanını yormamak için sayfalama kullanıyoruz.
      */
-    public List<Employee> getAllEmployees(int page, int size) {
-        List<Employee> allEmployees = employeeRepository.findAll(); // Tüm çalışanları çekiyoruz
-        return PaginationUtil.paginate(allEmployees, page, size); // Sayfalama işlemini uyguluyoruz
+    public Page<Employee> getAllEmployees(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return employeeRepository.findAll(pageable);
     }
 
     public EmployeeResponseDto createEmployee(EmployeeRequestDto request) {

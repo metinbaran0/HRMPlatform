@@ -43,11 +43,16 @@ public class SecurityConfig {
 		// CSRF'yi devre dışı bırak
 		http.csrf(AbstractHttpConfigurer::disable);
 		http.cors(AbstractHttpConfigurer::disable);
-		
-		
-		
-		
-		
+
+
+
+
+		http.cors(AbstractHttpConfigurer::disable);
+
+
+
+
+
 		// JWT doğrulama filtresini ekle
 		http.addFilterBefore(getJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 		

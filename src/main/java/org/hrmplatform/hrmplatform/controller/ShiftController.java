@@ -19,12 +19,13 @@ import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
 @RequestMapping(SHIFT)
 @RequiredArgsConstructor
 @CrossOrigin("*")
+@PreAuthorize("isAuthenticated()")
 public class ShiftController {
     private final ShiftService shiftService;
 
     //HATALI KOD SECURITY HATASI ALIYORUM
     @PostMapping(CREATE_SHIFT)
-   // @PreAuthorize("hasRole('ROLE_COMPANY_ADMIN')")// sadece şirket yöneticleri vardiya oluşturabilir.
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<Shift>> createShift(@RequestBody CreateShiftRequest request, @RequestParam Long companyId) {
         Shift shift = shiftService.createShift(request, companyId);
         return ResponseEntity.ok(BaseResponse.<Shift>builder()

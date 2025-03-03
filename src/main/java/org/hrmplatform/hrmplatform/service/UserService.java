@@ -104,12 +104,10 @@ public class UserService {
 
 		// Loglama işlemi
 		log.info("Generated token for user ID {}: {}, Role: {}", user.getId(), token, role);
-		
-		return new DoLoginResponseDto(role, token);
+
+		return new DoLoginResponseDto(role, user.getId(), token);
 	}
 
-	
-	
 	
 	public void activateUser(String activationCode) {
 		User user = userRepository.findByActivationCode(activationCode)

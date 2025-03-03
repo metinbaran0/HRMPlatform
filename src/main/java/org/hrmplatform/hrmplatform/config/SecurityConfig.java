@@ -27,7 +27,7 @@ public class SecurityConfig {
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
-	
+
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests(req -> {
@@ -38,18 +38,19 @@ public class SecurityConfig {
 					.requestMatchers(EndPoints.ROOT + EndPoints.DEVELOPER + "/**")
 					.hasAnyAuthority("SITE_ADMIN", "COMPANY_ADMIN")  // Sadece SITE_ADMIN ve COMPANY_ADMIN erişebilir
 					.anyRequest().authenticated();  // Diğer istekler kimlik doğrulama gerektirir
+
 		});
-		
+
 		// CSRF'yi devre dışı bırak
 		http.csrf(AbstractHttpConfigurer::disable);
-		
-		
-		
-		
-		
+		http.cors(AbstractHttpConfigurer::disable);
+
+
+
+
 		// JWT doğrulama filtresini ekle
 		http.addFilterBefore(getJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-		
+
 		return http.build();
 	}
 }

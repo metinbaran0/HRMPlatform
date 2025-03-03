@@ -21,7 +21,7 @@ public class EndPoints {
     public static final String COMPANY = ROOT + "/company";
     public static final String SHIFT = ROOT + "/shift";
 
-    public static final String AUTH = API + "/auth"; // Base path olarak auth eklendi
+    public static final String AUTH = ROOT + "/auth"; // Base path olarak auth eklendi
 
     // USER
     public static final String REGISTER = "/register";

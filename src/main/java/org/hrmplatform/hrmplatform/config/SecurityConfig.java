@@ -42,6 +42,7 @@ public class SecurityConfig {
 		
 		// CSRF'yi devre dışı bırak
 		http.csrf(AbstractHttpConfigurer::disable);
+		http.cors(AbstractHttpConfigurer::disable);
 		
 		
 		

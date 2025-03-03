@@ -139,6 +139,9 @@ public class UserService {
 		
 		sendActivationEmail(user);
 	}
+	
+	
+	
 	public void resetPassword(ResetPasswordRequestDto dto) {
 		User user = userRepository.findByEmail(dto.email())
 		                          .orElseThrow(() -> new HRMPlatformException(ErrorType.USERID_NOTFOUND));

@@ -21,7 +21,7 @@ public class EmailNotificationService {
 	
 	public void notifyAdminAndApplicant(Company company) {
 		try {
-			String verificationLink = appConfig.getBaseUrl() + "/api/company/verify-email?token=" + company.getEmailVerificationToken();
+			String verificationLink = appConfig.getBaseUrl() + "/v1/api/company/verify-email?token" + company.getEmailVerificationToken();
 			String siteAdminEmail = appConfig.getSiteAdminEmail();
 			
 			// Site Admin'e başvuru bildirimi gönder

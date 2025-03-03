@@ -290,22 +290,24 @@ public class CompanyService {
         Company company = companyRepository.findByEmailVerificationToken(token)
                                            .orElseThrow(() -> new HRMPlatformException(ErrorType.TOKEN_NOT_FOUND));
         
+        // Token geçerliliğini kontrol et
         if (company.getTokenExpirationTime().isBefore(LocalDateTime.now())) {
             throw new HRMPlatformException(ErrorType.TOKEN_EXPIRED);
         }
         
+        // E-posta doğrulama işlemi
         company.setEmailVerified(true);
-        company.setEmailVerificationToken(null);
-        company.setTokenExpirationTime(null);
+        company.setEmailVerificationToken(null); // Tokeni sıfırlıyoruz
+        company.setTokenExpirationTime(null);    // Token süresini sıfırlıyoruz
         companyRepository.save(company);
         
-        // Yönlendirme işlemi frontend tarafından yapılabilir, backend sadece durumu günceller
-        // Örneğin: Redirect to company profile page
-    }
-
-    
       
-                   //     METIN
+    }
+    
+    
+    
+    
+    //     METIN
     
     
     public int getTotalCompanyCount() {

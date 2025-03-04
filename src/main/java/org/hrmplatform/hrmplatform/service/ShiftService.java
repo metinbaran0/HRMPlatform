@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.hrmplatform.hrmplatform.dto.request.CreateShiftRequest;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
 import org.hrmplatform.hrmplatform.entity.Shift;
+import org.hrmplatform.hrmplatform.enums.ShiftType;
 import org.hrmplatform.hrmplatform.mapper.ShiftMapper;
 import org.hrmplatform.hrmplatform.repository.ShiftRepository;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +20,24 @@ public class ShiftService {
     private final ShiftMapper shiftMapper;
 
 
-    public Shift createShift(CreateShiftRequest request, Long companyId) {
+  /*  public Shift createShift(CreateShiftRequest request, Long companyId) {
         Shift shift = shiftMapper.toShift(request,companyId);
+        return shiftRepository.save(shift);
+    }*/
+
+    public Shift createShift(CreateShiftRequest request, Long companyId, ShiftType shiftType) {
+        // Request'ten gelen verilerle Shift entity'si oluşturuluyor
+        Shift shift = shiftMapper.toShift(request, companyId);
+
+        // Vardiya türünü (ShiftType) atıyoruz
+        shift.setShiftType(shiftType);
+
+        // Vardiya süresini hesaplıyoruz (başlangıç ve bitiş saatlerine göre)
+        if (shift.getStartTime() != null && shift.getEndTime() != null) {
+            shift.setDurationInMinutes((int) java.time.Duration.between(shift.getStartTime(), shift.getEndTime()).toMinutes());
+        }
+
+        // Shift nesnesini veritabanına kaydediyoruz
         return shiftRepository.save(shift);
     }
 

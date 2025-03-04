@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.hrmplatform.hrmplatform.dto.request.CreateShiftRequest;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
 import org.hrmplatform.hrmplatform.entity.Shift;
+import org.hrmplatform.hrmplatform.enums.ShiftType;
 import org.hrmplatform.hrmplatform.service.ShiftService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,7 @@ public class ShiftController {
     private final ShiftService shiftService;
 
     //HATALI KOD SECURITY HATASI ALIYORUM
-    @PostMapping(CREATE_SHIFT)
+   /* @PostMapping(CREATE_SHIFT)
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<Shift>> createShift(@RequestBody CreateShiftRequest request, @RequestParam Long companyId) {
         Shift shift = shiftService.createShift(request, companyId);
@@ -34,7 +35,21 @@ public class ShiftController {
                 .success(true)
                 .message("Vardiya başarıyla oluşturuldu.")
                 .build());
+    }*/
+    @PostMapping(CREATE_SHIFT)
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<Shift>> createShift(@RequestBody CreateShiftRequest request,
+                                                           @RequestParam Long companyId,
+                                                           @RequestParam ShiftType shiftType) {
+        Shift shift = shiftService.createShift(request, companyId, shiftType);  // ShiftType'ı parametre olarak gönderiyoruz
+        return ResponseEntity.ok(BaseResponse.<Shift>builder()
+                .code(200)
+                .data(shift)
+                .success(true)
+                .message("Vardiya başarıyla oluşturuldu.")
+                .build());
     }
+
         //tüm vardiyalrı getirme
     @GetMapping(GETALL_SHIFT)
     public ResponseEntity<BaseResponse<List<Shift>>> getAllShifts() {

@@ -16,12 +16,13 @@ public class EndPoints {
 
     public static final String USER = ROOT + "/user";
     public static final String USERROLE = ROOT + "/userrole";
-
+    
     public static final String LEAVE = ROOT + "/leave";
+    public static final String COMMENT = ROOT + "/comment";
     public static final String COMPANY = ROOT + "/company";
     public static final String SHIFT = ROOT + "/shift";
 
-    public static final String AUTH = API + "/auth"; // Base path olarak auth eklendi
+    public static final String AUTH = ROOT + "/auth"; // Base path olarak auth eklendi
 
     // USER
     public static final String REGISTER = "/register";
@@ -84,5 +85,11 @@ public class EndPoints {
     public static final String ACTIVE_SHIFT ="active-shift" ;
     public static final String DELETE_SHIFT = "/delete-shift";
     public static final String UPDATE_SHIFT = "update-shift/{id}";
+    
+    
+    //COMMENT
+    public static final String CREATE_COMMENT= "/create-comment";
+    public static final String GETALL_COMMENT= "/getall-comment";
+    
+    
 }
-

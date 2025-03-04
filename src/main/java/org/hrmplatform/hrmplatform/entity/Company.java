@@ -31,7 +31,6 @@ public class Company {
     
     private String sector;
     private Integer employeeCount;
-    private String adminContactEmail; // SITE_ADMIN iletişim adresi
     
     private Long userId;
     

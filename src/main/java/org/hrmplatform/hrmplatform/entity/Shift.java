@@ -5,8 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hrmplatform.hrmplatform.enums.ShiftType;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -27,6 +29,10 @@ public class Shift {
 
     private Integer durationInMinutes; //vardiya süresini hesaplamak için ayrı bir alan
     private boolean deleted = false; // Soft delete
+
+    @Enumerated(EnumType.STRING)
+    private ShiftType shiftType;  // Sabah, Akşam, Gece veya Saatlik Vardiya tipi
+
 
     @PrePersist
     protected void onCreate() {

@@ -39,7 +39,7 @@ public class SecurityConfig {
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
 		configuration.setAllowCredentials(true); // withCredentials kullanıyorsanız bu gerekli
-		
+
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);
 		return source;
@@ -59,11 +59,11 @@ public class SecurityConfig {
 		// CSRF'yi devre dışı bırak
 		http.csrf(AbstractHttpConfigurer::disable);
 		http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
-		
-		
-		
-		
-		
+
+
+
+
+
 		// JWT doğrulama filtresini ekle
 		http.addFilterBefore(getJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 		

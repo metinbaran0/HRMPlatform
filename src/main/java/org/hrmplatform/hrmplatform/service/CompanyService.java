@@ -2,9 +2,7 @@ package org.hrmplatform.hrmplatform.service;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.hrmplatform.hrmplatform.dto.request.CompanyDto;
-import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
 import org.hrmplatform.hrmplatform.dto.response.SubscriptionResponse;
 import org.hrmplatform.hrmplatform.entity.Company;
 import org.hrmplatform.hrmplatform.entity.Employee;
@@ -17,15 +15,14 @@ import org.hrmplatform.hrmplatform.exception.ErrorType;
 import org.hrmplatform.hrmplatform.exception.HRMPlatformException;
 import org.hrmplatform.hrmplatform.mapper.CompanyMapper;
 import org.hrmplatform.hrmplatform.repository.CompanyRepository;
+import org.hrmplatform.hrmplatform.util.JwtManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -40,6 +37,7 @@ public class CompanyService {
     private final EmailService emailService; // EmailService enjekte edildi
     private final UserRoleService userRoleService;
     private final EmailNotificationService emailNotificationService;
+    private final JwtManager jwtManager;
     
     @Lazy
     private final EmployeeService employeeService;
@@ -54,7 +52,8 @@ public class CompanyService {
                           UserRoleService userRoleService,
                           @Lazy EmployeeService employeeService,
                           UserService userService,
-                          EmailNotificationService emailNotificationService) {
+                          EmailNotificationService emailNotificationService,
+                         JwtManager jwtManager) {
 		this.companyRepository = companyRepository;
 		this.companyMapper = companyMapper;
 		this.emailService = emailService;
@@ -62,6 +61,7 @@ public class CompanyService {
 		this.employeeService = employeeService;
 		this.userService = userService;
         this.emailNotificationService= emailNotificationService;
+        this.jwtManager = jwtManager;
 	}
 	
 	

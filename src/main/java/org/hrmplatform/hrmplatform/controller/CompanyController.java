@@ -2,35 +2,27 @@ package org.hrmplatform.hrmplatform.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import net.datafaker.providers.base.Bool;
 import org.hrmplatform.hrmplatform.dto.request.CompanyDto;
 import org.hrmplatform.hrmplatform.dto.request.SubscriptionPlanRequest;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
 import org.hrmplatform.hrmplatform.dto.response.CompanySummaryResponseDto;
 import org.hrmplatform.hrmplatform.dto.response.SubscriptionResponse;
 import org.hrmplatform.hrmplatform.entity.Company;
-import org.hrmplatform.hrmplatform.enums.SubscriptionPlan;
 import org.hrmplatform.hrmplatform.exception.ErrorType;
-import org.hrmplatform.hrmplatform.exception.HRMPlatformException;
 import org.hrmplatform.hrmplatform.service.CompanyService;
 import org.hrmplatform.hrmplatform.service.EmailService;
-import org.hrmplatform.hrmplatform.service.UserRoleService;
 import org.hrmplatform.hrmplatform.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
-import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
+
 @RestController
 @RequestMapping(COMPANY)
 @RequiredArgsConstructor
@@ -185,7 +177,6 @@ public class CompanyController {
     }
 
     //bir şirketin üyelik planlanını getirir
-    @PreAuthorize("hasAnyAuthority('SITE_ADMIN', 'COMPANY_ADMIN')")
     @GetMapping(SUBSCRIPTION + "/{id}")
     public ResponseEntity<BaseResponse<SubscriptionResponse>> getSubscriptionPlan(@PathVariable Long id) {
         SubscriptionResponse subscription = companyService.getSubscriptionPlan(id);
@@ -277,7 +268,6 @@ public class CompanyController {
 		}
 	}
 		//Şirket ekleme
-	@PreAuthorize("isAuthenticated()")
 	@PostMapping(ADDCOMPANY)
 	public ResponseEntity<BaseResponse<Boolean>> addCompany(@RequestBody @Valid CompanyDto companyDto) {
 		companyService.addCompany(companyDto);

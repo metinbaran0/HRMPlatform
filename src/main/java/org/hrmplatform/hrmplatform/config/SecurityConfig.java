@@ -49,7 +49,7 @@ public class SecurityConfig {
 		http.authorizeHttpRequests(req -> {
 			req
 					.requestMatchers(EndPoints.AUTH + "/register", EndPoints.AUTH + "/dologin", "/swagger-ui/**", "/v3/api-docs/**").permitAll()  // Herkese açık
-					.requestMatchers(EndPoints.EMPLOYEE + "/**").permitAll()  // EmployeeController'daki tüm endpointler açık
+					.requestMatchers(EndPoints.EMPLOYEE + "/**",EndPoints.EMAIL+"/**").permitAll()
 					.requestMatchers("/company/**","/shift/**").hasAnyRole("SITE_ADMIN", "COMPANY_ADMIN")  // Sadece SITE_ADMIN ve COMPANY_ADMIN erişebilir
 					.requestMatchers(EndPoints.ROOT + EndPoints.DEVELOPER + "/**")
 					.hasAnyAuthority("SITE_ADMIN", "COMPANY_ADMIN")  // Sadece SITE_ADMIN ve COMPANY_ADMIN erişebilir

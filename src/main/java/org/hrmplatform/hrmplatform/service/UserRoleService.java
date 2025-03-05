@@ -9,6 +9,10 @@ import org.hrmplatform.hrmplatform.dto.response.UserRoleResponseDto;
 import org.hrmplatform.hrmplatform.entity.User;
 import org.hrmplatform.hrmplatform.entity.UserRole;
 import org.hrmplatform.hrmplatform.enums.Role;
+import org.hrmplatform.hrmplatform.exception.CustomErrorType;
+import org.hrmplatform.hrmplatform.exception.ErrorType;
+import org.hrmplatform.hrmplatform.exception.HRMPlatformException;
+import org.hrmplatform.hrmplatform.exception.InvalidArgumentException;
 import org.hrmplatform.hrmplatform.repository.UserRoleRepository;
 import org.hrmplatform.hrmplatform.view.VwUserRole;
 import org.springframework.data.domain.PageRequest;
@@ -31,22 +35,31 @@ public class UserRoleService {
 	// veya istisna oluşursa, tüm değişiklikler geri alınır (rollback yapılır) sistem önceki güvenli duruma döner ve
 	// veritabanı tutarsızlıklarından kaçınılmış olur.
 	@Transactional
-	public ResponseEntity<BaseResponse<Boolean>> assignRoleToUser(UserRoleRequestDto dto) {
+	public void assignRoleToUser(UserRoleRequestDto dto) {
+		// Kullanıcıyı bul
 		Optional<User> userOptional = userService.findById(dto.userId());
 		
 		if (userOptional.isEmpty()) {
-			return ResponseEntity.badRequest().body(new BaseResponse<>(false, "User not found", 400, null));
+			throw new HRMPlatformException(ErrorType.USER_NOTFOUND);  // Kullanıcı bulunamadığında hata fırlat
 		}
 		
 		User user = userOptional.get();
 		
+		// Kullanıcının zaten belirtilen role sahip olup olmadığını kontrol et
+		Optional<UserRole> existingUserRole = userRoleRepository.findByUserIdAndRole(user.getId(), dto.role());
+		
+		if (existingUserRole.isPresent()) {
+			// Eğer kullanıcı zaten bu role sahipse, hata fırlat
+			throw new InvalidArgumentException(CustomErrorType.INVALID_ROLE);
+		}
+		
 		// Yeni rol ataması yap
 		UserRole userRole = UserRole.builder().userId(user.getId()).role(dto.role()).build();
 		
+		// Veritabanına kaydet
 		userRoleRepository.save(userRole);
-		
-		return ResponseEntity.ok(new BaseResponse<>(true, "Role assigned successfully", 200, true));
 	}
+	
 	
 	public List<UserRoleResponseDto> findAll(int page, int size) {
 		Pageable pageable = PageRequest.of(page - 1, size);

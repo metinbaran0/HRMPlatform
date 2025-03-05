@@ -26,6 +26,10 @@ public class Break {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean deleted= false;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -36,5 +40,7 @@ public class Break {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+
 }
 

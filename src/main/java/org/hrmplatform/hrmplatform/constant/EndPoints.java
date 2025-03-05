@@ -23,7 +23,8 @@ public class EndPoints {
     public static final String SHIFT = ROOT + "/shift";
 
     public static final String AUTH = ROOT + "/auth"; // Base path olarak auth eklendi
-
+    public static final String EMAIL = ROOT + "/email";
+    
     // USER
     public static final String REGISTER = "/register";
     public static final String DOLOGIN = "/dologin";
@@ -91,5 +92,6 @@ public class EndPoints {
     public static final String CREATE_COMMENT= "/create-comment";
     public static final String GETALL_COMMENT= "/getall-comment";
     
-    
+    //EMAIL
+    public static final String SEND_EMAIL = "/send-email";
 }

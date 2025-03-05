@@ -3,6 +3,7 @@ package org.hrmplatform.hrmplatform.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.hrmplatform.hrmplatform.dto.request.CompanyDto;
+import org.hrmplatform.hrmplatform.dto.request.EmailRequest;
 import org.hrmplatform.hrmplatform.dto.request.SubscriptionPlanRequest;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
 import org.hrmplatform.hrmplatform.dto.response.CompanySummaryResponseDto;
@@ -371,6 +372,7 @@ public class CompanyController {
 //			                                                               .build()));
 //		}
 //	}
+	
 
 	
 	

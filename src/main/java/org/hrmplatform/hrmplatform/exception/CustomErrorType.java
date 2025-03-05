@@ -17,7 +17,7 @@ public enum CustomErrorType implements ErrorTypeInterface {
 	VALIDATION_TOKEN(4000,"Geçersiz token...",HttpStatus.BAD_REQUEST),
 	
 	// Eksik veya Beklenen Veri Hatası
-	HRMPLATFORM_ID_MISSING(2005, "Hospital ID claim eksik.", HttpStatus.BAD_REQUEST),
+	HRMPLATFORM_ID_MISSING(2005, "Company ID claim eksik.", HttpStatus.BAD_REQUEST),
 	
 	// email hatası
 	EMAIL_MISSING(2007, "Email claim eksik.", HttpStatus.BAD_REQUEST),

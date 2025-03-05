@@ -25,6 +25,8 @@ public class EmployeeShift {
 
     private LocalDateTime assignedDate;
     private Boolean isActive;
+    @Builder.Default
+    private Boolean isDeleted = false;
 
     @PrePersist
     protected void onCreate() {

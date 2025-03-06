@@ -16,14 +16,16 @@ public class EndPoints {
 
     public static final String USER = ROOT + "/user";
     public static final String USERROLE = ROOT + "/userrole";
-    
     public static final String LEAVE = ROOT + "/leave";
     public static final String COMMENT = ROOT + "/comment";
     public static final String COMPANY = ROOT + "/company";
     public static final String SHIFT = ROOT + "/shift";
+    public static final String BREAK = ROOT + "/break";
+    public static final String EMPLOYEE_SHIFT = ROOT + "/employee-shift";
 
     public static final String AUTH = ROOT + "/auth"; // Base path olarak auth eklendi
-
+    public static final String EMAIL = ROOT + "/email";
+    
     // USER
     public static final String REGISTER = "/register";
     public static final String DOLOGIN = "/dologin";
@@ -85,11 +87,30 @@ public class EndPoints {
     public static final String ACTIVE_SHIFT ="active-shift" ;
     public static final String DELETE_SHIFT = "/delete-shift";
     public static final String UPDATE_SHIFT = "update-shift/{id}";
-    
-    
+
+    //BREAK
+    public static final String CREATE_BREAK= "/create-break";
+    public static final String ALL_BREAK = "/get-all-break";
+    public static final String GET_BREAK_BYID ="/getbreak-by-id/{breakId}" ;
+    public static final String GET_BREAK_BYSHIFT ="/getbreak-by-shift/{shiftId}" ;
+    public static final String GET_BREAK_BYCOMPANY ="/getbreak-by-company/{companyId}" ;
+    public static final String UPDATE_BREAK ="/update-break/{breakId}" ;
+    public static final String DELETE_BREAK ="/delete-break/{breakId}" ;
+
+    //EMPLOYEE_SHIFT
+    public static final String CREATE_EMPLOYEE_SHIFT= "/create-employee-shift";
+    public static final String ALL_EMPLOYEE_SHIFTS= "/all-employee-shift";
+    public static final String GET_EMPLOYEE_SHIFTS_BY_EMPLOYEE_ID= "/get-employee-shift-byemployee-id/{employeeId}";
+    public static final String UPDATE_EMPLOYEE_SHIFT= "/update-employee-shift/{employeeShiftId}";
+    public static final String DELETE_EMPLOYEE_SHIFT= "/delete-employee-shift/{employeeShiftId}";
+
     //COMMENT
     public static final String CREATE_COMMENT= "/create-comment";
     public static final String GETALL_COMMENT= "/getall-comment";
+
     
-    
+    //EMAIL
+    public static final String SEND_EMAIL = "/send-email";
+
+
 }

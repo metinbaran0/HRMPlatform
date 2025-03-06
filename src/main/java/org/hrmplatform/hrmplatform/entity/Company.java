@@ -50,6 +50,8 @@ public class Company {
     @Builder.Default
     private boolean isDeleted = false;  // Soft delete için alan
     
+    
+    
     @Column(name = "is_active")
     @Builder.Default
     private boolean isActive = true;

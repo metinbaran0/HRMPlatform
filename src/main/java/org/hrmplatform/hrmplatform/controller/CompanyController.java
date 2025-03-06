@@ -3,6 +3,7 @@ package org.hrmplatform.hrmplatform.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.hrmplatform.hrmplatform.dto.request.CompanyDto;
+import org.hrmplatform.hrmplatform.dto.request.EmailRequest;
 import org.hrmplatform.hrmplatform.dto.request.SubscriptionPlanRequest;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
 import org.hrmplatform.hrmplatform.dto.response.CompanySummaryResponseDto;
@@ -31,7 +32,7 @@ import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
 public class CompanyController {
 	private final CompanyService companyService;
 	private final UserService userService;
-	private final EmailService emailService;
+
   //findbyname ve token işemleri yapılacak
     //bütün şirketleri görme
     @GetMapping(FINDALLCOMPANY)
@@ -39,7 +40,7 @@ public class CompanyController {
         List<Company> companies = companyService.findAllCompanies(); // Şirket listesini al
         return ResponseEntity.ok(
                 BaseResponse.<List<Company>>builder()
-                        .code(200)
+                        .code(201)
                         .data(companies) // Listeyi buraya ekliyoruz
                         .message("Şirketler başarıyla getirildi")
                         .success(true)
@@ -69,6 +70,10 @@ public class CompanyController {
                             .success(false)
                             .build());
         }
+		
+		
+		
+		
 
     }
 
@@ -371,6 +376,7 @@ public class CompanyController {
 //			                                                               .build()));
 //		}
 //	}
+	
 
 	
 	

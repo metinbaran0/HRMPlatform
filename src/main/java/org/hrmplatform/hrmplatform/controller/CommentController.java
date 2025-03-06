@@ -1,5 +1,6 @@
 package org.hrmplatform.hrmplatform.controller;
 
+import org.hrmplatform.hrmplatform.dto.request.CommentRequestDto;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
 import org.hrmplatform.hrmplatform.entity.Comment;
 import org.hrmplatform.hrmplatform.service.CommentService;
@@ -20,10 +21,19 @@ public class CommentController {
 		this.commentService = commentService;
 	}
 	
-	
 	@PostMapping(CREATE_COMMENT)
-	public ResponseEntity<BaseResponse<Comment>> addComment(@RequestBody String content) {
-		Comment savedComment = commentService.addComment(content);
+	public ResponseEntity<BaseResponse<Comment>> addComment(@RequestBody CommentRequestDto request) {
+		if (request == null || request.content() == null || request.content().trim().isEmpty()) {
+			return ResponseEntity.badRequest().body(
+					BaseResponse.<Comment>builder()
+					            .code(400)
+					            .success(false)
+					            .message("Yorum içeriği boş olamaz!")
+					            .build()
+			);
+		}
+		
+		Comment savedComment = commentService.addComment(request.content());
 		
 		return ResponseEntity.ok(
 				BaseResponse.<Comment>builder()
@@ -34,8 +44,12 @@ public class CommentController {
 				            .build()
 		);
 	}
+	
 	@GetMapping(GETALL_COMMENT)
-	public ResponseEntity<BaseResponse<List<Comment>>> getAllComments() {
+	public ResponseEntity<BaseResponse<List<Comment>>> getAllComments(
+			@RequestParam(defaultValue = "1") int page,
+			@RequestParam(defaultValue = "10") int size
+	) {
 		List<Comment> comments = commentService.getAllComments();
 		return ResponseEntity.ok(
 				BaseResponse.<List<Comment>>builder()
@@ -46,5 +60,4 @@ public class CommentController {
 				            .build()
 		);
 	}
-	
 }

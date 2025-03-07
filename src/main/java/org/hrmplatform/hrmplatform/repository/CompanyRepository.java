@@ -1,5 +1,6 @@
 package org.hrmplatform.hrmplatform.repository;
 
+import org.hrmplatform.hrmplatform.dto.request.CompanyDto;
 import org.hrmplatform.hrmplatform.entity.Company;
 import org.hrmplatform.hrmplatform.entity.Employee;
 import org.hrmplatform.hrmplatform.enums.Status;
@@ -39,4 +40,6 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     // Büyük/küçük harfe duyarsız ve iki kelimeyi de içeren arama
     @Query("SELECT c FROM Company c WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     List<Company> findByNameIgnoreCase(@Param("name") String name);
+
+    List<Company> findByStatusAndIsDeletedFalse(Status status); // Silinmemiş ve onaylanmış şirketler
 }

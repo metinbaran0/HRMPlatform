@@ -60,6 +60,7 @@ public class EndPoints {
     public static final String DELETECOMPANY = "/delete-company";
     public static final String PENDING = "/pending-company";
     public static final String APPROVE = "/approve-company";
+    public static final String APPROVED = "/approved";
     public static final String REJECT = "/reject-company";
     public static final String SUBSCRIPTION = "/subscription";
     public static final String FINDBYCOMPANYNAME = "/find-byname-company";

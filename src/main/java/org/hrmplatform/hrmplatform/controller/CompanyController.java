@@ -149,6 +149,20 @@ public class CompanyController {
                 .data(approvedCompany)
                 .build());
     }
+	//onaylanmış şirketleri getirme
+	@GetMapping(APPROVED)
+	public ResponseEntity<BaseResponse<List<CompanyDto>>> getApprovedCompanies() {
+		List<CompanyDto> companies = companyService.getApprovedCompanies();
+
+		 return ResponseEntity.ok(
+				BaseResponse.<List<CompanyDto>>builder()
+						.code(201)
+						.data(companies)
+						.message("Onaylanmış şirketler başarıyla getirildi")
+						.success(true)
+						.build());
+
+	}
 
     //şirket başvurusu reddetme
     @PutMapping(REJECT + "/{id}")

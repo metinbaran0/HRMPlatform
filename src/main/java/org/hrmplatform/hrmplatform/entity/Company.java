@@ -75,6 +75,16 @@ public class Company {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+        // Eğer status "APPROVED" ise üyelik bitiş süresi ayarlanacak
+        if (this.status == Status.APPROVED && this.subscriptionPlan != null) {
+            LocalDateTime now = LocalDateTime.now();
+
+            if (subscriptionPlan == SubscriptionPlan.MONTHLY) {
+                subscriptionEndDate = now.plusMonths(1);
+            } else if (subscriptionPlan == SubscriptionPlan.YEARLY) {
+                subscriptionEndDate = now.plusYears(1);
+            }
+        }
     }
     
     // Üyelik planını ayarla ve bitiş tarihini güncelle

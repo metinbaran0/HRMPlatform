@@ -27,6 +27,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class CompanyService {
@@ -433,5 +434,20 @@ public class CompanyService {
     }
 
 
+    public List<CompanyDto> getApprovedCompanies() {
+        List<Company> approvedCompanies = companyRepository.findByStatusAndIsDeletedFalse(Status.APPROVED);
+        return approvedCompanies.stream()
+                .map(company -> new CompanyDto(
+                        company.getName(),
+                        company.getAddress(),
+                        company.getPhone(),
+                        company.getEmail(),
+                        company.getSubscriptionPlan(),
+                        company.getContactPerson(),
+                        company.getSector(),
+                        company.getEmployeeCount()
+                ))
+                .collect(Collectors.toList());
 
+    }
 }

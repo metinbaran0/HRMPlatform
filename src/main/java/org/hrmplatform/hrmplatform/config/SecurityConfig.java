@@ -51,11 +51,11 @@ public class SecurityConfig {
 					// Herkese açık endpointler
 					.requestMatchers(EndPoints.AUTH + "/register", EndPoints.AUTH + "/dologin", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 					.requestMatchers(EndPoints.EMPLOYEE + "/**", EndPoints.EMAIL + "/**").permitAll()
-					.requestMatchers(EndPoints.COMPANY + EndPoints.ADDCOMPANY).permitAll()
+					.requestMatchers(EndPoints.COMPANY + EndPoints.ADDCOMPANY,EndPoints.COMPANY+"/verify-email").permitAll()
 					
 					// "COMPANY_ADMIN" yetkisiyle erişilebilen endpointler
 					.requestMatchers(EndPoints.LEAVE + EndPoints.PENDINGLEAVESFORMANAGER).hasAuthority("COMPANY_ADMIN")
-					.requestMatchers(EndPoints.ASSET + "/add").hasRole("COMPANY_ADMIN")
+					.requestMatchers(EndPoints.ASSET + "/add").hasAnyRole("EMPLOYEE", "COMPANY_ADMIN")
 					.requestMatchers(EndPoints.ASSET + "/update/**").hasRole("COMPANY_ADMIN")
 					.requestMatchers(EndPoints.ASSET + "/delete/**").hasRole("COMPANY_ADMIN")
 					

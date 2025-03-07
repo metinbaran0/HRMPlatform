@@ -33,7 +33,7 @@ public class AssetController {
 	 * @param assetRequest Zimmet eklemek için gerekli verileri içeren DTO
 	 * @return Eklenen zimmet bilgilerini içeren cevap
 	 */
-	@PreAuthorize("hasRole('COMPANY_ADMIN')")
+	@PreAuthorize("hasRole('EMPLOYEE') or hasRole('COMPANY_ADMIN')")
 	@PostMapping(ADD_ASSET)
 	public ResponseEntity<BaseResponse<AssetResponseDto>> addAsset(@RequestBody AssetRequestDto assetRequest) {
 		AssetResponseDto savedAsset = assetService.addAsset(assetRequest);

@@ -3,6 +3,7 @@ package org.hrmplatform.hrmplatform.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.hrmplatform.hrmplatform.dto.request.CompanyDto;
+import org.hrmplatform.hrmplatform.dto.request.EmailRequest;
 import org.hrmplatform.hrmplatform.dto.request.SubscriptionPlanRequest;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
 import org.hrmplatform.hrmplatform.dto.response.CompanySummaryResponseDto;
@@ -27,7 +28,6 @@ import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
 @RequestMapping(COMPANY)
 @RequiredArgsConstructor
 @CrossOrigin("*")
-@PreAuthorize("isAuthenticated()")
 public class CompanyController {
 	private final CompanyService companyService;
 	private final UserService userService;
@@ -69,6 +69,10 @@ public class CompanyController {
                             .success(false)
                             .build());
         }
+		
+		
+		
+		
 
     }
 
@@ -282,7 +286,6 @@ public class CompanyController {
 	}
 	
 	@GetMapping("/v1/api/company/verify-email")
-	@PreAuthorize("isAuthenticated()")
 	public ResponseEntity<BaseResponse<String>> verifyEmail(@RequestParam String token,
 	                                                        @RequestParam(required = false, defaultValue = "false") boolean redirect) {
 		System.out.println("Token received: " + token);
@@ -371,6 +374,7 @@ public class CompanyController {
 //			                                                               .build()));
 //		}
 //	}
+	
 
 	
 	

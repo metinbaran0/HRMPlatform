@@ -88,7 +88,11 @@ public class EndPoints {
     public static final String GETSHIF_BYID = "/getshift-by-id/{id}";
     public static final String ACTIVE_SHIFT ="active-shift" ;
     public static final String DELETE_SHIFT = "/delete-shift";
-    public static final String UPDATE_SHIFT = "update-shift/{id}";
+    public static final String UPDATE_SHIFT = "/update-shift/{id}";
+    public static final String SHIFTTYPE = "/shifttype/{shiftType}";
+    public static final String DATE_SHIFT = "/date-shift";
+    public static final String DISTRIBUTION = "/distribution";
+
 
     //BREAK
     public static final String CREATE_BREAK= "/create-break";

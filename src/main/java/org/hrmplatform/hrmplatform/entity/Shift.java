@@ -7,9 +7,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hrmplatform.hrmplatform.enums.ShiftType;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-//deneme
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,8 +22,8 @@ public class Shift {
     private Long id;
     private Long companyId;
     private String shiftName;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private LocalDate startTime;
+    private LocalDate endTime;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -32,6 +32,7 @@ public class Shift {
 
     @Enumerated(EnumType.STRING)
     private ShiftType shiftType;  // Sabah, Akşam, Gece veya Saatlik Vardiya tipi
+
 
 
     @PrePersist

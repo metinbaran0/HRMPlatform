@@ -3,10 +3,13 @@ package org.hrmplatform.hrmplatform.service;
 import lombok.AllArgsConstructor;
 import org.hrmplatform.hrmplatform.dto.request.CreateEmployeeShiftRequest;
 import org.hrmplatform.hrmplatform.entity.EmployeeShift;
+import org.hrmplatform.hrmplatform.entity.Shift;
 import org.hrmplatform.hrmplatform.mapper.EmployeeShiftMapper;
 import org.hrmplatform.hrmplatform.repository.EmployeeShiftRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,4 +64,5 @@ public class EmployeeShiftService {
     public void softDeleteEmployeeShift(Long employeeShiftId) {
 
     }
+
 }

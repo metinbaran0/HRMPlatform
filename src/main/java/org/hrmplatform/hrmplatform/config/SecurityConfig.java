@@ -50,6 +50,9 @@ public class SecurityConfig {
 			req
 					.requestMatchers(EndPoints.AUTH + "/register", EndPoints.AUTH + "/dologin", "/swagger-ui/**", "/v3/api-docs/**").permitAll()  // Herkese açık
 					.requestMatchers(EndPoints.EMPLOYEE + "/**",EndPoints.EMAIL+"/**").permitAll()
+					.requestMatchers(EndPoints.COMPANY + EndPoints.ADDCOMPANY).permitAll()
+					.requestMatchers(EndPoints.LEAVE + EndPoints.PENDINGLEAVESFORMANAGER).hasAuthority("COMPANY_ADMIN")
+					.requestMatchers(EndPoints.LEAVE + "/**").hasAnyRole("EMPLOYEE", "COMPANY_ADMIN")
 					.requestMatchers("/company/**","/shift/**").hasAnyRole("SITE_ADMIN", "COMPANY_ADMIN")  // Sadece SITE_ADMIN ve COMPANY_ADMIN erişebilir
 					.requestMatchers(EndPoints.ROOT + EndPoints.DEVELOPER + "/**")
 					.hasAnyAuthority("SITE_ADMIN", "COMPANY_ADMIN")  // Sadece SITE_ADMIN ve COMPANY_ADMIN erişebilir

@@ -25,6 +25,7 @@ public class LeaveController {
 	}
 	
 	// Yeni izin talebi oluşturma (Kullanıcı yapacak)
+	@PreAuthorize("hasRole('EMPLOYEE')")
 	@PostMapping(LEAVEREQUEST)
 	public ResponseEntity<BaseResponse<LeaveRequest>> requestLeave(@RequestBody LeaveRequestDto dto) {
 		if (!leaveService.isUserExists(dto.employeeId())) {
@@ -44,6 +45,7 @@ public class LeaveController {
 	}
 	
 	// Kullanıcıya ait izin taleplerini getirme
+	@PreAuthorize("hasRole('EMPLOYEE,COMPANY_ADMIN')")
 	@GetMapping(LEAVEBYUSERID)
 	public ResponseEntity<BaseResponse<List<LeaveRequest>>> getUserLeaves(@PathVariable Long employeeId) {
 		if (!leaveService.isUserExists(employeeId)) {
@@ -63,9 +65,8 @@ public class LeaveController {
 	}
 	
 	// Yöneticinin tüm bekleyen izin taleplerini getirme
-	
+	@PreAuthorize("hasRole('COMPANY_ADMIN')")
 	@GetMapping(PENDINGLEAVESFORMANAGER)
-	@PreAuthorize("hasAnyAuthority('SITE_ADMIN', 'COMPANY_ADMIN')")
 	public ResponseEntity<BaseResponse<List<LeaveRequest>>> getPendingLeavesForManager(@PathVariable Long managerId) {
 		// Yönetici sadece bekleyen izin taleplerini görmeli
 		List<LeaveRequest> leaveRequests = leaveService.getAllPendingLeaveRequests();
@@ -78,6 +79,7 @@ public class LeaveController {
 	}
 	
 	// İzin talebini kabul etme (Yönetici tarafından)
+	@PreAuthorize("hasRole('COMPANY_ADMIN')")
 	@PutMapping(ACCEPTLEAVE)
 	public ResponseEntity<BaseResponse<LeaveRequest>> acceptLeaveRequest(@PathVariable Long managerId, @PathVariable Long employeeId) {
 		try {
@@ -98,6 +100,7 @@ public class LeaveController {
 	}
 	
 	// İzin talebini reddetme (Yönetici tarafından)
+	@PreAuthorize("hasRole('COMPANY_ADMIN')")
 	@PutMapping(REJECTLEAVE)
 	public ResponseEntity<BaseResponse<LeaveRequest>> rejectLeaveRequest(@PathVariable Long managerId, @PathVariable Long employeeId) {
 		try {

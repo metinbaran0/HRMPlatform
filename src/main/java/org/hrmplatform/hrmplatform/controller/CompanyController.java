@@ -285,18 +285,11 @@ public class CompanyController {
 		                                       .build());
 	}
 	
-	@GetMapping("/v1/api/company/verify-email")
-	public ResponseEntity<BaseResponse<String>> verifyEmail(@RequestParam String token,
-	                                                        @RequestParam(required = false, defaultValue = "false") boolean redirect) {
+	@GetMapping("/verify-email")
+	public ResponseEntity<BaseResponse<String>> verifyEmail(@RequestParam String token
+	                                                        ) {
 		System.out.println("Token received: " + token);
 		companyService.verifyEmail(token);
-		
-		// Eğer yönlendirme isteniyorsa, HTTP 302 Redirect yap
-		if (redirect) {
-			return ResponseEntity.status(HttpStatus.FOUND)
-			                     .header(HttpHeaders.LOCATION, "http://localhost:9090/v1/api/company/company/profile?companyId")
-			                     .build();
-		}
 		
 		// JSON yanıt döndür
 		return ResponseEntity.ok(BaseResponse.<String>builder()

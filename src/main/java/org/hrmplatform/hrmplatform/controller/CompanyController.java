@@ -28,7 +28,6 @@ import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
 @RequestMapping(COMPANY)
 @RequiredArgsConstructor
 @CrossOrigin("*")
-@PreAuthorize("isAuthenticated()")
 public class CompanyController {
 	private final CompanyService companyService;
 	private final UserService userService;
@@ -287,7 +286,6 @@ public class CompanyController {
 	}
 	
 	@GetMapping("/v1/api/company/verify-email")
-	@PreAuthorize("isAuthenticated()")
 	public ResponseEntity<BaseResponse<String>> verifyEmail(@RequestParam String token,
 	                                                        @RequestParam(required = false, defaultValue = "false") boolean redirect) {
 		System.out.println("Token received: " + token);

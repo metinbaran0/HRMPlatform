@@ -48,15 +48,28 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests(req -> {
 			req
-					.requestMatchers(EndPoints.AUTH + "/register", EndPoints.AUTH + "/dologin", "/swagger-ui/**", "/v3/api-docs/**").permitAll()  // Herkese açık
-					.requestMatchers(EndPoints.EMPLOYEE + "/**",EndPoints.EMAIL+"/**").permitAll()
+					// Herkese açık endpointler
+					.requestMatchers(EndPoints.AUTH + "/register", EndPoints.AUTH + "/dologin", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+					.requestMatchers(EndPoints.EMPLOYEE + "/**", EndPoints.EMAIL + "/**").permitAll()
 					.requestMatchers(EndPoints.COMPANY + EndPoints.ADDCOMPANY).permitAll()
+					
+					// "COMPANY_ADMIN" yetkisiyle erişilebilen endpointler
 					.requestMatchers(EndPoints.LEAVE + EndPoints.PENDINGLEAVESFORMANAGER).hasAuthority("COMPANY_ADMIN")
+					.requestMatchers(EndPoints.ASSET + "/add").hasRole("COMPANY_ADMIN")
+					.requestMatchers(EndPoints.ASSET + "/update/**").hasRole("COMPANY_ADMIN")
+					.requestMatchers(EndPoints.ASSET + "/delete/**").hasRole("COMPANY_ADMIN")
+					
+					// "EMPLOYEE" ve "COMPANY_ADMIN" rollerinin erişebileceği endpointler
 					.requestMatchers(EndPoints.LEAVE + "/**").hasAnyRole("EMPLOYEE", "COMPANY_ADMIN")
-					.requestMatchers("/company/**","/shift/**").hasAnyRole("SITE_ADMIN", "COMPANY_ADMIN")  // Sadece SITE_ADMIN ve COMPANY_ADMIN erişebilir
-					.requestMatchers(EndPoints.ROOT + EndPoints.DEVELOPER + "/**")
-					.hasAnyAuthority("SITE_ADMIN", "COMPANY_ADMIN")  // Sadece SITE_ADMIN ve COMPANY_ADMIN erişebilir
-					.anyRequest().authenticated();  // Diğer istekler kimlik doğrulama gerektirir
+					.requestMatchers(EndPoints.ASSET + "/{id}").hasAnyRole("EMPLOYEE", "COMPANY_ADMIN")
+					.requestMatchers(EndPoints.ASSET + "/all").hasAnyRole("EMPLOYEE", "COMPANY_ADMIN")
+					.requestMatchers("/company/**", "/shift/**").hasAnyRole("SITE_ADMIN", "COMPANY_ADMIN")
+					
+					// "SITE_ADMIN" ve "COMPANY_ADMIN" erişebileceği endpointler
+					.requestMatchers(EndPoints.ROOT + EndPoints.DEVELOPER + "/**").hasAnyAuthority("SITE_ADMIN", "COMPANY_ADMIN")
+					
+					// Diğer istekler kimlik doğrulama gerektirir
+					.anyRequest().authenticated();
 		});
 		
 		// CSRF'yi devre dışı bırak

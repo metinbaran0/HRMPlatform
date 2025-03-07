@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -20,8 +21,8 @@ public class Asset {
     private Long id;
     private Long employeeId;
     private String assetName;
-    private String assetDescription;
-    private LocalDateTime assignedDate;
-    private boolean status;
-    private LocalDateTime updatedAt;
+    private String assetType;
+    private String serialNumber;
+    private LocalDate assignedDate;
+    private LocalDate returnDate;
 }

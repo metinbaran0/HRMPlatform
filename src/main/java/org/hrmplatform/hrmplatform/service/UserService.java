@@ -1,5 +1,6 @@
 package org.hrmplatform.hrmplatform.service;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class UserService {
-	private final UserRepository userRepository;
+private final UserRepository userRepository;
 	private final JwtManager jwtManager;
 	
 	@Lazy
@@ -242,4 +243,29 @@ public class UserService {
 	public void save(User user) {
 		userRepository.save(user);
 	}
+	
+//	// Kullanıcıyı pasif hale getirme işlemi
+//	@Transactional
+//	public void deactivateUser(Long companyId) throws Exception {
+//
+//		UserRole userRole = userRoleService.findByCompanyId(companyId)
+//		                                   .orElseThrow(() -> new Exception("Kullanıcı bulunamadı"));
+//
+//
+//		if (userRole.getRole().equals(Role.COMPANY_ADMIN)) {
+//			// 3. Kullanıcının ait olduğu şirketteki tüm çalışanları pasif hale getir
+//			Long company = employeeService.findByUserId(companyId)
+//			                                .orElseThrow(() -> new Exception("Çalışan bilgisi bulunamadı"))
+//			                                .getCompanyId();
+//
+//			employeeService.deactivateEmployeesByCompanyId(company);
+//		}
+//
+//		User user = findById(userRole.getUserId())
+//		                       .orElseThrow(() -> new Exception("Kullanıcı bilgisi bulunamadı"));
+//		user.setActivated(false);
+//		userRepository.save(user);
+//		userRoleService.save(userRole);
+//	}
+	
 }

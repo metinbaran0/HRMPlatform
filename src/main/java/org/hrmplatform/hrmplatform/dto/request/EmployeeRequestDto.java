@@ -4,8 +4,6 @@ package org.hrmplatform.hrmplatform.dto.request;
 import jakarta.validation.constraints.*;
 
 public record EmployeeRequestDto (
-    @NotNull(message = "Company ID cannot be null")
-    Long companyId,
 
     @NotBlank(message = "Name cannot be empty")
     String name,
@@ -22,6 +20,5 @@ public record EmployeeRequestDto (
     String phone,
 
     @NotBlank(message = "Position cannot be empty")
-    String position,
-    boolean isActive
+    String position
 ){}

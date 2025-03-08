@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
+import org.hrmplatform.hrmplatform.dto.response.TokenValidationResult;
 import org.hrmplatform.hrmplatform.util.JwtManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -33,19 +34,18 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 		 * sağlayacağız.
 		 */
 		final String authorizationHeader = request.getHeader("Authorization");
-		if(Objects.nonNull(authorizationHeader) && authorizationHeader.startsWith("Bearer ")) {
+		if (Objects.nonNull(authorizationHeader) && authorizationHeader.startsWith("Bearer ")) {
 			String token = authorizationHeader.substring(7);
-			Optional<Long> userId = jwtManager.validateToken(token);
-			if(userId.isPresent()) {
-				UserDetails userDetails = jwtUserDetails.getUserById(userId.get());
-				// spring in bizim kimliğimizi doğrulayabileceği kendi içerisinde yetkileri yönetebileceği token
+			Optional<TokenValidationResult> tokenValidationResult = jwtManager.validateToken(token); // TokenValidationResult kullan
+			if (tokenValidationResult.isPresent()) {
+				Long userId = tokenValidationResult.get().authId(); // authId bilgisini al
+				UserDetails userDetails = jwtUserDetails.getUserById(userId);
 				UsernamePasswordAuthenticationToken authenticationToken
 						= new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-				// geçerli güvenlik çemberinin içerisinde oturum açan kullanıcıya ait token bilgisini geçtiğimiz kısım.
 				SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 			}
 		}
-		filterChain.doFilter(request,response);
+		filterChain.doFilter(request, response);
 	}
 }
 

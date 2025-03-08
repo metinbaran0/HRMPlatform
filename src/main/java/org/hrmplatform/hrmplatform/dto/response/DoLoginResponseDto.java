@@ -8,5 +8,6 @@ public record DoLoginResponseDto(
 		Long userId,
 		String token
 
+
 ) {
 }

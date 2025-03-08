@@ -78,6 +78,7 @@ public class EndPoints {
     public static final String UPDATE_EMPLOYEE = "update-employee/{id}";
     public static final String DELETE_EMPLOYEE = "delete-employee/{id}";
     public static final String CHANGE_EMPLOYEE_STATUS = "change-/{id}/status";
+  
 
 
     //SHIFT

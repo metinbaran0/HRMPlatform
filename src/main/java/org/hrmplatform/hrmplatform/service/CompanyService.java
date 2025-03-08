@@ -2,6 +2,7 @@ package org.hrmplatform.hrmplatform.service;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import org.hrmplatform.hrmplatform.config.JwtUserDetails;
 import org.hrmplatform.hrmplatform.dto.request.CompanyDto;
 import org.hrmplatform.hrmplatform.dto.response.SubscriptionResponse;
 import org.hrmplatform.hrmplatform.entity.Company;
@@ -18,6 +19,8 @@ import org.hrmplatform.hrmplatform.repository.CompanyRepository;
 import org.hrmplatform.hrmplatform.util.JwtManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
@@ -35,13 +38,11 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
     private final CompanyMapper companyMapper;
     private final EmailService emailService; // EmailService enjekte edildi
-    private final UserRoleService userRoleService;
     private final EmailNotificationService emailNotificationService;
-    private final JwtManager jwtManager;
+   
     
-    @Lazy
-    private final EmployeeService employeeService;
-    private final UserService userService;
+   
+   
     
     @Value("${hrmplatform.siteAdminEmail}")
     private String siteAdminEmail; // siteAdminEmail değerini application.yml'den al
@@ -50,18 +51,12 @@ public class CompanyService {
                           CompanyMapper companyMapper,
                           EmailService emailService,
                           UserRoleService userRoleService,
-                          @Lazy EmployeeService employeeService,
-                          UserService userService,
                           EmailNotificationService emailNotificationService,
                          JwtManager jwtManager) {
 		this.companyRepository = companyRepository;
 		this.companyMapper = companyMapper;
 		this.emailService = emailService;
-		this.userRoleService = userRoleService;
-		this.employeeService = employeeService;
-		this.userService = userService;
         this.emailNotificationService= emailNotificationService;
-        this.jwtManager = jwtManager;
 	}
 	
 	
@@ -323,30 +318,7 @@ public class CompanyService {
     }
     
     
-    // Kullanıcıyı pasif hale getirme işlemi
-    @Transactional
-    public void deactivateUser(Long userId) throws Exception {
-       
-        UserRole userRole = userRoleService.findById(userId)
-                                           .orElseThrow(() -> new Exception("Kullanıcı bulunamadı"));
-        
-       
-        if (userRole.getRole().equals(Role.COMPANY_ADMIN)) {
-            // 3. Kullanıcının ait olduğu şirketteki tüm çalışanları pasif hale getir
-            Long companyId = employeeService.findByUserId(userId)
-                                            .orElseThrow(() -> new Exception("Çalışan bilgisi bulunamadı"))
-                                            .getCompanyId();
-            
-            employeeService.deactivateEmployeesByCompanyId(companyId);
-        }
-        
-        User user = userService.findById(userRole.getUserId())
-                               .orElseThrow(() -> new Exception("Kullanıcı bilgisi bulunamadı"));
-        user.setActivated(false);
-        userService.save(user);
-        userRoleService.save(userRole);
-    }
-    
+  
     
     
     // companyId'ye göre şirketi bulma
@@ -362,10 +334,11 @@ public class CompanyService {
                 .orElseThrow(() -> new HRMPlatformException(ErrorType.COMPANY_NOT_FOUND));
     }
     
-    public Optional<Employee> findByUserId(Long userId) {
-        return companyRepository.findByUserId(userId);
-    }
-
+   
+    
+    
+    
+   
     
     
     //-----------
@@ -431,7 +404,7 @@ public class CompanyService {
     public List<Company> findByCompanyName(String name) {
         return companyRepository.findByNameIgnoreCase(name);
     }
-
-
+    
+    
 
 }

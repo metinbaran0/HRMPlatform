@@ -68,4 +68,8 @@ public class AssetService {
 				asset.getReturnDate()
 		);
 	}
+	
+	public List<Asset> getAssetsByCompany(Long companyId) {
+		return assetRepository.findByCompanyId(companyId);
+	}
 }

@@ -20,6 +20,7 @@ public class Asset {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long employeeId;
+    private Long companyId;
     private String assetName;
     private String assetType;
     private String serialNumber;

@@ -2,6 +2,7 @@ package org.hrmplatform.hrmplatform.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.hrmplatform.hrmplatform.config.JwtUserDetails;
 import org.hrmplatform.hrmplatform.dto.request.CompanyDto;
 import org.hrmplatform.hrmplatform.dto.request.EmailRequest;
 import org.hrmplatform.hrmplatform.dto.request.SubscriptionPlanRequest;
@@ -13,6 +14,7 @@ import org.hrmplatform.hrmplatform.exception.ErrorType;
 import org.hrmplatform.hrmplatform.service.CompanyService;
 import org.hrmplatform.hrmplatform.service.EmailService;
 import org.hrmplatform.hrmplatform.service.UserService;
+import org.hrmplatform.hrmplatform.util.JwtManager;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,9 +30,15 @@ import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
 @RequestMapping(COMPANY)
 @RequiredArgsConstructor
 @CrossOrigin("*")
-public class CompanyController {
+public class
+
+
+
+
+CompanyController {
 	private final CompanyService companyService;
 	private final UserService userService;
+	
 
   //findbyname ve token işemleri yapılacak
     //bütün şirketleri görme
@@ -250,27 +258,7 @@ public class CompanyController {
 		                                     .build());
 	}
 	
-	//Kullanıcı hesabını pasif hale getirir
-	@PatchMapping("/users/deactivate")
-	public ResponseEntity<BaseResponse<String>> deactivateUser(@RequestParam Long userId) {
-		try {
-			companyService.deactivateUser(userId);
-			return ResponseEntity.ok(BaseResponse.<String>builder()
-			                                     .code(200)
-			                                     .message("Kullanıcı başarıyla pasif hale getirildi")
-			                                     .success(true)
-			                                     .data("Kullanıcı hesabı pasif hale getirildi")
-			                                     .build());
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-			                     .body(BaseResponse.<String>builder()
-			                                       .code(500)
-			                                       .message("Hata oluştu: " + e.getMessage())
-			                                       .success(false)
-			                                       .data(null)
-			                                       .build());
-		}
-	}
+	
 		//Şirket ekleme
 	@PostMapping(ADDCOMPANY)
 	public ResponseEntity<BaseResponse<Boolean>> addCompany(@RequestBody @Valid CompanyDto companyDto) {
@@ -296,9 +284,19 @@ public class CompanyController {
 		                                     .code(200)
 		                                     .message("E-posta başarıyla doğrulandı")
 		                                     .success(true)
-		                                     .data("Hesabınız onaylandı. Artık giriş yapabilirsiniz.")
+		                                     .data("Hesabınız onaylandı.")
 		                                     .build());
 	}
+	
+	@GetMapping("/{companyId}")
+	public ResponseEntity<?> getCompanyDetails(@PathVariable Long companyId, @RequestHeader("Authorization") String token) {
+		Company company = companyService.getCompanyById(companyId);
+		if (company != null) {
+			return ResponseEntity.ok(company);
+		}
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Şirket bulunamadı");
+	}
+	
 	
 	
 		
@@ -321,6 +319,9 @@ public class CompanyController {
 			                                                               .success(false)
 			                                                               .build()));
 		}
+	
+	
+
 
 
 //		// 2️⃣ COMPANY_ADMIN → Sadece kendi şirketinin profiline erişebilir

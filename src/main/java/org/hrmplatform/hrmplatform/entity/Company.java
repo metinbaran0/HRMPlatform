@@ -32,8 +32,6 @@ public class Company {
     private String sector;
     private Integer employeeCount;
     
-    private Long userId;
-    
     private boolean emailVerified; // Mail doğrulama durumu
     
     private String emailVerificationToken; //  Doğrulama tokeni
@@ -50,12 +48,11 @@ public class Company {
     @Builder.Default
     private boolean isDeleted = false;  // Soft delete için alan
     
-    
-    
-    @Column(name = "is_active")
+        @Column(name = "is_active")
     @Builder.Default
     private boolean isActive = true;
     
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

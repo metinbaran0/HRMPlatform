@@ -1,5 +1,6 @@
 package org.hrmplatform.hrmplatform.service;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -43,10 +44,15 @@ public class UserService {
 	@Autowired
 	private EmailService emailService;
 	
-	public UserService(UserRepository userRepository, JwtManager jwtManager, @Lazy UserRoleService userRoleService) {
+	@Lazy
+	private final EmployeeService employeeService;
+	
+	public UserService(UserRepository userRepository, JwtManager jwtManager, @Lazy UserRoleService userRoleService,
+	                   @Lazy EmployeeService employeeService) {
 		this.userRepository = userRepository;
 		this.jwtManager = jwtManager;
 		this.userRoleService = userRoleService;
+		this.employeeService= employeeService;
 	}
 	
 	public void register(@Valid RegisterRequestDto dto) {
@@ -91,23 +97,29 @@ public class UserService {
 		if (!passwordEncoder.matches(dto.password(), user.getPassword())) {
 			throw new InvalidArgumentException(CustomErrorType.INVALID_EMAIL_OR_PASSWORD);
 		}
-		
-		// JWT oluşturma
-		String token = jwtManager.createToken(user.getId());
-		
-
-		// Kullanıcının rolünü çek
 		UserRole userRole = userRoleService.findUserRoleByUserId(user.getId())
 		                                   .orElseThrow(() -> new HRMPlatformException(ErrorType.USER_ROLE_NOT_FOUND));
 		
 		Role role = userRole.getRole();  // UserRole içindeki Role enum'unu al
-
+		
+		// JWT oluşturma
+		String token = jwtManager.createToken(
+				user.getId(),          // authId
+				user.getEmail(),       // email
+				role,                 // role
+				user.getCompanyId(),   // companyId
+				user.getActivated(),  // activated
+				user.getStatus()   );
+		
+		
+		// Kullanıcının rolünü çek
+		
 		// Loglama işlemi
 		log.info("Generated token for user ID {}: {}, Role: {}", user.getId(), token, role);
-
-		return new DoLoginResponseDto(role, user.getId(), token);
+		
+		return new DoLoginResponseDto(role, user.getId(), token );
 	}
-
+	
 	
 	public void activateUser(String activationCode) {
 		User user = userRepository.findByActivationCode(activationCode)
@@ -117,12 +129,23 @@ public class UserService {
 			throw new HRMPlatformException(ErrorType.ACTIVATION_CODE_EXPIRED);
 		}
 		
-		user.setStatus(true);
-		user.setActivated(true);
-		user.setActivationCode("USED");
-		userRepository.save(user);
+		// JWT oluştur
+		UserRole userRole = userRoleService.findUserRoleByUserId(user.getId())
+		                                   .orElseThrow(() -> new HRMPlatformException(ErrorType.USER_ROLE_NOT_FOUND));
 		
-		jwtManager.createToken(user.getId());
+		Role role = userRole.getRole();
+		
+		String token = jwtManager.createToken(
+				user.getId(),          // authId
+				user.getEmail(),       // email
+				role,                 // role
+				user.getCompanyId(),   // companyId
+				user.getActivated(),  // activated
+				user.getStatus()      // status
+		);
+		
+		// Loglama işlemi
+		log.info("User activated: {} - New token generated: {}", user.getEmail(), token);
 	}
 	
 	public void resendActivationEmail(String email) {
@@ -225,4 +248,29 @@ public class UserService {
 	public void save(User user) {
 		userRepository.save(user);
 	}
+	
+//	// Kullanıcıyı pasif hale getirme işlemi
+//	@Transactional
+//	public void deactivateUser(Long companyId) throws Exception {
+//
+//		UserRole userRole = userRoleService.findByCompanyId(companyId)
+//		                                   .orElseThrow(() -> new Exception("Kullanıcı bulunamadı"));
+//
+//
+//		if (userRole.getRole().equals(Role.COMPANY_ADMIN)) {
+//			// 3. Kullanıcının ait olduğu şirketteki tüm çalışanları pasif hale getir
+//			Long company = employeeService.findByUserId(companyId)
+//			                                .orElseThrow(() -> new Exception("Çalışan bilgisi bulunamadı"))
+//			                                .getCompanyId();
+//
+//			employeeService.deactivateEmployeesByCompanyId(company);
+//		}
+//
+//		User user = findById(userRole.getUserId())
+//		                       .orElseThrow(() -> new Exception("Kullanıcı bilgisi bulunamadı"));
+//		user.setActivated(false);
+//		userRepository.save(user);
+//		userRoleService.save(userRole);
+//	}
+	
 }

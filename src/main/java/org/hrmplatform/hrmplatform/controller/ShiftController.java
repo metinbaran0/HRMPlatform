@@ -2,6 +2,7 @@ package org.hrmplatform.hrmplatform.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.hrmplatform.hrmplatform.dto.request.CreateShiftRequest;
+import org.hrmplatform.hrmplatform.dto.request.ShiftDto;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
 import org.hrmplatform.hrmplatform.entity.Shift;
 import org.hrmplatform.hrmplatform.enums.ShiftType;
@@ -27,31 +28,39 @@ import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
 public class ShiftController {
     private final ShiftService shiftService;
 
-    //HATALI KOD SECURITY HATASI ALIYORUM
-   /* @PostMapping(CREATE_SHIFT)
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<BaseResponse<Shift>> createShift(@RequestBody CreateShiftRequest request, @RequestParam Long companyId) {
-        Shift shift = shiftService.createShift(request, companyId);
-        return ResponseEntity.ok(BaseResponse.<Shift>builder()
-                .code(200)
-                .data(shift)
-                .success(true)
-                .message("Vardiya başarıyla oluşturuldu.")
-                .build());
-    }*/
     @PostMapping(CREATE_SHIFT)
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<BaseResponse<Shift>> createShift(@RequestBody CreateShiftRequest request,
-                                                           @RequestParam Long companyId,
-                                                           @RequestParam ShiftType shiftType) {
-        Shift shift = shiftService.createShift(request, companyId, shiftType);  // ShiftType'ı parametre olarak gönderiyoruz
-        return ResponseEntity.ok(BaseResponse.<Shift>builder()
-                .code(200)
-                .data(shift)
+    public ResponseEntity<BaseResponse<ShiftDto>> createShift(@RequestBody ShiftDto shiftDto) {
+        ShiftDto createdShift = shiftService.createShift(shiftDto.shiftName(),
+                shiftDto.startTime(), shiftDto.endTime(), shiftDto.shiftType());
+
+        BaseResponse<ShiftDto> response = BaseResponse.<ShiftDto>builder()
                 .success(true)
-                .message("Vardiya başarıyla oluşturuldu.")
-                .build());
+                .message("Shift created successfully")
+                .code(HttpStatus.CREATED.value())
+                .data(createdShift)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    /**
+     *@PostMapping(CREATE_SHIFT)
+     * public ResponseEntity<BaseResponse<ShiftDto>> createShift(@RequestBody ShiftDto shiftDto, @AuthenticationPrincipal UserDetails userDetails) {
+     *     Long companyId = userDetails.getCompanyId();  // Oturumdan veya kullanıcıdan companyId'yi alıyorsunuz
+     *     ShiftDto createdShift = shiftService.createShift(companyId, shiftDto.shiftName(),
+     *             shiftDto.startTime(), shiftDto.endTime(), shiftDto.shiftType());
+     *
+     *     BaseResponse<ShiftDto> response = BaseResponse.<ShiftDto>builder()
+     *             .success(true)
+     *             .message("Shift created successfully")
+     *             .code(HttpStatus.CREATED.value())
+     *             .data(createdShift)
+     *             .build();
+     *
+     *     return ResponseEntity.status(HttpStatus.CREATED).body(response);
+     * }
+     *
+     */
 
     //tüm vardiyalrı getirme
     @GetMapping(GETALL_SHIFT)

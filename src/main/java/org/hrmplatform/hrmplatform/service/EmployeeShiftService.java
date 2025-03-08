@@ -65,4 +65,12 @@ public class EmployeeShiftService {
 
     }
 
+    public boolean checkShiftConflict(Long employeeId, LocalDate date) {
+        // Çalışanın belirli bir tarihte atanmış vardiyalarının olup olmadığını kontrol et
+        List<EmployeeShift> shiftsOnDate = employeeShiftRepository.findByEmployeeIdAndAssignedDate(employeeId, date);
+
+        // Eğer vardiya listesi boş değilse, çakışma var demektir
+        return !shiftsOnDate.isEmpty();
+    }
+
 }

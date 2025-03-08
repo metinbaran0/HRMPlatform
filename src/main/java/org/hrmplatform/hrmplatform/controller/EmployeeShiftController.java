@@ -94,5 +94,16 @@ public class EmployeeShiftController {
         );
     }
 
+//Bir çalışanın aynı gün içinde birden fazla vardiya alıp almadığının kontrol edilmesi
+
+    @GetMapping(GET_SHIFT_CONFLICT_BY_EMPLOYEE_ID)
+    public ResponseEntity<Boolean> checkShiftConflict(@PathVariable Long employeeId, @RequestParam LocalDate date) {
+        // Vardiya çakışması kontrolü yapılır
+        boolean hasConflict = employeeShiftService.checkShiftConflict(employeeId, date);
+
+        // Çakışma durumu (true = çakışma var, false = çakışma yok)
+        return ResponseEntity.ok(hasConflict);
+    }
+
 
 }

@@ -1,8 +1,10 @@
 package org.hrmplatform.hrmplatform.service;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.hrmplatform.hrmplatform.dto.request.CreateShiftRequest;
+import org.hrmplatform.hrmplatform.dto.request.ShiftDto;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
 import org.hrmplatform.hrmplatform.entity.EmployeeShift;
 import org.hrmplatform.hrmplatform.entity.Shift;
@@ -23,30 +25,6 @@ public class ShiftService {
     private final ShiftRepository shiftRepository;
     private final ShiftMapper shiftMapper;
     private final EmployeeShiftRepository employeeShiftRepository;
-
-
-
-  /*  public Shift createShift(CreateShiftRequest request, Long companyId) {
-        Shift shift = shiftMapper.toShift(request,companyId);
-        return shiftRepository.save(shift);
-    }*/
-
-    public Shift createShift(CreateShiftRequest request, Long companyId, ShiftType shiftType) {
-        // Request'ten gelen verilerle Shift entity'si oluşturuluyor
-        Shift shift = shiftMapper.toShift(request, companyId);
-
-        // Vardiya türünü (ShiftType) atıyoruz
-        shift.setShiftType(shiftType);
-
-        // Vardiya süresini hesaplıyoruz (başlangıç ve bitiş saatlerine göre)
-        if (shift.getStartTime() != null && shift.getEndTime() != null) {
-            shift.setDurationInMinutes((int) java.time.Duration.between(shift.getStartTime(), shift.getEndTime()).toMinutes());
-        }
-
-        // Shift nesnesini veritabanına kaydediyoruz
-        return shiftRepository.save(shift);
-    }
-
 
     public List<Shift> getAllShifts() {
         return shiftRepository.findAll();
@@ -130,5 +108,18 @@ public class ShiftService {
         }
 
         return shiftDistribution;
+    }
+
+    @Transactional
+    public ShiftDto createShift( String shiftName, LocalDate startTime, LocalDate endTime, ShiftType shiftType) {
+        Shift shift = Shift.builder()
+                .shiftName(shiftName)
+                .startTime(startTime)
+                .endTime(endTime)
+                .shiftType(shiftType)
+                .build();
+
+        Shift savedShift = shiftRepository.save(shift);  // Vardiya kaydını veritabanına kaydet
+        return shiftMapper.toShiftDTO(savedShift);  // DTO'ya dönüştürüp döndür
     }
 }

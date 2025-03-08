@@ -12,6 +12,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	Optional<User> findByActivationCode(String activationCode);  // Aktivasyon kodu ile kullanıcıyı bulma metodu
 	List<User> findByNameContainingAndEmailContaining(String name, String email);
 	Optional<User> findByName(String name);
+
+
 	
 	
  }

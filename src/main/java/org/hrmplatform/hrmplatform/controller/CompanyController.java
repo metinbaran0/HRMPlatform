@@ -264,27 +264,7 @@ public class CompanyController {
 		                                     .build());
 	}
 	
-	//Kullanıcı hesabını pasif hale getirir
-	@PatchMapping("/users/deactivate")
-	public ResponseEntity<BaseResponse<String>> deactivateUser(@RequestParam Long userId) {
-		try {
-			companyService.deactivateUser(userId);
-			return ResponseEntity.ok(BaseResponse.<String>builder()
-			                                     .code(200)
-			                                     .message("Kullanıcı başarıyla pasif hale getirildi")
-			                                     .success(true)
-			                                     .data("Kullanıcı hesabı pasif hale getirildi")
-			                                     .build());
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-			                     .body(BaseResponse.<String>builder()
-			                                       .code(500)
-			                                       .message("Hata oluştu: " + e.getMessage())
-			                                       .success(false)
-			                                       .data(null)
-			                                       .build());
-		}
-	}
+
 		//Şirket ekleme
 	@PostMapping(ADDCOMPANY)
 	public ResponseEntity<BaseResponse<Boolean>> addCompany(@RequestBody @Valid CompanyDto companyDto) {

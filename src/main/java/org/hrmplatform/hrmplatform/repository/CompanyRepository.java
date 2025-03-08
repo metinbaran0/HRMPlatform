@@ -35,8 +35,6 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
                                                        @Param("endDate") LocalDateTime endDate);
 
 
-    Optional<Employee> findByUserId(Long userId);
-
     // Büyük/küçük harfe duyarsız ve iki kelimeyi de içeren arama
     @Query("SELECT c FROM Company c WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     List<Company> findByNameIgnoreCase(@Param("name") String name);

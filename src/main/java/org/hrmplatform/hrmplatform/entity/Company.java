@@ -31,8 +31,7 @@ public class Company {
     
     private String sector;
     private Integer employeeCount;
-    
-    private Long userId;
+
     
     private boolean emailVerified; // Mail doğrulama durumu
     

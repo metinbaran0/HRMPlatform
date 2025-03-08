@@ -1,21 +1,26 @@
 package org.hrmplatform.hrmplatform.service;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.hrmplatform.hrmplatform.dto.request.EmployeeRequestDto;
 import org.hrmplatform.hrmplatform.dto.request.EmployeeUpdateDto;
 import org.hrmplatform.hrmplatform.dto.response.EmployeeResponseDto;
+import org.hrmplatform.hrmplatform.dto.response.TokenValidationResult;
 import org.hrmplatform.hrmplatform.entity.Company;
 import org.hrmplatform.hrmplatform.entity.Employee;
 import org.hrmplatform.hrmplatform.exception.EmployeeNotFoundException;
 import org.hrmplatform.hrmplatform.exception.ErrorType;
 import org.hrmplatform.hrmplatform.mapper.EmployeeMapper;
 import org.hrmplatform.hrmplatform.repository.EmployeeRepository;
+import org.hrmplatform.hrmplatform.util.JwtManager;
 import org.hrmplatform.hrmplatform.util.PaginationUtil;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,7 +35,8 @@ public class EmployeeService {
     @Lazy
     private final CompanyService companyService;
     private final EmployeeMapper employeeMapper;
-   
+    private final JwtManager jwtManager;
+
 
     /**
      * Tüm çalışanları getirir (sayfalama eklenmiştir).
@@ -41,10 +47,28 @@ public class EmployeeService {
         return employeeRepository.findAll(pageable);
     }
 
-    public EmployeeResponseDto createEmployee(EmployeeRequestDto request) {
-        Company company = companyService.findByCompanyId(request.companyId())
-                .orElseThrow(() -> new IllegalArgumentException("Company not found with ID: " + request.companyId()));
+    public EmployeeResponseDto createEmployee(
+            @RequestHeader("Authorization") String token,
+            @RequestBody @Valid EmployeeRequestDto request) {
 
+        // Token'ı doğrula ve companyId bilgisini al
+        Optional<TokenValidationResult> tokenValidationResult = jwtManager.validateToken(token.replace("Bearer ", ""));
+        if (tokenValidationResult.isEmpty()) {
+            throw new IllegalArgumentException("Geçersiz token");
+        }
+
+        Long companyId = tokenValidationResult.get().companyId();
+
+        // Eğer companyId null ise, bu kullanıcının bir şirketi yok demektir
+        if (companyId == null) {
+            throw new IllegalArgumentException("Bu işlemi gerçekleştirmek için bir şirkete ait olmalısınız");
+        }
+
+        // Şirketi bul
+        Company company = companyService.findByCompanyId(companyId)
+                .orElseThrow(() -> new IllegalArgumentException("Company not found with ID: " + companyId));
+
+        // Employee nesnesini oluştur ve companyId bilgisini ekle
         Employee employee = Employee.builder()
                 .companyId(company.getId())
                 .name(request.name())
@@ -57,9 +81,10 @@ public class EmployeeService {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
+        // Employee'yi kaydet
         Employee savedEmployee = employeeRepository.save(employee);
 
-        // **Manuel Mapping**
+        // EmployeeResponseDto'yu oluştur ve dön
         return new EmployeeResponseDto(
                 savedEmployee.getId(),
                 company.getName(), // Şirket adını ekledik
@@ -121,39 +146,13 @@ public class EmployeeService {
     }
     
     
-              //  METIN
+
     
+
     
-    // companyId'ye göre çalışanları bulma
-    public Employee findEmployeeById(Long employeeId) {
-        return employeeRepository.findById(employeeId)
-                                 .orElseThrow(() -> new RuntimeException("Çalışan bulunamadı"));
-    }
+
     
-    // companyId ile şirkete ait çalışanları pasif hale getirme
-    public void deactivateEmployeesByCompanyId(Long companyId) {
-        // Şirketin çalışanlarını bul ve pasif hale getir
-        List<Employee> employees = employeeRepository.findByCompanyId(companyId);
-        for (Employee employee : employees) {
-            employee.setActive(false);
-            employeeRepository.save(employee);
-        }
-    }
+
     
-    // Employee üzerinden isActive ve company bilgilerini alma
-    public boolean isEmployeeActive(Long employeeId) {
-        Employee employee = findEmployeeById(employeeId);
-        return employee.isActive();
-    }
-    
-    public Company getCompanyByEmployeeId(Long employeeId) {
-        Employee employee = findEmployeeById(employeeId);
-        Long companyId = employee.getCompanyId();
-        return companyService.findById(companyId)
-                                .orElseThrow(() -> new RuntimeException("Şirket bulunamadı"));
-    }
-    
-    public Optional<Employee> findByUserId(Long userId) {
-        return companyService.findByUserId(userId);
-    }
+
 }

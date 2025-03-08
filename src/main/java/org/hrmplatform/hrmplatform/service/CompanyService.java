@@ -324,30 +324,7 @@ public class CompanyService {
     }
     
     
-    // Kullanıcıyı pasif hale getirme işlemi
-    @Transactional
-    public void deactivateUser(Long userId) throws Exception {
-       
-        UserRole userRole = userRoleService.findById(userId)
-                                           .orElseThrow(() -> new Exception("Kullanıcı bulunamadı"));
-        
-       
-        if (userRole.getRole().equals(Role.COMPANY_ADMIN)) {
-            // 3. Kullanıcının ait olduğu şirketteki tüm çalışanları pasif hale getir
-            Long companyId = employeeService.findByUserId(userId)
-                                            .orElseThrow(() -> new Exception("Çalışan bilgisi bulunamadı"))
-                                            .getCompanyId();
-            
-            employeeService.deactivateEmployeesByCompanyId(companyId);
-        }
-        
-        User user = userService.findById(userRole.getUserId())
-                               .orElseThrow(() -> new Exception("Kullanıcı bilgisi bulunamadı"));
-        user.setActivated(false);
-        userService.save(user);
-        userRoleService.save(userRole);
-    }
-    
+
     
     
     // companyId'ye göre şirketi bulma
@@ -362,10 +339,7 @@ public class CompanyService {
         return findById(companyId)
                 .orElseThrow(() -> new HRMPlatformException(ErrorType.COMPANY_NOT_FOUND));
     }
-    
-    public Optional<Employee> findByUserId(Long userId) {
-        return companyRepository.findByUserId(userId);
-    }
+
 
     
     

@@ -91,21 +91,27 @@ public class UserService {
 		if (!passwordEncoder.matches(dto.password(), user.getPassword())) {
 			throw new InvalidArgumentException(CustomErrorType.INVALID_EMAIL_OR_PASSWORD);
 		}
-		
+		UserRole userRole = userRoleService.findUserRoleByUserId(user.getId())
+				.orElseThrow(() -> new HRMPlatformException(ErrorType.USER_ROLE_NOT_FOUND));
+
+		Role role = userRole.getRole();  // UserRole içindeki Role enum'unu al
+
 		// JWT oluşturma
-		String token = jwtManager.createToken(user.getId());
+		String token = jwtManager.createToken(
+				user.getId(),          // authId
+				user.getEmail(),       // email
+				role,                 // role
+				user.getCompanyId(),   // companyId
+				user.getActivated(),  // activated
+				user.getStatus()   );
 		
 
 		// Kullanıcının rolünü çek
-		UserRole userRole = userRoleService.findUserRoleByUserId(user.getId())
-		                                   .orElseThrow(() -> new HRMPlatformException(ErrorType.USER_ROLE_NOT_FOUND));
-		
-		Role role = userRole.getRole();  // UserRole içindeki Role enum'unu al
 
 		// Loglama işlemi
 		log.info("Generated token for user ID {}: {}, Role: {}", user.getId(), token, role);
 
-		return new DoLoginResponseDto(role, user.getId(), token);
+		return new DoLoginResponseDto(role, user.getId(), token );
 	}
 
 	
@@ -116,13 +122,24 @@ public class UserService {
 		if (user.getActivationCodeExpireAt().isBefore(LocalDateTime.now())) {
 			throw new HRMPlatformException(ErrorType.ACTIVATION_CODE_EXPIRED);
 		}
-		
-		user.setStatus(true);
-		user.setActivated(true);
-		user.setActivationCode("USED");
-		userRepository.save(user);
-		
-		jwtManager.createToken(user.getId());
+
+		// JWT oluştur
+		UserRole userRole = userRoleService.findUserRoleByUserId(user.getId())
+				.orElseThrow(() -> new HRMPlatformException(ErrorType.USER_ROLE_NOT_FOUND));
+
+		Role role = userRole.getRole();
+
+		String token = jwtManager.createToken(
+				user.getId(),          // authId
+				user.getEmail(),       // email
+				role,                 // role
+				user.getCompanyId(),   // companyId
+				user.getActivated(),  // activated
+				user.getStatus()      // status
+		);
+
+		// Loglama işlemi
+		log.info("User activated: {} - New token generated: {}", user.getEmail(), token);
 	}
 	
 	public void resendActivationEmail(String email) {

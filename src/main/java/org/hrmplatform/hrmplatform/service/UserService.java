@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class UserService {
-	private final UserRepository userRepository;
+private final UserRepository userRepository;
 	private final JwtManager jwtManager;
 	
 	@Lazy
@@ -44,15 +44,10 @@ public class UserService {
 	@Autowired
 	private EmailService emailService;
 	
-	@Lazy
-	private final EmployeeService employeeService;
-	
-	public UserService(UserRepository userRepository, JwtManager jwtManager, @Lazy UserRoleService userRoleService,
-	                   @Lazy EmployeeService employeeService) {
+	public UserService(UserRepository userRepository, JwtManager jwtManager, @Lazy UserRoleService userRoleService) {
 		this.userRepository = userRepository;
 		this.jwtManager = jwtManager;
 		this.userRoleService = userRoleService;
-		this.employeeService= employeeService;
 	}
 	
 	public void register(@Valid RegisterRequestDto dto) {
@@ -98,10 +93,10 @@ public class UserService {
 			throw new InvalidArgumentException(CustomErrorType.INVALID_EMAIL_OR_PASSWORD);
 		}
 		UserRole userRole = userRoleService.findUserRoleByUserId(user.getId())
-		                                   .orElseThrow(() -> new HRMPlatformException(ErrorType.USER_ROLE_NOT_FOUND));
-		
+				.orElseThrow(() -> new HRMPlatformException(ErrorType.USER_ROLE_NOT_FOUND));
+
 		Role role = userRole.getRole();  // UserRole içindeki Role enum'unu al
-		
+
 		// JWT oluşturma
 		String token = jwtManager.createToken(
 				user.getId(),          // authId
@@ -111,15 +106,15 @@ public class UserService {
 				user.getActivated(),  // activated
 				user.getStatus()   );
 		
-		
+
 		// Kullanıcının rolünü çek
-		
+
 		// Loglama işlemi
 		log.info("Generated token for user ID {}: {}, Role: {}", user.getId(), token, role);
-		
+
 		return new DoLoginResponseDto(role, user.getId(), token );
 	}
-	
+
 	
 	public void activateUser(String activationCode) {
 		User user = userRepository.findByActivationCode(activationCode)
@@ -128,13 +123,13 @@ public class UserService {
 		if (user.getActivationCodeExpireAt().isBefore(LocalDateTime.now())) {
 			throw new HRMPlatformException(ErrorType.ACTIVATION_CODE_EXPIRED);
 		}
-		
+
 		// JWT oluştur
 		UserRole userRole = userRoleService.findUserRoleByUserId(user.getId())
-		                                   .orElseThrow(() -> new HRMPlatformException(ErrorType.USER_ROLE_NOT_FOUND));
-		
+				.orElseThrow(() -> new HRMPlatformException(ErrorType.USER_ROLE_NOT_FOUND));
+
 		Role role = userRole.getRole();
-		
+
 		String token = jwtManager.createToken(
 				user.getId(),          // authId
 				user.getEmail(),       // email
@@ -143,7 +138,7 @@ public class UserService {
 				user.getActivated(),  // activated
 				user.getStatus()      // status
 		);
-		
+
 		// Loglama işlemi
 		log.info("User activated: {} - New token generated: {}", user.getEmail(), token);
 	}

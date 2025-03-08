@@ -51,18 +51,18 @@ public class JwtManager {
 		Date expirationDate = new Date(System.currentTimeMillis() + ExDate);
 		Algorithm algorithm = Algorithm.HMAC512(SecretKey);
 		String token = JWT.create()
-		                  .withAudience()
-		                  .withIssuer(Issuer)
-		                  .withIssuedAt(createdDate)
-		                  .withExpiresAt(expirationDate)
-		                  .withClaim("authId", authId)
-		                  .withClaim("email", email)
-		                  .withClaim("role", role.name())
-		                  .withClaim("companyId", companyId)
-		                  .withClaim("activated", activated)
-		                  .withClaim("status", status)
-		                  .withClaim("key", "JX_15_TJJJ")
-		                  .sign(algorithm);
+				.withAudience()
+				.withIssuer(Issuer)
+				.withIssuedAt(createdDate)
+				.withExpiresAt(expirationDate)
+				.withClaim("authId", authId)
+				.withClaim("email", email)
+				.withClaim("role", role.name())
+				.withClaim("companyId", companyId)
+				.withClaim("activated", activated)
+				.withClaim("status", status)
+				.withClaim("key", "JX_15_TJJJ")
+				.sign(algorithm);
 		return token;
 	}
 	
@@ -76,13 +76,13 @@ public class JwtManager {
 			Algorithm algorithm = Algorithm.HMAC512(SecretKey);
 			JWTVerifier verifier = JWT.require(algorithm).build();
 			DecodedJWT decodedJWT = verifier.verify(token); // Bu token bize mi ait
-			
+
 			if (Objects.isNull(decodedJWT)) // Eğer Token doğrulanamaz ise null döner bizde empty olarak return ederiz.
 				return Optional.empty();
-			
+
 			Long authId = decodedJWT.getClaim("authId").asLong();
 			Long companyId = decodedJWT.getClaim("companyId").asLong(); // companyId bilgisini al
-			
+
 			// Eğer companyId claim'i yoksa veya null ise, companyId'yi null olarak ayarla
 			if (decodedJWT.getClaim("companyId").isNull()) {
 				companyId = null;

@@ -47,13 +47,13 @@ public class EmployeeController {
     @PostMapping(CREATE_EMPLOYEE)
     @PreAuthorize("hasAuthority('COMPANY_ADMIN')")
     public ResponseEntity<BaseResponse<EmployeeResponseDto>> createEmployee(
-            @RequestHeader("Authorization") String token,
+            @RequestHeader("Authorization") String token, // Token'ı header'dan al
             @RequestBody @Valid EmployeeRequestDto dto) {
-        
+
         try {
             // EmployeeService'deki createEmployee metodunu çağır
             EmployeeResponseDto createdEmployee = employeeService.createEmployee(token, dto);
-            
+
             // Başarılı yanıt dön
             return ResponseEntity.ok(new BaseResponse<>(
                     true,
@@ -63,27 +63,42 @@ public class EmployeeController {
         } catch (IllegalArgumentException ex) {
             // Hata durumunda 400 Bad Request dön
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                 .body(new BaseResponse<>(
-                                         false,
-                                         ex.getMessage(),
-                                         400,
-                                         null));
+                    .body(new BaseResponse<>(
+                            false,
+                            ex.getMessage(),
+                            400,
+                            null));
         } catch (Exception ex) {
             // Diğer hatalar için 500 Internal Server Error dön
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                 .body(new BaseResponse<>(
-                                         false,
-                                         "An unexpected error occurred: " + ex.getMessage(),
-                                         500,
-                                         null));
+                    .body(new BaseResponse<>(
+                            false,
+                            "An unexpected error occurred: " + ex.getMessage(),
+                            500,
+                            null));
         }
     }
     
     
-    
-    
-    
-    
+    /**
+     * Var olan bir çalışanı günceller. (Sadece ADMIN)
+     */
+    @PutMapping(UPDATE_EMPLOYEE)
+    @PreAuthorize("hasAuthority('COMPANY_ADMIN')")
+    public ResponseEntity<BaseResponse<Boolean>> updateEmployee(
+            @PathVariable Long id,
+            @Valid @RequestBody EmployeeUpdateDto employee) {
+        
+        employeeService.updateEmployee(id, employee);
+        return ResponseEntity.ok(BaseResponse.<Boolean>builder()
+                                             .code(200)
+                                             .message("personel başarıyla güncellendi")
+                                             .success(true)
+                                             .data(true)
+                                             .build());
+        
+        
+    }
     
     
     /**
@@ -105,5 +120,4 @@ public class EmployeeController {
         Employee employee = employeeService.changeEmployeeStatus(id);
         return ResponseEntity.ok(new BaseResponse<>(true, "Employee status updated successfully", 200, employee));
     }
-    
 }

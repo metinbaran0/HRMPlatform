@@ -2,7 +2,6 @@ package org.hrmplatform.hrmplatform.service;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import org.hrmplatform.hrmplatform.config.JwtUserDetails;
 import org.hrmplatform.hrmplatform.dto.request.CompanyDto;
 import org.hrmplatform.hrmplatform.dto.response.SubscriptionResponse;
 import org.hrmplatform.hrmplatform.entity.Company;
@@ -19,8 +18,6 @@ import org.hrmplatform.hrmplatform.repository.CompanyRepository;
 import org.hrmplatform.hrmplatform.util.JwtManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
@@ -30,6 +27,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class CompanyService {
@@ -38,11 +36,13 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
     private final CompanyMapper companyMapper;
     private final EmailService emailService; // EmailService enjekte edildi
+    private final UserRoleService userRoleService;
     private final EmailNotificationService emailNotificationService;
-   
+    private final JwtManager jwtManager;
     
-   
-   
+    @Lazy
+    private final EmployeeService employeeService;
+    private final UserService userService;
     
     @Value("${hrmplatform.siteAdminEmail}")
     private String siteAdminEmail; // siteAdminEmail değerini application.yml'den al
@@ -51,12 +51,18 @@ public class CompanyService {
                           CompanyMapper companyMapper,
                           EmailService emailService,
                           UserRoleService userRoleService,
+                          @Lazy EmployeeService employeeService,
+                          UserService userService,
                           EmailNotificationService emailNotificationService,
                          JwtManager jwtManager) {
 		this.companyRepository = companyRepository;
 		this.companyMapper = companyMapper;
 		this.emailService = emailService;
+		this.userRoleService = userRoleService;
+		this.employeeService = employeeService;
+		this.userService = userService;
         this.emailNotificationService= emailNotificationService;
+        this.jwtManager = jwtManager;
 	}
 	
 	
@@ -318,7 +324,7 @@ public class CompanyService {
     }
     
     
-  
+
     
     
     // companyId'ye göre şirketi bulma
@@ -333,12 +339,8 @@ public class CompanyService {
         return findById(companyId)
                 .orElseThrow(() -> new HRMPlatformException(ErrorType.COMPANY_NOT_FOUND));
     }
-    
-   
-    
-    
-    
-   
+
+
     
     
     //-----------
@@ -404,7 +406,22 @@ public class CompanyService {
     public List<Company> findByCompanyName(String name) {
         return companyRepository.findByNameIgnoreCase(name);
     }
-    
-    
 
+
+    public List<CompanyDto> getApprovedCompanies() {
+        List<Company> approvedCompanies = companyRepository.findByStatusAndIsDeletedFalse(Status.APPROVED);
+        return approvedCompanies.stream()
+                .map(company -> new CompanyDto(
+                        company.getName(),
+                        company.getAddress(),
+                        company.getPhone(),
+                        company.getEmail(),
+                        company.getSubscriptionPlan(),
+                        company.getContactPerson(),
+                        company.getSector(),
+                        company.getEmployeeCount()
+                ))
+                .collect(Collectors.toList());
+
+    }
 }

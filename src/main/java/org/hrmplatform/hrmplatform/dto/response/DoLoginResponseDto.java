@@ -7,6 +7,7 @@ public record DoLoginResponseDto(
 		Role role,
 		Long userId,
 		String token
-		
+
+
 ) {
 }

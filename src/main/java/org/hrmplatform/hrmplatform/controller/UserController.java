@@ -40,7 +40,7 @@ import java.util.Map;
 @CrossOrigin("*")
 public class UserController {
     
-    private final UserService userService;
+  private final UserService userService;
     
     // Kullanıcı servisini enjekte ediyoruz
     public UserController(UserService userService) {
@@ -63,46 +63,46 @@ public class UserController {
                                              .success(true)
                                              .build());
     }
-    
+
     /**
      * Kullanıcıyı giriş yapmasını sağlar ve JWT token döndürür.
      *
      * @param request Kullanıcı giriş bilgilerini içeren DTO
-     * @return JWT token
+     * @return JWT token ve kullanıcı bilgileri
      */
     @PostMapping(DOLOGIN)
     public ResponseEntity<BaseResponse<DoLoginResponseDto>> doLogin(@RequestBody @Valid LoginRequestDto request) {
         try {
             // Service katmanından giriş işlemini gerçekleştir
             DoLoginResponseDto response = userService.doLogin(request);
-            
+
             // Başarılı yanıt oluştur
             return ResponseEntity.ok(BaseResponse.<DoLoginResponseDto>builder()
-                                                 .code(200)
-                                                 .data(response)
-                                                 .message("Giriş başarılı")
-                                                 .success(true)
-                                                 .build());
-            
+                    .code(200)
+                    .data(response)
+                    .message("Giriş başarılı")
+                    .success(true)
+                    .build());
+
         } catch (InvalidArgumentException ex) {
             // Geçersiz kimlik doğrulama bilgileri durumunda 401 Unauthorized dön
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                 .body(BaseResponse.<DoLoginResponseDto>builder()
-                                                   .code(401)
-                                                   .message(ex.getMessage())
-                                                   .success(false)
-                                                   .data(null)
-                                                   .build());
-            
+                    .body(BaseResponse.<DoLoginResponseDto>builder()
+                            .code(401)
+                            .message(ex.getMessage())
+                            .success(false)
+                            .data(null)
+                            .build());
+
         } catch (HRMPlatformException ex) {
             // Diğer hatalar için 500 Internal Server Error dön
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                 .body(BaseResponse.<DoLoginResponseDto>builder()
-                                                   .code(500)
-                                                   .message("Sunucu hatası: " + ex.getMessage())
-                                                   .success(false)
-                                                   .data(null)
-                                                   .build());
+                    .body(BaseResponse.<DoLoginResponseDto>builder()
+                            .code(500)
+                            .message("Sunucu hatası: " + ex.getMessage())
+                            .success(false)
+                            .data(null)
+                            .build());
         }
     }
     

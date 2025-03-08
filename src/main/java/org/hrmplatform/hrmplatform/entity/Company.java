@@ -31,6 +31,7 @@ public class Company {
     
     private String sector;
     private Integer employeeCount;
+
     
     private boolean emailVerified; // Mail doğrulama durumu
     
@@ -48,11 +49,12 @@ public class Company {
     @Builder.Default
     private boolean isDeleted = false;  // Soft delete için alan
     
-        @Column(name = "is_active")
+    
+    
+    @Column(name = "is_active")
     @Builder.Default
     private boolean isActive = true;
     
-
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -72,6 +74,16 @@ public class Company {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+        // Eğer status "APPROVED" ise üyelik bitiş süresi ayarlanacak
+        if (this.status == Status.APPROVED && this.subscriptionPlan != null) {
+            LocalDateTime now = LocalDateTime.now();
+
+            if (subscriptionPlan == SubscriptionPlan.MONTHLY) {
+                subscriptionEndDate = now.plusMonths(1);
+            } else if (subscriptionPlan == SubscriptionPlan.YEARLY) {
+                subscriptionEndDate = now.plusYears(1);
+            }
+        }
     }
     
     // Üyelik planını ayarla ve bitiş tarihini güncelle

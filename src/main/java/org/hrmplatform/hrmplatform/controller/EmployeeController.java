@@ -6,8 +6,12 @@ import org.hrmplatform.hrmplatform.dto.request.EmployeeRequestDto;
 import org.hrmplatform.hrmplatform.dto.request.EmployeeUpdateDto;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
 import org.hrmplatform.hrmplatform.dto.response.EmployeeResponseDto;
+import org.hrmplatform.hrmplatform.dto.response.TokenValidationResult;
 import org.hrmplatform.hrmplatform.entity.Employee;
+import org.hrmplatform.hrmplatform.exception.EmployeeNotFoundException;
+import org.hrmplatform.hrmplatform.exception.UnauthorizedException;
 import org.hrmplatform.hrmplatform.service.EmployeeService;
+import org.hrmplatform.hrmplatform.util.JwtManager;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
 
@@ -24,6 +29,7 @@ import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
 @CrossOrigin("*")
 public class EmployeeController {
     private final EmployeeService employeeService;
+    private final JwtManager jwtManager;
     
     /**
      * Tüm çalışanları getirir. (Sadece ADMIN)
@@ -31,16 +37,36 @@ public class EmployeeController {
     @GetMapping(GET_ALL_EMPLOYEES)
     @PreAuthorize("hasAuthority('COMPANY_ADMIN')")
     public ResponseEntity<BaseResponse<Page<Employee>>> getAllEmployees(
+            @RequestHeader("Authorization") String token, // Token'ı header'dan al
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        Page<Employee> employees = employeeService.getAllEmployees(page, size);
+
+        // Token'ı doğrula ve companyId bilgisini al
+        Optional<TokenValidationResult> tokenValidationResult = jwtManager.validateToken(token.replace("Bearer ", ""));
+        if (tokenValidationResult.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new BaseResponse<>(false, "Geçersiz token", 401, null));
+        }
+
+        Long companyId = tokenValidationResult.get().companyId();
+
+        // Eğer companyId null ise, bu kullanıcının bir şirketi yok demektir
+        if (companyId == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new BaseResponse<>(false, "Bu işlemi gerçekleştirmek için bir şirkete ait olmalısınız", 403, null));
+        }
+
+        // Şirkete ait çalışanları getir
+        Page<Employee> employees = employeeService.getAllEmployeesByCompanyId(companyId, page, size);
 
         if (employees.isEmpty()) {
-            return ResponseEntity.ok(new BaseResponse<>(false, "No employees found", 404, employees));
+            return ResponseEntity.ok(new BaseResponse<>(false, "No employees found for company ID: " + companyId, 404, employees));
         }
 
         return ResponseEntity.ok(new BaseResponse<>(true, "Employees retrieved successfully", 200, employees));
     }
+
+
     /**
      * Yeni bir çalışan ekler. (Sadece ADMIN)
      */
@@ -85,19 +111,36 @@ public class EmployeeController {
      */
     @PutMapping(UPDATE_EMPLOYEE)
     @PreAuthorize("hasAuthority('COMPANY_ADMIN')")
-    public ResponseEntity<BaseResponse<Boolean>> updateEmployee(
+    public ResponseEntity<BaseResponse<EmployeeResponseDto>> updateEmployee(
+            @RequestHeader("Authorization") String token,
             @PathVariable Long id,
-            @Valid @RequestBody EmployeeUpdateDto employee) {
-        
-        employeeService.updateEmployee(id, employee);
-        return ResponseEntity.ok(BaseResponse.<Boolean>builder()
-                                             .code(200)
-                                             .message("personel başarıyla güncellendi")
-                                             .success(true)
-                                             .data(true)
-                                             .build());
-        
-        
+            @RequestBody @Valid EmployeeUpdateDto employeeDetails) {
+        try {
+            EmployeeResponseDto updatedEmployee = employeeService.updateEmployee(token, id, employeeDetails);
+            return ResponseEntity.ok(new BaseResponse<>(true, "Çalışan başarıyla güncellendi", 200, updatedEmployee));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new BaseResponse<>(false, ex.getMessage(), 400, null));
+        } catch (EmployeeNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new BaseResponse<>(false, ex.getMessage(), 404, null));
+        }
+    }
+    @PreAuthorize("hasAuthority('COMPANY_ADMIN')")
+    @GetMapping(GET_EMPLOYEE_BY_ID)
+    public ResponseEntity<BaseResponse<EmployeeResponseDto>> getEmployeeById(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long id) {
+        try {
+            EmployeeResponseDto employee = employeeService.getEmployeeById(token, id);
+            return ResponseEntity.ok(new BaseResponse<>(true, "Çalışan bilgileri başarıyla getirildi", 200, employee));
+        } catch (UnauthorizedException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new BaseResponse<>(false, ex.getMessage(), 401, null));
+        } catch (EmployeeNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new BaseResponse<>(false, ex.getMessage(), 404, null));
+        }
     }
     
     
@@ -106,9 +149,20 @@ public class EmployeeController {
      */
     @DeleteMapping(DELETE_EMPLOYEE)
     @PreAuthorize("hasAuthority('COMPANY_ADMIN')")
-    public ResponseEntity<BaseResponse<Void>> deleteEmployee(@PathVariable Long id) {
-        employeeService.deleteEmployee(id);
-        return ResponseEntity.ok(new BaseResponse<>(true, "Employee deleted successfully", 200, null));
+    public ResponseEntity<String> deleteEmployee(
+            @PathVariable Long id,
+            @RequestHeader("Authorization") String token) {
+        try {
+            // "Bearer " kısmını kaldır
+            if (token != null && token.startsWith("Bearer ")) {
+                token = token.substring(7);
+            }
+
+            employeeService.deleteEmployee(id, token);
+            return ResponseEntity.ok("Employee deleted successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        }
     }
     
     /**
@@ -116,8 +170,19 @@ public class EmployeeController {
      */
     @PutMapping(CHANGE_EMPLOYEE_STATUS)
     @PreAuthorize("hasAuthority('COMPANY_ADMIN')")
-    public ResponseEntity<BaseResponse<Employee>> changeEmployeeStatus(@PathVariable Long id) {
-        Employee employee = employeeService.changeEmployeeStatus(id);
-        return ResponseEntity.ok(new BaseResponse<>(true, "Employee status updated successfully", 200, employee));
+    public ResponseEntity<Void> changeEmployeeStatus(
+            @PathVariable Long id,
+            @RequestHeader("Authorization") String token) {
+        try {
+            // "Bearer " kısmını kaldır
+            if (token != null && token.startsWith("Bearer ")) {
+                token = token.substring(7);
+            }
+
+            employeeService.changeEmployeeStatus(id, token);
+            return ResponseEntity.ok().build(); // 200 OK döner
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 401 Unauthorized döner
+        }
     }
 }

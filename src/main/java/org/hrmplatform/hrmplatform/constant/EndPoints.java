@@ -75,6 +75,7 @@ public class EndPoints {
     // EMPLOYEE
     public static final String EMPLOYEE = ROOT + "/employee";
     public static final String GET_ALL_EMPLOYEES = "/get-all-employees";
+    public static final String GET_EMPLOYEE_BY_ID = "/get-employee-by-id/{id}";
     public static final String CREATE_EMPLOYEE = "/create-employee";
     public static final String UPDATE_EMPLOYEE = "update-employee/{id}";
     public static final String DELETE_EMPLOYEE = "delete-employee/{id}";

@@ -20,6 +20,7 @@ public enum ErrorType implements ErrorTypeInterface {
 	COMPANY_ALREADY_DELETED(40,"Şirket silinmiş" , HttpStatus.BAD_REQUEST),
 	EMAIL_NOT_VERIFIED(402,"Mail onaylanmamış" , HttpStatus.BAD_REQUEST),
 	EMAIL_SENDING_FAILED(789,"Mail gönderirken hata oluştu" ,HttpStatus.BAD_REQUEST ),
+	SHIFT_ALREADY_ASSIGNED(2001, "Çalışan bu vardiyaya zaten atanmış.", HttpStatus.CONFLICT),
 
 
 	UNAUTHORIZED_OPERATION(403, "Bu işlemi yapmak için yetkiniz yok.", HttpStatus.FORBIDDEN),

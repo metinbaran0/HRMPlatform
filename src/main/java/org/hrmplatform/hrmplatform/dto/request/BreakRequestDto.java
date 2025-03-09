@@ -1,12 +1,12 @@
 package org.hrmplatform.hrmplatform.dto.request;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public record BreakRequestDto(
         Long shiftId,
         Long companyId,
         String breakName,
-        LocalDateTime startTime,
-        LocalDateTime endTime
+        LocalDate startTime,
+        LocalDate endTime
 ) {
 }

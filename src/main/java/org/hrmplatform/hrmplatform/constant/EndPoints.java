@@ -89,7 +89,11 @@ public class EndPoints {
     public static final String GETSHIF_BYID = "/getshift-by-id/{id}";
     public static final String ACTIVE_SHIFT ="active-shift" ;
     public static final String DELETE_SHIFT = "/delete-shift";
-    public static final String UPDATE_SHIFT = "update-shift/{id}";
+    public static final String UPDATE_SHIFT = "/update-shift/{id}";
+    public static final String SHIFTTYPE = "/shifttype/{shiftType}";
+    public static final String DATE_SHIFT = "/date-shift";
+    public static final String DISTRIBUTION = "/distribution";
+
 
     //BREAK
     public static final String CREATE_BREAK= "/create-break";
@@ -106,6 +110,7 @@ public class EndPoints {
     public static final String GET_EMPLOYEE_SHIFTS_BY_EMPLOYEE_ID= "/get-employee-shift-byemployee-id/{employeeId}";
     public static final String UPDATE_EMPLOYEE_SHIFT= "/update-employee-shift/{employeeShiftId}";
     public static final String DELETE_EMPLOYEE_SHIFT= "/delete-employee-shift/{employeeShiftId}";
+    public static final String FILTERDATE = "//employee-shifts/by-date";
 
     //COMMENT
     public static final String CREATE_COMMENT= "/create-comment";

@@ -119,11 +119,11 @@ public class UserRoleService {
 		return userRoleRepository.countByUserRoleRole(role);
 	}
 	
-	// userId'ye göre UserRole'ü bulma
-	public Optional<UserRole> findById(Long userId) throws Exception {
-		return userRoleRepository.findById(userId);
-		
-		
-	}
+//	// userId'ye göre UserRole'ü bulma
+//	public Optional<UserRole> findByCompanyId(Long companyId) throws Exception {
+//		return userRoleRepository.findByCompanyId(companyId);
+//
+//
+//	}
 	
 }

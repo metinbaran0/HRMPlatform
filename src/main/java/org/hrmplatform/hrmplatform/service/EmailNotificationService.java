@@ -21,7 +21,8 @@ public class EmailNotificationService {
 	
 	public void notifyAdminAndApplicant(Company company) {
 		try {
-			String verificationLink = appConfig.getBaseUrl() + "/v1/api/company/verify-email?token" + company.getEmailVerificationToken();
+			String verificationLink =
+					appConfig.getBaseUrl() + "/v1/api/company/verify-email?token=" + company.getEmailVerificationToken();
 			String siteAdminEmail = appConfig.getSiteAdminEmail();
 			
 			// Site Admin'e başvuru bildirimi gönder
@@ -33,8 +34,9 @@ public class EmailNotificationService {
 			// Başvuran şirkete bilgilendirme e-postası gönder
 			String applicantEmail = company.getEmail();
 			emailService.sendEmail(applicantEmail,
-			                       "Başvurunuz alındı",
-			                       "Başvurunuz alındı. Başvurunuzun sonucu incelenip size detaylı bilgi verilecektir.");
+			                       "Şirket Başvurunuzu Doğrulayın",
+			                       "Başvurunuz alınmıştır.\nŞirket başvurunuzu tamamlamak için aşağıdaki linke " +
+					                       "tıklayın:\n\n" + verificationLink);
 			log.info("Başvuran şirkete bilgilendirme e-postası gönderildi.");
 			
 		} catch (Exception e) {

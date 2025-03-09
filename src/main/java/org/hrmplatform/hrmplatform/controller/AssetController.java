@@ -3,6 +3,7 @@ package org.hrmplatform.hrmplatform.controller;
 import org.hrmplatform.hrmplatform.dto.request.AssetRequestDto;
 import org.hrmplatform.hrmplatform.dto.response.AssetResponseDto;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
+import org.hrmplatform.hrmplatform.entity.Asset;
 import org.hrmplatform.hrmplatform.service.AssetService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,7 +34,7 @@ public class AssetController {
 	 * @param assetRequest Zimmet eklemek için gerekli verileri içeren DTO
 	 * @return Eklenen zimmet bilgilerini içeren cevap
 	 */
-	@PreAuthorize("hasRole('EMPLOYEE') or hasRole('COMPANY_ADMIN')")
+	@PreAuthorize("hasAuthority('COMPANY_ADMIN')")
 	@PostMapping(ADD_ASSET)
 	public ResponseEntity<BaseResponse<AssetResponseDto>> addAsset(@RequestBody AssetRequestDto assetRequest) {
 		AssetResponseDto savedAsset = assetService.addAsset(assetRequest);
@@ -131,5 +132,11 @@ public class AssetController {
 				            .message("Zimmet başarıyla silindi.")
 				            .build()
 		);
+	}
+	
+	@GetMapping("/company/{companyId}")
+	public ResponseEntity<?> getAssetsByCompany(@PathVariable Long companyId) {
+		List<Asset> assets = assetService.getAssetsByCompany(companyId);
+		return ResponseEntity.ok(assets);
 	}
 }

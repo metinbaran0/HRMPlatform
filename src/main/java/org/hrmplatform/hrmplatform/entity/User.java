@@ -30,6 +30,8 @@ public class User {
     @Column(name = "is_activated", nullable = false)
     private Boolean activated = false;
     
+
+    
     @Column(name = "activation_code")
     private String activationCode;
     

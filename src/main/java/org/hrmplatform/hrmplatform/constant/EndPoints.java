@@ -110,7 +110,7 @@ public class EndPoints {
     public static final String GET_EMPLOYEE_SHIFTS_BY_EMPLOYEE_ID= "/get-employee-shift-byemployee-id/{employeeId}";
     public static final String UPDATE_EMPLOYEE_SHIFT= "/update-employee-shift/{employeeShiftId}";
     public static final String DELETE_EMPLOYEE_SHIFT= "/delete-employee-shift/{employeeShiftId}";
-    public static final String GET_SHIFT_CONFLICT_BY_EMPLOYEE_ID = "/{employeeId}/shift-conflict";  // Yeni eklenen yol
+    public static final String FILTERDATE = "//employee-shifts/by-date";
 
     //COMMENT
     public static final String CREATE_COMMENT= "/create-comment";

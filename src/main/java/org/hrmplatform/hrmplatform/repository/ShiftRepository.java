@@ -15,4 +15,6 @@ public interface ShiftRepository extends JpaRepository<Shift, Long> {
     List<Shift> findByShiftType(ShiftType shiftType);
 
     List<Shift> findByStartTimeBetween(LocalDate startDate, LocalDate endDate);
+
+
 }

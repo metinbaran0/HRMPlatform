@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.hrmplatform.hrmplatform.dto.request.CreateEmployeeShiftRequest;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
 import org.hrmplatform.hrmplatform.entity.EmployeeShift;
+import org.hrmplatform.hrmplatform.exception.HRMPlatformException;
 import org.hrmplatform.hrmplatform.service.EmployeeShiftService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,15 +28,25 @@ public class EmployeeShiftController {
     // Çalışan vardiyası oluşturma
     @PostMapping(CREATE_EMPLOYEE_SHIFT)
     public ResponseEntity<BaseResponse<EmployeeShift>> createEmployeeShift(@RequestBody CreateEmployeeShiftRequest request) {
-        EmployeeShift employeeShift = employeeShiftService.createEmployeeShift(request, request.employeeId(), request.shiftId());
+        try {
+            EmployeeShift employeeShift = employeeShiftService.createEmployeeShift(request, request.employeeId(), request.shiftId());
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(BaseResponse.<EmployeeShift>builder()
-                        .code(201)
-                        .message("Çalışan vardiyası başarıyla oluşturuldu.")
-                        .success(true)
-                        .data(employeeShift)
-                        .build());
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(BaseResponse.<EmployeeShift>builder()
+                            .code(201)
+                            .message("Çalışan vardiyası başarıyla oluşturuldu.")
+                            .success(true)
+                            .data(employeeShift)
+                            .build());
+        } catch ( HRMPlatformException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(BaseResponse.<EmployeeShift>builder()
+                            .code(409)
+                            .message(e.getMessage())
+                            .success(false)
+                            .data(null)
+                            .build());
+        }
     }
 
     // Bütün çalışan vardiyalarını getirme
@@ -66,10 +77,12 @@ public class EmployeeShiftController {
         );
     }
 
-    // Çalışan vardiyasını güncelleme
     @PutMapping(UPDATE_EMPLOYEE_SHIFT)
     public ResponseEntity<BaseResponse<EmployeeShift>> updateEmployeeShift(@PathVariable Long employeeShiftId,
                                                                            @RequestBody CreateEmployeeShiftRequest request) {
+        // Service üzerinden çalışan ve vardiya ID'lerini doğrulama
+        employeeShiftService.validateEmployeeAndShift(request.employeeId(), request.shiftId());
+
         EmployeeShift updatedShift = employeeShiftService.updateEmployeeShift(employeeShiftId, request);
         return ResponseEntity.ok(
                 BaseResponse.<EmployeeShift>builder()
@@ -81,10 +94,12 @@ public class EmployeeShiftController {
         );
     }
 
+
     // Çalışan vardiyasını soft-delete
     @DeleteMapping(DELETE_EMPLOYEE_SHIFT)
     public ResponseEntity<BaseResponse<Void>> deleteEmployeeShift(@PathVariable Long employeeShiftId) {
-        employeeShiftService.softDeleteEmployeeShift(employeeShiftId);
+        employeeShiftService.softDeleteEmployeeShift(employeeShiftId);  // Servis metodunu çağırıyoruz
+
         return ResponseEntity.ok(
                 BaseResponse.<Void>builder()
                         .code(200)
@@ -94,16 +109,22 @@ public class EmployeeShiftController {
         );
     }
 
-//Bir çalışanın aynı gün içinde birden fazla vardiya alıp almadığının kontrol edilmesi
-
-    @GetMapping(GET_SHIFT_CONFLICT_BY_EMPLOYEE_ID)
-    public ResponseEntity<Boolean> checkShiftConflict(@PathVariable Long employeeId, @RequestParam LocalDate date) {
-        // Vardiya çakışması kontrolü yapılır
-        boolean hasConflict = employeeShiftService.checkShiftConflict(employeeId, date);
-
-        // Çakışma durumu (true = çakışma var, false = çakışma yok)
-        return ResponseEntity.ok(hasConflict);
+    @GetMapping(FILTERDATE)
+    public ResponseEntity<BaseResponse<List<EmployeeShift>>> getEmployeeShiftsByDate(@RequestParam LocalDate startDate, @RequestParam LocalDate endDate) {
+        List<EmployeeShift> employeeShifts = employeeShiftService.getEmployeeShiftsByDateRange(startDate, endDate);
+        return ResponseEntity.ok(
+                BaseResponse.<List<EmployeeShift>>builder()
+                        .code(200)
+                        .message("Vardiya tarih aralığı başarıyla getirildi.")
+                        .success(true)
+                        .data(employeeShifts)
+                        .build()
+        );
     }
+
+
+
+
 
 
 }

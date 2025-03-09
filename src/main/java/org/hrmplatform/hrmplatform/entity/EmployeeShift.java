@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -26,7 +27,9 @@ public class EmployeeShift {
     private LocalDateTime assignedDate;
     private Boolean isActive;
     @Builder.Default
-    private Boolean isDeleted = false;
+    private Boolean deleted = false;
+
+    private LocalDate shiftDate;
 
     @PrePersist
     protected void onCreate() {

@@ -28,6 +28,7 @@ import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
 public class ShiftController {
     private final ShiftService shiftService;
 
+
     @PostMapping(CREATE_SHIFT)
     public ResponseEntity<BaseResponse<ShiftDto>> createShift(@RequestBody ShiftDto shiftDto) {
         ShiftDto createdShift = shiftService.createShift(shiftDto.shiftName(),
@@ -232,9 +233,15 @@ public class ShiftController {
 
     // Vardiya çakışmasını kontrol eden endpoint
     @GetMapping("/employee/{employeeId}/shift-conflict")
-    public ResponseEntity<Boolean> checkShiftConflict(@PathVariable Long employeeId, @RequestParam LocalDate date) {
+    public ResponseEntity<BaseResponse<Boolean>> checkShiftConflict(@PathVariable Long employeeId, @RequestParam LocalDate date) {
         boolean hasConflict = shiftService.checkShiftConflict(employeeId, date);
-        return ResponseEntity.ok(hasConflict);
+        return ResponseEntity.ok(
+                BaseResponse.<Boolean>builder()
+                        .code(200)
+                        .message("true")
+                        .success(true)
+                        .data(hasConflict)
+                        .build());
     }
 
     // Vardiya dağılımını almak için endpoint
@@ -243,6 +250,8 @@ public class ShiftController {
         Map<Long, List<Shift>> distribution = shiftService.getShiftDistribution();
         return ResponseEntity.ok(distribution);
     }
+
+
 
 
 

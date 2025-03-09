@@ -122,4 +122,6 @@ public class ShiftService {
         Shift savedShift = shiftRepository.save(shift);  // Vardiya kaydını veritabanına kaydet
         return shiftMapper.toShiftDTO(savedShift);  // DTO'ya dönüştürüp döndür
     }
+
+
 }

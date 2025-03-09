@@ -9,6 +9,12 @@ import java.util.List;
 import java.util.Optional;
 
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+
 	Page<Employee> findByCompanyId(Long companyId, Pageable pageable);
+
+	List<Employee> findByCompanyId(Long companyId);
+//	Optional<Employee> findByUserId(Long userId);
+
+
 	
 }

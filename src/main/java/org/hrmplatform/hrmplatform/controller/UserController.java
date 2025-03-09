@@ -1,6 +1,7 @@
 package org.hrmplatform.hrmplatform.controller;
 
 import jakarta.validation.Valid;
+import org.hrmplatform.hrmplatform.config.JwtUserDetails;
 import org.hrmplatform.hrmplatform.dto.request.LoginRequestDto;
 import org.hrmplatform.hrmplatform.dto.request.RegisterRequestDto;
 import org.hrmplatform.hrmplatform.dto.request.ResetPasswordRequestDto;
@@ -39,7 +40,7 @@ import java.util.Map;
 @CrossOrigin("*")
 public class UserController {
     
-    private final UserService userService;
+  private final UserService userService;
     
     // Kullanıcı servisini enjekte ediyoruz
     public UserController(UserService userService) {
@@ -203,4 +204,27 @@ public ResponseEntity<BaseResponse<UserProfileResponseDto>> getUserProfile(@Requ
                                              .build());
     }
     
+//
+//    //Kullanıcı hesabını pasif hale getirir
+//    @PatchMapping("/users/deactivate")
+//    public ResponseEntity<BaseResponse<String>> deactivateUser(@RequestParam Long companyId) {
+//        try {
+//            userService.deactivateUser(companyId);
+//            return ResponseEntity.ok(BaseResponse.<String>builder()
+//                                                 .code(200)
+//                                                 .message("Kullanıcı başarıyla pasif hale getirildi")
+//                                                 .success(true)
+//                                                 .data("Kullanıcı hesabı pasif hale getirildi")
+//                                                 .build());
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                                 .body(BaseResponse.<String>builder()
+//                                                   .code(500)
+//                                                   .message("Hata oluştu: " + e.getMessage())
+//                                                   .success(false)
+//                                                   .data(null)
+//                                                   .build());
+//        }
+//    }
+  
 }

@@ -7,9 +7,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hrmplatform.hrmplatform.enums.ShiftType;
 
+import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-//deneme
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,8 +23,8 @@ public class Shift {
     private Long id;
     private Long companyId;
     private String shiftName;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private LocalDate startTime;
+    private LocalDate endTime;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -34,16 +35,28 @@ public class Shift {
     private ShiftType shiftType;  // Sabah, Akşam, Gece veya Saatlik Vardiya tipi
 
 
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
-        this.durationInMinutes = (int) java.time.Duration.between(startTime, endTime).toMinutes();
+        calculateDuration();
     }
 
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    // Vardiya süresini hesaplamak için yardımcı metod
+    public void calculateDuration() {
+        // Eğer sadece tarih bilgisi varsa, saati 00:00:00 kabul ederiz
+        LocalDateTime startDateTime = startTime.atStartOfDay(); // Start tarihinin 00:00:00'da olduğunu varsayıyoruz
+        LocalDateTime endDateTime = endTime.atStartOfDay(); // End tarihinin 00:00:00'da olduğunu varsayıyoruz
+
+        // Eğer saat bilgisi de varsa, startTime ve endTime'a saat bilgisi ekleyerek doğru hesaplama yapabilirsiniz
+        Duration duration = Duration.between(startDateTime, endDateTime);
+        this.durationInMinutes = (int) duration.toMinutes();
     }
 
 

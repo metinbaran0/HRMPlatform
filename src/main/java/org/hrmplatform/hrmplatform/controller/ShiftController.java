@@ -2,6 +2,7 @@ package org.hrmplatform.hrmplatform.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.hrmplatform.hrmplatform.dto.request.CreateShiftRequest;
+import org.hrmplatform.hrmplatform.dto.request.ShiftDto;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
 import org.hrmplatform.hrmplatform.entity.Shift;
 import org.hrmplatform.hrmplatform.enums.ShiftType;
@@ -11,7 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.hrmplatform.hrmplatform.constant.EndPoints.COMPANY;
 import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
@@ -24,33 +28,42 @@ import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
 public class ShiftController {
     private final ShiftService shiftService;
 
-    //HATALI KOD SECURITY HATASI ALIYORUM
-   /* @PostMapping(CREATE_SHIFT)
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<BaseResponse<Shift>> createShift(@RequestBody CreateShiftRequest request, @RequestParam Long companyId) {
-        Shift shift = shiftService.createShift(request, companyId);
-        return ResponseEntity.ok(BaseResponse.<Shift>builder()
-                .code(200)
-                .data(shift)
-                .success(true)
-                .message("Vardiya başarıyla oluşturuldu.")
-                .build());
-    }*/
+
     @PostMapping(CREATE_SHIFT)
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<BaseResponse<Shift>> createShift(@RequestBody CreateShiftRequest request,
-                                                           @RequestParam Long companyId,
-                                                           @RequestParam ShiftType shiftType) {
-        Shift shift = shiftService.createShift(request, companyId, shiftType);  // ShiftType'ı parametre olarak gönderiyoruz
-        return ResponseEntity.ok(BaseResponse.<Shift>builder()
-                .code(200)
-                .data(shift)
+    public ResponseEntity<BaseResponse<ShiftDto>> createShift(@RequestBody ShiftDto shiftDto) {
+        ShiftDto createdShift = shiftService.createShift(shiftDto.shiftName(),
+                shiftDto.startTime(), shiftDto.endTime(), shiftDto.shiftType());
+
+        BaseResponse<ShiftDto> response = BaseResponse.<ShiftDto>builder()
                 .success(true)
-                .message("Vardiya başarıyla oluşturuldu.")
-                .build());
+                .message("Shift created successfully")
+                .code(HttpStatus.CREATED.value())
+                .data(createdShift)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-        //tüm vardiyalrı getirme
+    /**
+     *@PostMapping(CREATE_SHIFT)
+     * public ResponseEntity<BaseResponse<ShiftDto>> createShift(@RequestBody ShiftDto shiftDto, @AuthenticationPrincipal UserDetails userDetails) {
+     *     Long companyId = userDetails.getCompanyId();  // Oturumdan veya kullanıcıdan companyId'yi alıyorsunuz
+     *     ShiftDto createdShift = shiftService.createShift(companyId, shiftDto.shiftName(),
+     *             shiftDto.startTime(), shiftDto.endTime(), shiftDto.shiftType());
+     *
+     *     BaseResponse<ShiftDto> response = BaseResponse.<ShiftDto>builder()
+     *             .success(true)
+     *             .message("Shift created successfully")
+     *             .code(HttpStatus.CREATED.value())
+     *             .data(createdShift)
+     *             .build();
+     *
+     *     return ResponseEntity.status(HttpStatus.CREATED).body(response);
+     * }
+     *
+     */
+
+    //tüm vardiyalrı getirme
     @GetMapping(GETALL_SHIFT)
     public ResponseEntity<BaseResponse<List<Shift>>> getAllShifts() {
         List<Shift> shifts = shiftService.getAllShifts();
@@ -142,6 +155,7 @@ public class ShiftController {
         return ResponseEntity.ok(response);
     }
 
+    //vardiya güncelleme
     @PutMapping(UPDATE_SHIFT)
     public ResponseEntity<BaseResponse<Shift>> updateShift(@PathVariable Long id, @RequestBody CreateShiftRequest request) {
         Shift updatedShift = shiftService.updateShift(id, request);
@@ -160,5 +174,86 @@ public class ShiftController {
                 .message("Vardiya bulunamadı.")
                 .build());
     }
+
+    @GetMapping(SHIFTTYPE)
+    public ResponseEntity<BaseResponse<List<Shift>>> getShiftsByShiftType(@PathVariable ShiftType shiftType) {
+        try {
+            // Vardiya türüne göre vardiya listesi alınıyor
+            List<Shift> shifts = shiftService.getShiftsByShiftType(shiftType);
+
+            // Eğer vardiya listesi boşsa, uygun bir mesaj ile döner
+            if (shifts.isEmpty()) {
+                return ResponseEntity.ok(
+                        BaseResponse.<List<Shift>>builder()
+                                .code(204)
+                                .message("Belirtilen vardiya türüne ait herhangi bir vardiya bulunmamaktadır.")
+                                .success(true)
+                                .data(shifts)
+                                .build()
+                );
+            }
+
+            // Başarılı sonuç dönülür
+            return ResponseEntity.ok(
+                    BaseResponse.<List<Shift>>builder()
+                            .code(200)
+                            .message("Vardiya türüne ait vardiyalar başarıyla getirildi.")
+                            .success(true)
+                            .data(shifts)
+                            .build()
+            );
+        } catch (Exception e) {
+            // Hata durumunda uygun bir mesaj ile hata kodu dönülür
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(BaseResponse.<List<Shift>>builder()
+                            .code(500)
+                            .message("Vardiya listesi alınırken bir hata oluştu: " + e.getMessage())
+                            .success(false)
+                            .data(Collections.emptyList()) // Boş liste gönderilir
+                            .build()
+                    );
+        }
+    }
+
+    //belirli bir tarihe aralığına ait vardiyaları getirme
+    @GetMapping(DATE_SHIFT)
+    public ResponseEntity<BaseResponse<List<Shift>>> getShiftsByDateRange(
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate) {
+        List<Shift> shifts = shiftService.getShiftsByDateRange(startDate, endDate);
+        return ResponseEntity.ok(
+                BaseResponse.<List<Shift>>builder()
+                        .code(200)
+                        .message("Tarih aralığındaki vardiyalar başarıyla getirildi.")
+                        .success(true)
+                        .data(shifts)
+                        .build()
+        );
+    }
+
+    // Vardiya çakışmasını kontrol eden endpoint
+    @GetMapping("/employee/{employeeId}/shift-conflict")
+    public ResponseEntity<BaseResponse<Boolean>> checkShiftConflict(@PathVariable Long employeeId, @RequestParam LocalDate date) {
+        boolean hasConflict = shiftService.checkShiftConflict(employeeId, date);
+        return ResponseEntity.ok(
+                BaseResponse.<Boolean>builder()
+                        .code(200)
+                        .message("true")
+                        .success(true)
+                        .data(hasConflict)
+                        .build());
+    }
+
+    // Vardiya dağılımını almak için endpoint
+    @GetMapping(DISTRIBUTION)
+    public ResponseEntity<Map<Long, List<Shift>>> getShiftDistribution() {
+        Map<Long, List<Shift>> distribution = shiftService.getShiftDistribution();
+        return ResponseEntity.ok(distribution);
+    }
+
+
+
+
+
 
 }

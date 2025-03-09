@@ -31,7 +31,7 @@ import java.util.Optional;
 @Lazy
 @AllArgsConstructor
 public class EmployeeService {
-    private final EmployeeRepository employeeRepository;
+     private final EmployeeRepository employeeRepository;
     private final EmailService emailService;
     @Lazy
     private final CompanyService companyService;
@@ -261,13 +261,14 @@ public class EmployeeService {
     }
 }
     
-    
+
+//    public Optional<Employee> findByUserId(Long userId) {
+//        return employeeRepository.findByUserId(userId);
+//    }
 
     
 
-    
 
-    
-
-    
+  
+}
 

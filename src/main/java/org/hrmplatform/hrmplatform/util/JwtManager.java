@@ -40,7 +40,7 @@ public class JwtManager {
 	private String SecretKey;
 	@Value("${hrmplatform.jwt.issuer}")
 	private String Issuer;
-	private final Long ExDate = 1000L * 60 * 5; // 5dk sonra iptal olsun
+	private final Long ExDate = 1000L * 60 * 30; // 5dk sonra iptal olsun
 	
 	public String createToken(Long authId, String email, Role role, Long companyId, Boolean activated, Boolean status,
 	                          Long employeeId) {

@@ -25,6 +25,7 @@ public class ShiftService {
     private final ShiftRepository shiftRepository;
     private final ShiftMapper shiftMapper;
     private final EmployeeShiftRepository employeeShiftRepository;
+    private final AuthService authService;
 
     public List<Shift> getAllShifts() {
         return shiftRepository.findAll();
@@ -111,16 +112,19 @@ public class ShiftService {
     }
 
     @Transactional
-    public ShiftDto createShift( String shiftName, LocalDate startTime, LocalDate endTime, ShiftType shiftType) {
+    public ShiftDto createShift(String token, ShiftDto shiftDto) {
+        Long companyId = authService.getCompanyIdFromToken(token); // AuthService üzerinden companyId alındı
+
         Shift shift = Shift.builder()
-                .shiftName(shiftName)
-                .startTime(startTime)
-                .endTime(endTime)
-                .shiftType(shiftType)
+                .companyId(companyId)
+                .shiftName(shiftDto.shiftName())
+                .startTime(shiftDto.startTime())
+                .endTime(shiftDto.endTime())
+                .shiftType(shiftDto.shiftType())
                 .build();
 
-        Shift savedShift = shiftRepository.save(shift);  // Vardiya kaydını veritabanına kaydet
-        return shiftMapper.toShiftDTO(savedShift);  // DTO'ya dönüştürüp döndür
+        Shift savedShift = shiftRepository.save(shift);
+        return shiftMapper.toShiftDTO(savedShift);
     }
 
 

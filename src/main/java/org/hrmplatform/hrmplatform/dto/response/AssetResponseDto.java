@@ -10,5 +10,6 @@ public record AssetResponseDto(
 		String serialNumber,
 		LocalDate assignedDate,
 		LocalDate returnDate
+		
 ) {
 }

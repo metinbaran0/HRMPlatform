@@ -30,20 +30,32 @@ public class ShiftController {
 
 
     @PostMapping(CREATE_SHIFT)
-    public ResponseEntity<BaseResponse<ShiftDto>> createShift(@RequestBody ShiftDto shiftDto) {
-        ShiftDto createdShift = shiftService.createShift(shiftDto.shiftName(),
-                shiftDto.startTime(), shiftDto.endTime(), shiftDto.shiftType());
-
-        BaseResponse<ShiftDto> response = BaseResponse.<ShiftDto>builder()
-                .success(true)
-                .message("Shift created successfully")
-                .code(HttpStatus.CREATED.value())
-                .data(createdShift)
-                .build();
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public ResponseEntity<BaseResponse<ShiftDto>> createShift(
+            @RequestHeader("Authorization") String token,
+            @RequestBody ShiftDto shiftDto) {
+        try {
+            ShiftDto createdShift = shiftService.createShift(token, shiftDto);
+            return ResponseEntity.ok(new BaseResponse<>(
+                    true,
+                    "Shift created successfully",
+                    201,
+                    createdShift));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new BaseResponse<>(
+                            false,
+                            ex.getMessage(),
+                            400,
+                            null));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new BaseResponse<>(
+                            false,
+                            "An unexpected error occurred: " + ex.getMessage(),
+                            500,
+                            null));
+        }
     }
-
     /**
      *@PostMapping(CREATE_SHIFT)
      * public ResponseEntity<BaseResponse<ShiftDto>> createShift(@RequestBody ShiftDto shiftDto, @AuthenticationPrincipal UserDetails userDetails) {

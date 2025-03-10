@@ -33,7 +33,7 @@ public class CommentController {
 			);
 		}
 		
-		Comment savedComment = commentService.addComment(request.content());
+		Comment savedComment = commentService.addComment(request);
 		
 		return ResponseEntity.ok(
 				BaseResponse.<Comment>builder()

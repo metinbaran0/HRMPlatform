@@ -25,7 +25,7 @@ public class User {
     private String password;
     private Boolean status;
     private Long companyId;
-  
+    private Long employeeId;
     
     @Column(name = "is_activated", nullable = false)
     private Boolean activated = false;

@@ -104,7 +104,8 @@ private final UserRepository userRepository;
 				role,                 // role
 				user.getCompanyId(),   // companyId
 				user.getActivated(),  // activated
-				user.getStatus()   );
+				user.getStatus() ,
+				user.getEmployeeId());
 		
 
 		// Kullanıcının rolünü çek
@@ -136,8 +137,8 @@ private final UserRepository userRepository;
 				role,                 // role
 				user.getCompanyId(),   // companyId
 				user.getActivated(),  // activated
-				user.getStatus()      // status
-		);
+				user.getStatus() ,     // status
+				user.getEmployeeId());
 
 		// Loglama işlemi
 		log.info("User activated: {} - New token generated: {}", user.getEmail(), token);

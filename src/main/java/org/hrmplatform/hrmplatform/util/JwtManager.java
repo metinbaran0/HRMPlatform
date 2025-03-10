@@ -42,7 +42,8 @@ public class JwtManager {
 	private String Issuer;
 	private final Long ExDate = 1000L * 60 * 5; // 5dk sonra iptal olsun
 	
-	public String createToken(Long authId, String email, Role role, Long companyId, Boolean activated, Boolean status){
+	public String createToken(Long authId, String email, Role role, Long companyId, Boolean activated, Boolean status,
+	                          Long employeeId) {
 		// Breakpoint buraya koyun
 		if (companyId == null) {
 			log.warn("companyId is null for user: {}", authId);
@@ -61,6 +62,7 @@ public class JwtManager {
 				.withClaim("companyId", companyId)
 				.withClaim("activated", activated)
 				.withClaim("status", status)
+				          .withClaim("employeeId", employeeId)
 				.withClaim("key", "JX_15_TJJJ")
 				.sign(algorithm);
 		return token;
@@ -82,15 +84,15 @@ public class JwtManager {
 
 			Long authId = decodedJWT.getClaim("authId").asLong();
 			Long companyId = decodedJWT.getClaim("companyId").asLong(); // companyId bilgisini al
-
+			Long employeeId = decodedJWT.getClaim("employeeId").asLong();
 			// Eğer companyId claim'i yoksa veya null ise, companyId'yi null olarak ayarla
 			if (decodedJWT.getClaim("companyId").isNull()) {
 				companyId = null;
 			}
 			// Breakpoint buraya koyun
-			log.info("Decoded token - authId: {}, companyId: {}", authId, companyId);
+			log.info("Decoded token - authId: {}, companyId: {}", authId, companyId,employeeId);
 			// TokenValidationResult DTO'sunu oluştur ve dön
-			return Optional.of(new TokenValidationResult(authId, companyId));
+			return Optional.of(new TokenValidationResult(authId, companyId,employeeId));
 		} catch (Exception exception) {
 			return Optional.empty();
 		}

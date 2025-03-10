@@ -1,11 +1,14 @@
 package org.hrmplatform.hrmplatform.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hrmplatform.hrmplatform.dto.request.CreateShiftRequest;
 import org.hrmplatform.hrmplatform.dto.request.ShiftDto;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
 import org.hrmplatform.hrmplatform.entity.Shift;
 import org.hrmplatform.hrmplatform.enums.ShiftType;
+import org.hrmplatform.hrmplatform.exception.ErrorType;
+import org.hrmplatform.hrmplatform.mapper.ShiftMapper;
 import org.hrmplatform.hrmplatform.service.ShiftService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +28,10 @@ import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
 @RequiredArgsConstructor
 @CrossOrigin("*")
 @PreAuthorize("isAuthenticated()")
+@Slf4j
 public class ShiftController {
     private final ShiftService shiftService;
+    private final ShiftMapper shiftMapper;
 
 
     @PostMapping(CREATE_SHIFT)
@@ -75,18 +80,6 @@ public class ShiftController {
      *
      */
 
-    //tüm vardiyalrı getirme
-    @GetMapping(GETALL_SHIFT)
-    public ResponseEntity<BaseResponse<List<Shift>>> getAllShifts() {
-        List<Shift> shifts = shiftService.getAllShifts();
-        BaseResponse<List<Shift>> response = BaseResponse.<List<Shift>>builder()
-                .code(200)
-                .data(shifts)
-                .success(true)
-                .message("Vardiyalar başarıyla getirildi.")
-                .build();
-        return ResponseEntity.ok(response);
-    }
 
     // Id'ye göre vardiya getirme
     @GetMapping(GETSHIF_BYID)
@@ -112,24 +105,35 @@ public class ShiftController {
 
     //belirli bir şirkete ait vardiyaları getirme
     @GetMapping(GETSHIFTBY_COMPANYID)
-    public ResponseEntity<BaseResponse<List<Shift>>> getShiftsByCompanyId(@PathVariable Long companyId) {
-        List<Shift> shifts = shiftService.getShiftsByCompanyId(companyId);
-        if (shifts != null && !shifts.isEmpty()) {
-            BaseResponse<List<Shift>> response = BaseResponse.<List<Shift>>builder()
-                    .code(200)
-                    .data(shifts)
-                    .success(true)
-                    .message("Şirketin vardiyaları başarıyla getirildi.")
-                    .build();
-            return ResponseEntity.ok(response);
+    public ResponseEntity<BaseResponse<List<Shift>>> getAllShifts(
+            @RequestHeader("Authorization") String token) { // Token'ı header'dan alıyoruz
+        try {
+            // ShiftService üzerinden vardiyaları getiriyoruz
+            List<Shift> shifts = shiftService.getAllShifts(token);
+
+            // Başarılı yanıt dönüyoruz
+            return ResponseEntity.ok(new BaseResponse<>(
+                    true,
+                    "Shifts retrieved successfully",
+                    200,
+                    shifts));
+        } catch (IllegalArgumentException ex) {
+            // Geçersiz token veya companyId hatası
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new BaseResponse<>(
+                            false,
+                            ex.getMessage(),
+                            400,
+                            null));
+        } catch (Exception ex) {
+            // Diğer hatalar için 500 Internal Server Error dönüyoruz
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new BaseResponse<>(
+                            false,
+                            "An unexpected error occurred: " + ex.getMessage(),
+                            500,
+                            null));
         }
-        BaseResponse<List<Shift>> response = BaseResponse.<List<Shift>>builder()
-                .code(404)
-                .data(null)
-                .success(false)
-                .message("Şirkete ait vardiya bulunamadı.")
-                .build();
-        return ResponseEntity.status(404).body(response);
     }
 
     //vardiya silme(soft delete)
@@ -169,22 +173,43 @@ public class ShiftController {
 
     //vardiya güncelleme
     @PutMapping(UPDATE_SHIFT)
-    public ResponseEntity<BaseResponse<Shift>> updateShift(@PathVariable Long id, @RequestBody CreateShiftRequest request) {
-        Shift updatedShift = shiftService.updateShift(id, request);
-        if (updatedShift != null) {
-            return ResponseEntity.ok(BaseResponse.<Shift>builder()
-                    .code(200)
-                    .data(updatedShift)
+    public ResponseEntity<BaseResponse<ShiftDto>> updateShift(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long id,
+            @RequestBody ShiftDto request) {
+        try {
+            // ShiftService üzerinden vardiyayı güncelliyoruz
+            Shift updatedShift = shiftService.updateShift(token, id, request);
+
+            // DTO'ya dönüştürerek döndürüyoruz
+            ShiftDto shiftDto = shiftMapper.toShiftDTO(updatedShift);
+
+            return ResponseEntity.ok(BaseResponse.<ShiftDto>builder()
+                    .code(HttpStatus.OK.value())
+                    .data(shiftDto)
                     .success(true)
                     .message("Vardiya başarıyla güncellendi.")
                     .build());
+
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(BaseResponse.<ShiftDto>builder()
+                            .code(HttpStatus.NOT_FOUND.value())
+                            .data(null)
+                            .success(false)
+                            .message(ex.getMessage())
+                            .build());
+
+        } catch (Exception ex) {
+            log.error("Vardiya güncellenirken hata oluştu: ", ex);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(BaseResponse.<ShiftDto>builder()
+                            .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                            .data(null)
+                            .success(false)
+                            .message("Beklenmeyen bir hata oluştu.")
+                            .build());
         }
-        return ResponseEntity.status(404).body(BaseResponse.<Shift>builder()
-                .code(404)
-                .data(null)
-                .success(false)
-                .message("Vardiya bulunamadı.")
-                .build());
     }
 
     @GetMapping(SHIFTTYPE)

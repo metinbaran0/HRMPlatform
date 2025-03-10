@@ -54,7 +54,8 @@ public class SecurityConfig {
 				    .ignoringRequestMatchers(
 						    EndPoints.COMPANY + EndPoints.ADDCOMPANY, // add company endpointi
 						    EndPoints.AUTH + "/dologin",              // login için
-						    EndPoints.AUTH + "/register"             // register için
+						    EndPoints.AUTH + "/register" ,           // register için
+						    EndPoints.COMMENT + "/getall-comment"      // yorumlar için
 				    ))
 		    .authorizeHttpRequests(req -> {
 			    req

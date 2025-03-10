@@ -14,6 +14,7 @@ import org.hrmplatform.hrmplatform.mapper.EmployeeMapper;
 import org.hrmplatform.hrmplatform.repository.EmployeeRepository;
 import org.hrmplatform.hrmplatform.util.JwtManager;
 import org.hrmplatform.hrmplatform.util.PaginationUtil;
+import org.hrmplatform.hrmplatform.view.VwEmployeeResponse;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Lazy
@@ -259,16 +261,24 @@ public class EmployeeService {
         // Employee'yi güncelle ve kaydet
         employeeRepository.save(employee);
     }
+    
+    
+    public List<VwEmployeeResponse> searchEmployeeByName(String name) {
+        List<Employee> employees = employeeRepository.findByNameContainingIgnoreCase(name);
+        return employees.stream()
+                        .map(employee -> new VwEmployeeResponse(employee.getId(), employee.getName(), employee.getPosition(), employee.getAvatar()))
+                        .collect(Collectors.toList());
+    }
+    
+    
+    // Çalışan adı ile çalışan ID'sini bulma metodu
+    public Long getEmployeeIdByName(String name) {
+        return employeeRepository.findEmployeeIdByName(name);
+    }
+    
 }
     
 
 //    public Optional<Employee> findByUserId(Long userId) {
 //        return employeeRepository.findByUserId(userId);
 //    }
-
-    
-
-
-  
-
-

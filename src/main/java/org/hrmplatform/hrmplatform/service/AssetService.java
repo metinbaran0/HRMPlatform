@@ -1,37 +1,50 @@
 package org.hrmplatform.hrmplatform.service;
 
+import lombok.RequiredArgsConstructor;
 import org.hrmplatform.hrmplatform.dto.request.AssetRequestDto;
 import org.hrmplatform.hrmplatform.dto.response.AssetResponseDto;
 import org.hrmplatform.hrmplatform.entity.Asset;
+import org.hrmplatform.hrmplatform.entity.Company;
 import org.hrmplatform.hrmplatform.repository.AssetRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class AssetService {
 	private final AssetRepository assetRepository;
+	private final AuthService authService;
+	private final EmployeeService employeeService;
 	
-	public AssetService(AssetRepository assetRepository) {
-		this.assetRepository = assetRepository;
-	}
-	
-	public AssetResponseDto addAsset(AssetRequestDto assetRequest) {
+	@Transactional
+	public AssetResponseDto addAsset(Long companyId, AssetRequestDto assetRequest) {
+		// Çalışan adını kullanarak çalışan ID'sini bul
+		Long employeeId = employeeService.getEmployeeIdByName(assetRequest.employeeName());
+		
+		if (employeeId == null) {
+			throw new IllegalArgumentException("Çalışan bulunamadı: " + assetRequest.employeeName());
+		}
+		
+		// Asset nesnesini oluştur
 		Asset asset = new Asset();
-		asset.setEmployeeId(assetRequest.employeeId());
+		asset.setCompanyId(companyId);
+		asset.setEmployeeId(employeeId);  // Burada employeeId'yi kullanıyoruz
 		asset.setAssetName(assetRequest.assetName());
 		asset.setAssetType(assetRequest.assetType());
 		asset.setSerialNumber(assetRequest.serialNumber());
 		asset.setAssignedDate(assetRequest.assignedDate());
 		asset.setReturnDate(assetRequest.returnDate());
 		
+		// Asset'i kaydet
 		Asset savedAsset = assetRepository.save(asset);
 		return toResponse(savedAsset);
 	}
 	
-	public List<AssetResponseDto> getAllAssets() {
-		return assetRepository.findAll()
+	public List<AssetResponseDto> getAllAssetsByCompany(Long companyId) {
+		return assetRepository.findByCompanyId(companyId)
 		                      .stream()
 		                      .map(this::toResponse)
 		                      .toList();
@@ -42,7 +55,9 @@ public class AssetService {
 	}
 	
 	public AssetResponseDto updateAsset(Long id, AssetRequestDto updatedAssetRequest) {
-		Asset asset = assetRepository.findById(id).orElseThrow(() -> new RuntimeException("Asset not found"));
+		Asset asset = assetRepository.findById(id)
+		                             .orElseThrow(() -> new RuntimeException("Asset not found or not authorized"));
+		
 		asset.setAssetName(updatedAssetRequest.assetName());
 		asset.setAssetType(updatedAssetRequest.assetType());
 		asset.setSerialNumber(updatedAssetRequest.serialNumber());
@@ -54,7 +69,13 @@ public class AssetService {
 	}
 	
 	public void deleteAsset(Long id) {
-		assetRepository.deleteById(id);
+		Asset asset = assetRepository.findById(id)
+		                             .orElseThrow(() -> new RuntimeException("Asset not found or not authorized"));
+		assetRepository.delete(asset);
+	}
+	
+	public List<Asset> getAssetsByCompany(Long companyId) {
+		return assetRepository.findByCompanyId(companyId);
 	}
 	
 	private AssetResponseDto toResponse(Asset asset) {
@@ -66,10 +87,7 @@ public class AssetService {
 				asset.getSerialNumber(),
 				asset.getAssignedDate(),
 				asset.getReturnDate()
+				
 		);
-	}
-	
-	public List<Asset> getAssetsByCompany(Long companyId) {
-		return assetRepository.findByCompanyId(companyId);
 	}
 }

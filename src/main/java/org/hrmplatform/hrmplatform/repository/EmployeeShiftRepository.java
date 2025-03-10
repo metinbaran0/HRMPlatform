@@ -12,7 +12,6 @@ public interface EmployeeShiftRepository extends JpaRepository<EmployeeShift, Lo
     List<EmployeeShift> findByEmployeeId(Long employeeId);
 
 
-    List<EmployeeShift> findByEmployeeIdAndAssignedDate(Long employeeId, LocalDate date);
 
 
     boolean existsByEmployeeIdAndShiftId(Long employeeId, Long shiftId);
@@ -22,4 +21,9 @@ public interface EmployeeShiftRepository extends JpaRepository<EmployeeShift, Lo
 
     // Tarih aralığına göre vardiya sorgulama
     List<EmployeeShift> findByShiftDateBetween(LocalDate startDate, LocalDate endDate);
+
+    List<EmployeeShift> findByCompanyId(Long companyId);
+
+    List<EmployeeShift> findByCompanyIdAndEmployeeId(Long companyId, Long employeeId);
+
 }

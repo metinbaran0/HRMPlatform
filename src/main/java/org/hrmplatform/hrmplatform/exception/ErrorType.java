@@ -36,7 +36,8 @@ public enum ErrorType implements ErrorTypeInterface {
 	SUBSCRIPTION_NOT_EXPIRED(101, "Abonelik sona ermedi",HttpStatus.BAD_REQUEST ),
 	TOKEN_EXPIRED(789,"token expired" ,HttpStatus.BAD_REQUEST ),
 	TOKEN_NOT_FOUND(456,"Token bulunamadı" ,HttpStatus.BAD_REQUEST ),
-	USER_ROLE_NOT_FOUND(1004, "Kullanıcıya ait rol bulunamadı!", HttpStatus.BAD_REQUEST);
+	USER_ROLE_NOT_FOUND(1004, "Kullanıcıya ait rol bulunamadı!", HttpStatus.BAD_REQUEST),
+	EMPLOYEE_NOT_FOUND_OR_NOT_IN_COMPANY(234,"Kullanıcı ya da Şirket bulunamadı" ,HttpStatus.BAD_REQUEST );
 	
 	//kklkk
 

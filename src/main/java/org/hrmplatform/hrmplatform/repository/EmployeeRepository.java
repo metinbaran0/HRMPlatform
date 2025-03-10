@@ -20,5 +20,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 	
 	@Query("SELECT e.id FROM Employee e WHERE LOWER(e.name) = LOWER(:name)")
 	Long findEmployeeIdByName(@Param("name") String name);
-	
+
+    boolean existsByIdAndCompanyId(Long employeeId, Long companyId);
+
 }

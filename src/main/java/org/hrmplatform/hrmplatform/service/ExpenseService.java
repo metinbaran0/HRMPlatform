@@ -12,7 +12,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ExpenceService {
+public class ExpenseService {
 	private final ExpenseRepository expenseRepository;
 	
 	public ExpenseResponseDto createExpense(ExpenseResponseDto expenseRequestDTO) {
@@ -47,13 +47,21 @@ public class ExpenceService {
 	// Expense nesnesini ExpenseResponseDto'ya dönüştüren metot
 	private ExpenseResponseDto mapToResponseDTO(Expense expense) {
 		return new ExpenseResponseDto(
-				expense.getId(),
 				expense.getEmployeeId(),
 				expense.getExpenseType(),
 				expense.getAmount(),
 				expense.getExpenseDate(),
 				expense.getDescription(),
-				expense.getStatus() == Status.APPROVED // Boolean dönüşümüne dikkat edin
+				expense.getStatus() == Status.APPROVED // Yeni eklediğimiz harcama status.pending ise false döner.
+				// (dto içinde boolean olarak tanımladığımız için.
 		);
 	}
+	
+	public List<ExpenseResponseDto> getAllExpenses() {
+		return expenseRepository.findAll()
+		                        .stream()
+		                        .map(this::mapToResponseDTO) // Expense → ExpenseResponseDto dönüşümü
+		                        .toList();
+	}
+	
 }

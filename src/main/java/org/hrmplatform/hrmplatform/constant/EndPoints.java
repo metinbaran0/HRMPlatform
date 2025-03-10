@@ -22,7 +22,9 @@ public class EndPoints {
     public static final String SHIFT = ROOT + "/shift";
     public static final String BREAK = ROOT + "/break";
     public static final String EMPLOYEE_SHIFT = ROOT + "/employee-shift";
-
+    public static final String EXPENSE = ROOT + "/expense";
+    
+    
     public static final String AUTH = ROOT + "/auth"; // Base path olarak auth eklendi
     public static final String EMAIL = ROOT + "/email";
     public static final String ASSET = ROOT + "/asset";
@@ -127,5 +129,10 @@ public class EndPoints {
     public static final String GET_ASSET_BY_ID = "/{id}";
     public static final String UPDATE_ASSET = "/update/{id}";
     public static final String DELETE_ASSET = "/delete/{id}";
-
+    
+    //EXPENCE
+    public static final String CREATE_EXPENSE = "/create-expense";
+    public static final String GETALL_EXPENSE = "/getall-expense";
+    
+    
 }

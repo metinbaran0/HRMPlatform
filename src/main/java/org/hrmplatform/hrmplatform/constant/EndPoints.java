@@ -88,7 +88,7 @@ public class EndPoints {
     //SHIFT
     public static final String CREATE_SHIFT= "/create-shift";
     public static final String GETALL_SHIFT = "/getall-shift";
-    public static final String GETSHIFTBY_COMPANYID ="getshift-by-company-id/{companyId}" ;
+    public static final String GETSHIFTBY_COMPANYID ="getshift-by-company-id" ;
     public static final String GETSHIF_BYID = "/getshift-by-id/{id}";
     public static final String ACTIVE_SHIFT ="active-shift" ;
     public static final String DELETE_SHIFT = "/delete-shift";

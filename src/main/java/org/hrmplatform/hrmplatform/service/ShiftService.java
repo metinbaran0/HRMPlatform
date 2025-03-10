@@ -27,16 +27,18 @@ public class ShiftService {
     private final EmployeeShiftRepository employeeShiftRepository;
     private final AuthService authService;
 
-    public List<Shift> getAllShifts() {
-        return shiftRepository.findAll();
-    }
 
     public List<Shift> getAllActiveShifts() {
         return shiftRepository.findByDeletedFalse(); // Silinmemiş vardiyaları alıyoruz
     }
 
 
-    public List<Shift> getShiftsByCompanyId(Long companyId) {
+    // Tüm vardiyaları getirme (giriş yapan kullanıcının companyId'sine göre)
+    public List<Shift> getAllShifts(String token) {
+        // AuthService üzerinden companyId alıyoruz
+        Long companyId = authService.getCompanyIdFromToken(token);
+
+        // Şirkete ait vardiyaları getiriyoruz
         return shiftRepository.findByCompanyId(companyId);
     }
 
@@ -56,8 +58,20 @@ public class ShiftService {
         return false;
     }
 
-    public Shift updateShift(Long id, CreateShiftRequest request) {
-        return null;
+    // Vardiya güncelleme (giriş yapan kullanıcının companyId'sine göre)
+    public Shift updateShift(String token, Long id, ShiftDto request) {
+        // Token'dan companyId al
+        Long companyId = authService.getCompanyIdFromToken(token);
+
+        // Şirkete ait olup olmadığını kontrol et
+        Shift existingShift = shiftRepository.findByIdAndCompanyId(id, companyId)
+                .orElseThrow(() -> new IllegalArgumentException("Vardiya bulunamadı veya bu şirkete ait değil."));
+
+        // Mapper kullanarak mevcut Shift nesnesini güncelle
+        shiftMapper.updateFromDto(request, existingShift);
+
+        // Güncellenmiş vardiyayı kaydet ve döndür
+        return shiftRepository.save(existingShift);
     }
 
 

@@ -10,8 +10,10 @@ import org.hrmplatform.hrmplatform.dto.response.TokenValidationResult;
 import org.hrmplatform.hrmplatform.entity.Employee;
 import org.hrmplatform.hrmplatform.exception.EmployeeNotFoundException;
 import org.hrmplatform.hrmplatform.exception.UnauthorizedException;
+import org.hrmplatform.hrmplatform.service.AuthService;
 import org.hrmplatform.hrmplatform.service.EmployeeService;
 import org.hrmplatform.hrmplatform.util.JwtManager;
+import org.hrmplatform.hrmplatform.view.VwEmployeeResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +32,7 @@ import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
 public class EmployeeController {
     private final EmployeeService employeeService;
     private final JwtManager jwtManager;
-    
+    private final AuthService authService;
     /**
      * Tüm çalışanları getirir. (Sadece ADMIN)
      */
@@ -185,7 +187,33 @@ public class EmployeeController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 401 Unauthorized döner
         }
     }
-
+    
+    @PreAuthorize("hasRole('EMPLOYEE') or hasRole('COMPANY_ADMIN')")
+    @GetMapping("/searchEmployeeByName")
+    public ResponseEntity<BaseResponse<List<VwEmployeeResponse>>> searchEmployeeByName(
+            @RequestHeader("Authorization") String token,
+            @RequestParam String name) {
+        
+        authService.getCompanyIdFromToken(token); // Yetkilendirme ve şirket doğrulaması
+        
+        List<VwEmployeeResponse> employees = employeeService.searchEmployeeByName(name);
+        
+        if (employees.isEmpty()) {
+            return ResponseEntity.ok(BaseResponse.<List<VwEmployeeResponse>>builder()
+                                                 .code(404)
+                                                 .message("Hiçbir çalışan bulunamadı")
+                                                 .success(false)
+                                                 .data(employees)
+                                                 .build());
+        }
+        
+        return ResponseEntity.ok(BaseResponse.<List<VwEmployeeResponse>>builder()
+                                             .code(200)
+                                             .message("Çalışanlar başarıyla getirildi")
+                                             .success(true)
+                                             .data(employees)
+                                             .build());
+    }
 
 
 

@@ -3,7 +3,7 @@ package org.hrmplatform.hrmplatform.dto.response;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public record ExpenseResponseDto(Long id,
+public record ExpenseResponseDto(
                                  Long employeeId,
                                  String expenseType,
                                  BigDecimal amount,

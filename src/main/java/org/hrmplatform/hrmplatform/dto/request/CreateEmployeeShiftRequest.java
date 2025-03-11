@@ -5,7 +5,7 @@ import java.time.LocalDate;
 
 public record CreateEmployeeShiftRequest(
         Long employeeId,
-        Long shiftId,
-        LocalDate shiftDate) {
+        Long shiftId
+        ) {
 
 }

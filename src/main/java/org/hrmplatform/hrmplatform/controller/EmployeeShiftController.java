@@ -43,7 +43,7 @@ public class EmployeeShiftController {
         } catch (HRMPlatformException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(BaseResponse.<EmployeeShift>builder()
-                            .code(409)
+                            .code(e.hashCode())
                             .message(e.getMessage())
                             .success(false)
                             .data(null)
@@ -96,44 +96,22 @@ public class EmployeeShiftController {
 
     // Çalışan ID'ye göre vardiyaları getirme
     @GetMapping(GET_EMPLOYEE_SHIFTS_BY_EMPLOYEE_ID)
-    public ResponseEntity<BaseResponse<List<EmployeeShift>>> getEmployeeShiftsByEmployeeId(@PathVariable Long employeeId) {
+    public ResponseEntity<BaseResponse<List<EmployeeShift>>> getEmployeeShiftsByEmployeeId(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long employeeId) {
         try {
-            List<EmployeeShift> employeeShifts = employeeShiftService.getEmployeeShiftsByEmployeeId(employeeId);
+            List<EmployeeShift> employeeShifts = employeeShiftService.getEmployeeShiftsByEmployeeId(token, employeeId);
             return ResponseEntity.ok(new BaseResponse<>(
                     true,
                     "Çalışanın vardiyaları başarıyla getirildi.",
                     200,
                     employeeShifts));
-        } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new BaseResponse<>(
-                            false,
-                            "Bir hata oluştu: " + ex.getMessage(),
-                            500,
-                            null));
-        }
-    }
-
-
-    @PutMapping(UPDATE_EMPLOYEE_SHIFT)
-    public ResponseEntity<BaseResponse<EmployeeShift>> updateEmployeeShift(@PathVariable Long employeeShiftId,
-                                                                           @RequestBody CreateEmployeeShiftRequest request) {
-        try {
-            // Service üzerinden çalışan ve vardiya ID'lerini doğrulama
-            employeeShiftService.validateEmployeeAndShift(request.employeeId(), request.shiftId());
-
-            EmployeeShift updatedShift = employeeShiftService.updateEmployeeShift(employeeShiftId, request);
-            return ResponseEntity.ok(new BaseResponse<>(
-                    true,
-                    "Çalışan vardiyası başarıyla güncellendi.",
-                    200,
-                    updatedShift));
         } catch (HRMPlatformException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new BaseResponse<>(
                             false,
-                            "Veri bulunamadı: " + ex.getMessage(),
-                            404,
+                            ex.getMessage(),
+                            400,
                             null));
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -144,6 +122,43 @@ public class EmployeeShiftController {
                             null));
         }
     }
+
+    //çalışan vardiyası güncelleme
+    @PutMapping(UPDATE_EMPLOYEE_SHIFT)
+    public ResponseEntity<BaseResponse<EmployeeShift>> updateEmployeeShift(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long employeeShiftId,
+            @RequestBody CreateEmployeeShiftRequest request) {
+        try {
+            EmployeeShift updatedShift = employeeShiftService.updateEmployeeShift(token, employeeShiftId, request);
+
+            return ResponseEntity.ok(BaseResponse.<EmployeeShift>builder()
+                    .code(200)
+                    .message("Çalışan vardiyası başarıyla güncellendi.")
+                    .success(true)
+                    .data(updatedShift)
+                    .build());
+
+        } catch (HRMPlatformException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(BaseResponse.<EmployeeShift>builder()
+                            .code(e.hashCode())
+                            .message(e.getMessage())
+                            .success(false)
+                            .data(null)
+                            .build());
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(BaseResponse.<EmployeeShift>builder()
+                            .code(500)
+                            .message("Beklenmeyen bir hata oluştu: " + e.getMessage())
+                            .success(false)
+                            .data(null)
+                            .build());
+        }
+    }
+
 
 
 

@@ -18,6 +18,7 @@ import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
 @RestController
 @RequestMapping(LEAVE)
 @RequiredArgsConstructor
+@CrossOrigin("*")
 public class LeaveController {
 	
 	private final LeaveService leaveService;
@@ -51,7 +52,10 @@ public class LeaveController {
 			                                     .build());
 		}
 		
+
+
 		
+
 		
 		// İzin talebini oluşturuyoruz
 		LeaveRequest createdLeave = leaveService.requestLeave(dto, employeeId, companyId);

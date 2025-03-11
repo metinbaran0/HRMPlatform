@@ -22,6 +22,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
@@ -225,6 +226,34 @@ public class CompanyController {
                         .build()
         );
     }
+
+	//Aktif üyelikler
+	@GetMapping(ACTIVESUBSCRIPTIONS)
+	public ResponseEntity<BaseResponse<Long>> getActiveSubscriptionsCount(){
+		Long activeSubscriptions = companyService.getActiveSubscriptionsCount();
+		return ResponseEntity.ok(
+				BaseResponse.<Long>builder()
+						.code(200)
+						.message("Aktif üyelikler getirildi")
+						.success(true)
+						.data(activeSubscriptions)
+						.build()
+		);
+	}
+
+	//istatistikler
+	@GetMapping(STATISTICS)
+	public BaseResponse<Map<String, Long>> getMonthlyCompanyStats(@RequestParam("year") int year) {
+		Map<String, Long> monthlyStats = companyService.getMonthlyCompanyStats(year);
+
+		// BaseResponse'ı controller'da döndürüyoruz.
+		return BaseResponse.<Map<String, Long>>builder()
+				.success(true)
+				.message(year + " yılı için aylık şirket kayıt istatistikleri")
+				.code(200)
+				.data(monthlyStats)
+				.build();
+	}
 
 
 

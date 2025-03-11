@@ -21,6 +21,7 @@ public class Expense {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long employeeId;
+    private Long companyId;
     private String expenseType;
     private BigDecimal amount;
     private LocalDateTime expenseDate;
@@ -29,4 +30,16 @@ public class Expense {
     private Status status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+    
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+    
 }

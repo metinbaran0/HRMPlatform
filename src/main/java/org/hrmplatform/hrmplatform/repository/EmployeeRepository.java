@@ -18,8 +18,13 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 //	Optional<Employee> findByUserId(Long userId);
     List<Employee> findByNameContainingIgnoreCase(String name);
 	
-	@Query("SELECT e.id FROM Employee e WHERE LOWER(e.name) = LOWER(:name)")
-	Long findEmployeeIdByName(@Param("name") String name);
+	// E-posta ile çalışanı bulma
+	@Query("SELECT e.id FROM Employee e WHERE LOWER(e.email) = LOWER(:email)")
+	Long findEmployeeIdByEmail(@Param("email") String email);
+
+
+	// Email'e göre çalışan ID'sini döndüren metot
+	Optional<Employee> findByEmail(String email);
 
     boolean existsByIdAndCompanyId(Long employeeId, Long companyId);
 

@@ -1,8 +1,11 @@
 package org.hrmplatform.hrmplatform.controller;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.hrmplatform.hrmplatform.dto.request.LeaveRequestDto;
+import org.hrmplatform.hrmplatform.entity.Employee;
 import org.hrmplatform.hrmplatform.entity.LeaveRequest;
+import org.hrmplatform.hrmplatform.service.EmployeeService;
 import org.hrmplatform.hrmplatform.service.LeaveService;
 import org.hrmplatform.hrmplatform.service.AuthService; // Eğer AuthService kullanıyorsanız
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
@@ -22,7 +25,8 @@ import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
 public class LeaveController {
 	
 	private final LeaveService leaveService;
-	private final AuthService authService; // AuthService sınıfını kullanıyorsanız ekleyin
+	private final AuthService authService;// AuthService sınıfını kullanıyorsanız ekleyin
+	private final EmployeeService employeeService;
 	
 	// Kullanıcı izin talebi oluşturma
 	@PreAuthorize("hasAuthority('EMPLOYEE')")
@@ -146,8 +150,18 @@ public class LeaveController {
 			@PathVariable Long employeeId) {
 		
 		// Token'dan yönetici ID'sini al
-		Long managerId = authService.getEmployeeIdFromToken(token);
+		Long managerId = authService.getEmployeeIdFromToken(token); // Bu yönetici ID'sidir
 		
+		// Çalışanın şirketine ait olup olmadığını kontrol et
+		Employee employee = employeeService.findById(employeeId)
+		                                   .orElseThrow(() -> new EntityNotFoundException("Çalışan bulunamadı."));
+		
+		// Çalışanın şirket ID'si ile yöneticinin şirket ID'sini karşılaştır
+		Long managerCompanyId = authService.getCompanyIdFromToken(token); // Yönetici şirket ID'si
+		
+		if (!employee.getCompanyId().equals(managerCompanyId)) {
+			throw new SecurityException("Bu çalışanın izin talebini onaylama yetkiniz yok.");
+		}
 		
 		// İzni onayla
 		LeaveRequest acceptedLeave = leaveService.acceptLeaveRequest(managerId, employeeId);
@@ -160,6 +174,7 @@ public class LeaveController {
 		                                     .build());
 	}
 	
+	
 	// Yönetici izin talebini reddetme
 	@PreAuthorize("hasAuthority('COMPANY_ADMIN')")
 	@PostMapping(REJECTLEAVE)
@@ -168,7 +183,7 @@ public class LeaveController {
 			@PathVariable Long employeeId) {
 		
 		// Token'dan yönetici ID'sini al
-		Long managerId = authService.getEmployeeIdFromToken(token);
+		Long managerId = authService.getCompanyIdFromToken(token);
 		
 		
 		// İzni reddet

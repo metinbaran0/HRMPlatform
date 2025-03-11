@@ -63,12 +63,13 @@ public class AuthService {
     public boolean isCompanyAdmin(String token) {
         Long employeeId = getEmployeeIdFromToken(token);
         
-        List<UserRole> userRole = userRoleService.findRoleByUserId(employeeId);
+        List<UserRole> userRoles = userRoleService.findRoleByUserId(employeeId);
         
-        if (userRole.isEmpty()) {
-            return false;
+        for (UserRole role : userRoles) {
+            if (role.getRole() == Role.COMPANY_ADMIN) {
+                return true;
+            }
         }
-        
-        return userRole.get(0).getRole() == Role.COMPANY_ADMIN;
+        return false;
     }
 }

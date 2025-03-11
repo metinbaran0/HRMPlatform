@@ -308,7 +308,9 @@ public class EmployeeService {
     public Optional<Employee> findByEmail(String email) {
         return employeeRepository.findByEmail(email);
     }
-   
+    public Employee save(Employee employee) {
+        return employeeRepository.save(employee);
+    }
 }
 
 //    public Optional<Employee> findByUserId(Long userId) {

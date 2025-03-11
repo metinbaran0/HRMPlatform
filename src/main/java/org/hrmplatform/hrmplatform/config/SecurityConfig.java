@@ -78,10 +78,10 @@ public class SecurityConfig {
 					    .requestMatchers(EndPoints.EXPENSE + EndPoints.GETALL_EXPENSE).hasAuthority("COMPANY_ADMIN")
 					    .requestMatchers(EndPoints.EXPENSE + EndPoints.APPROVE_EXPENSE).hasAuthority("COMPANY_ADMIN")
 					    .requestMatchers(EndPoints.EXPENSE + EndPoints.REJECT_EXPENSE).hasAuthority("COMPANY_ADMIN")
+					    .requestMatchers(EndPoints.COMPANY + EndPoints.APPROVE).hasAuthority("SITE_ADMIN")
 					    
 					    
 					    // "EMPLOYEE" ve "COMPANY_ADMIN" rollerinin erişebileceği endpointler
-					    .requestMatchers(EndPoints.LEAVE + "/**").hasAnyAuthority("EMPLOYEE", "COMPANY_ADMIN")
 					    .requestMatchers(EndPoints.ASSET + "/all").hasAnyRole("EMPLOYEE", "COMPANY_ADMIN")
 					    .requestMatchers("/company/**", "/shift/**").hasAnyRole("SITE_ADMIN", "COMPANY_ADMIN")
 					    

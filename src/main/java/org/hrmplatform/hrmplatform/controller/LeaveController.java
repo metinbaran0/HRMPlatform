@@ -17,6 +17,7 @@ import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
 @RestController
 @RequestMapping(LEAVE)
 @RequiredArgsConstructor
+@CrossOrigin("*")
 public class LeaveController {
 	
 	private final LeaveService leaveService;
@@ -24,7 +25,7 @@ public class LeaveController {
 	
 	// Kullanıcı izin talebi oluşturma
 	@PreAuthorize("hasAuthority('EMPLOYEE')")
-	@PostMapping("/leave-request")
+	@PostMapping(LEAVEREQUEST)
 	public ResponseEntity<BaseResponse<LeaveRequest>> requestLeave(
 			@RequestHeader("Authorization") String token,
 			@RequestBody LeaveRequestDto dto) {
@@ -50,14 +51,14 @@ public class LeaveController {
 			                                     .build());
 		}
 		
-		// Kullanıcının varlığını kontrol et
-		if (!leaveService.isUserExists(employeeId)) {
-			return ResponseEntity.ok(BaseResponse.<LeaveRequest>builder()
-			                                     .code(400)
-			                                     .success(false)
-			                                     .message("Hata: Belirtilen kullanıcı mevcut değil.")
-			                                     .build());
-		}
+//		// Kullanıcının varlığını kontrol et
+//		if (!leaveService.isUserExists(employeeId)) {
+//			return ResponseEntity.ok(BaseResponse.<LeaveRequest>builder()
+//			                                     .code(400)
+//			                                     .success(false)
+//			                                     .message("Hata: Belirtilen kullanıcı mevcut değil.")
+//			                                     .build());
+//		}
 		
 		// İzin talebini oluşturuyoruz
 		LeaveRequest createdLeave = leaveService.requestLeave(dto, employeeId, companyId);

@@ -30,12 +30,7 @@ import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
 @RequestMapping(COMPANY)
 @RequiredArgsConstructor
 @CrossOrigin("*")
-public class
-
-
-
-
-CompanyController {
+public class CompanyController {
 	private final CompanyService companyService;
 	private final UserService userService;
 	
@@ -146,16 +141,17 @@ CompanyController {
     }
 
     //şirket başvurusu onaylama
+    @PreAuthorize("hasAuthority('SITE_ADMIN')")
     @PutMapping(APPROVE + "/{id}")
-    public ResponseEntity<BaseResponse<Company>> approveCompany(@PathVariable Long id, String token) {
-        Company approvedCompany = companyService.approveCompany(id,token);
-
-        return ResponseEntity.ok(BaseResponse.<Company>builder()
-                .code(200)
-                .message("Şirket başvurusu onaylandı")
-                .success(true)
-                .data(approvedCompany)
-                .build());
+    public ResponseEntity<BaseResponse<Company>> approveCompany(@PathVariable Long id) {
+	    Company approvedCompany = companyService.approveCompany(id);
+	    
+	    return ResponseEntity.ok(BaseResponse.<Company>builder()
+	                                         .code(200)
+	                                         .message("Şirket başvurusu onaylandı ve giriş bilgileri gönderildi")
+	                                         .success(true)
+	                                         .data(approvedCompany)
+	                                         .build());
     }
 	//onaylanmış şirketleri getirme
 	@GetMapping(APPROVED)

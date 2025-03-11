@@ -19,6 +19,8 @@ import org.hrmplatform.hrmplatform.util.JwtManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +41,8 @@ public class CompanyService {
     private final UserRoleService userRoleService;
     private final EmailNotificationService emailNotificationService;
     private final JwtManager jwtManager;
+    private final PasswordService passwordService;
+    private final PasswordEncoder passwordEncoder;
     
     @Lazy
     private final EmployeeService employeeService;
@@ -54,7 +58,9 @@ public class CompanyService {
                           @Lazy EmployeeService employeeService,
                           UserService userService,
                           EmailNotificationService emailNotificationService,
-                         JwtManager jwtManager) {
+                         JwtManager jwtManager,
+                          PasswordService passwordService,
+                          PasswordEncoder passwordEncoder) {
 		this.companyRepository = companyRepository;
 		this.companyMapper = companyMapper;
 		this.emailService = emailService;
@@ -63,6 +69,8 @@ public class CompanyService {
 		this.userService = userService;
         this.emailNotificationService= emailNotificationService;
         this.jwtManager = jwtManager;
+        this.passwordService=passwordService;
+        this.passwordEncoder=passwordEncoder;
 	}
 	
 	
@@ -161,47 +169,71 @@ public class CompanyService {
     }
     
     @Transactional
-    public Company approveCompany(Long id, String token) {
+    @PreAuthorize("hasAuthority('SITE_ADMIN')")
+    public Company approveCompany(Long id) {
+        log.info("Şirket onaylama işlemi başladı. ID: {}", id);
+        
         // Şirketi ID ile bul
         Company company = companyRepository.findById(id)
                                            .orElseThrow(() -> new HRMPlatformException(ErrorType.COMPANY_NOT_FOUND));
         
-        // Soft delete olan şirketler onaylanamaz!
-        if (company.isDeleted()) {
-            throw new HRMPlatformException(ErrorType.COMPANY_ALREADY_DELETED);
+        // Şirket zaten onaylı mı?
+        if (company.getStatus() == Status.APPROVED) {
+            log.warn("Şirket zaten onaylanmış: {}", company.getId());
+            throw new HRMPlatformException(ErrorType.COMPANY_ALREADY_APPROVED);
         }
         
-        // Eğer token sağlanmışsa, token ile e-posta doğrulaması yap
-        if (token != null && !token.isEmpty()) {
-            company = companyRepository.findByEmailVerificationToken(token)
-                                       .orElseThrow(() -> new HRMPlatformException(ErrorType.TOKEN_NOT_FOUND));
-            
-            company.setEmailVerified(true);  // E-posta doğrulandı
-            company.setEmailVerificationToken(null);  // Tokeni sıfırla
-            company.setTokenExpirationTime(null);  // Token süresi geçersiz
-        }
-        
-        // Mail doğrulaması yapılmamış şirketler onaylanamaz!
+        // Şirketin e-posta doğrulaması yapılmış mı?
         if (!company.isEmailVerified()) {
+            log.error("Şirketin e-postası doğrulanmamış: {}", company.getEmail());
             throw new HRMPlatformException(ErrorType.EMAIL_NOT_VERIFIED);
         }
         
-        // Şirketin durumunu onaylı olarak güncelle
+        // Şirketi onaylı hale getir
         company.setStatus(Status.APPROVED);
         companyRepository.save(company);
         
-        // 🔹 Kullanıcıyı oluştur ve aktivasyon kodu gönder
-        userService.registerCompanyAdmin(company);
+        // Kullanıcı için rastgele bir şifre oluştur
+        String generatedPassword = passwordService.generateRandomPassword();
+        String hashedPassword = passwordEncoder.encode(generatedPassword);
+        
+        // Kullanıcı oluştur ve kaydet
+        User user = User.builder()
+                        .name(company.getContactPerson())
+                        .email(company.getEmail())
+                        .password(hashedPassword)
+                        .status(true)
+                        .companyId(company.getId())
+                        .employeeId(null)
+                        .activated(true)
+                        .activationCode(null)
+                        .activationCodeExpireAt(null)
+                        .resetToken(null)
+                        .resetTokenExpireAt(null)
+                        .build();
 
-        // Onay mailini başvuran şirkete gönder
-        emailService.sendEmail(
-                company.getEmail(), "Şirket Başvurunuz Onaylandı",
-                "Tebrikler, " + company.getName() + " şirketinizin başvurusu onaylandı! " +
-                        "Platformumuza giriş yaparak yönetim işlemlerini gerçekleştirebilirsiniz.");
-
+// Kullanıcıyı veritabanına kaydet
+        userService.save(user);
+        // Kullanıcıya rol atama işlemi
+        UserRole userRole = UserRole.builder()
+                                    .userId(user.getId())  // User nesnesi yerine ID kullanılmalı
+                                    .role(Role.COMPANY_ADMIN)   // Çalışana EMPLOYEE rolü atanıyor
+                                    .build();
+        
+        userRoleService.save(userRole);
+        
+        // Kullanıcıya e-posta ile şifreyi gönder
+        emailService.sendEmail(company.getEmail(), "Şirket Başvurunuz Onaylandı",
+                               "Tebrikler, " + company.getName() + " şirketinizin başvurusu onaylandı!\n" +
+                                       "Platformumuza giriş yapmak için aşağıdaki bilgileri kullanabilirsiniz:\n\n" +
+                                       "E-posta: " + company.getEmail() + "\n" +
+                                       "Şifre: " + generatedPassword + "\n\n" +
+                                       "Lütfen giriş yaptıktan sonra şifrenizi değiştirin.");
+        
+        log.info("Şirket onaylandı ve şifre e-postası gönderildi. ID: {}", company.getId());
         return company;
-
     }
+    
     
     
     @Transactional

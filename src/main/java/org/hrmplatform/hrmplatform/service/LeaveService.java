@@ -5,7 +5,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.hrmplatform.hrmplatform.dto.request.LeaveRequestDto;
 import org.hrmplatform.hrmplatform.entity.LeaveRequest;
-import org.hrmplatform.hrmplatform.entity.User;
 import org.hrmplatform.hrmplatform.entity.UserRole;
 import org.hrmplatform.hrmplatform.enums.Role;
 import org.hrmplatform.hrmplatform.enums.Status;
@@ -25,13 +24,13 @@ public class LeaveService {
 	private final UserRoleRepository userRoleRepository;
 	
 	// Yeni izin talebi oluşturma
-	public LeaveRequest requestLeave(@Valid LeaveRequestDto leaveRequestDto) {
+	public LeaveRequest requestLeave(@Valid LeaveRequestDto leaveRequestDto, Long employeeId) {
 		LocalDateTime startDateTime = leaveRequestDto.startDate().atStartOfDay();
 		LocalDateTime endDateTime = leaveRequestDto.endDate().atStartOfDay();
 		
 		// Aynı tarih aralığında onaylı izin talebi olup olmadığını kontrol et
 		List<LeaveRequest> overlappingRequests =
-				leaveRepository.findByEmployeeIdAndStatus(leaveRequestDto.employeeId(), Status.APPROVED);
+				leaveRepository.findByEmployeeIdAndStatus(employeeId, Status.APPROVED);
 		
 		for (LeaveRequest existingRequest : overlappingRequests) {
 			if ((startDateTime.isBefore(existingRequest.getEndDate()) && endDateTime.isAfter(existingRequest.getStartDate()))) {
@@ -64,7 +63,7 @@ public class LeaveService {
 	// İzin talebini kabul etme (Yönetici tarafından)
 	public LeaveRequest acceptLeaveRequest(Long managerId, Long employeeId) {
 		UserRole manager = userRoleRepository.findById(managerId)
-		                                 .orElseThrow(() -> new EntityNotFoundException("Yönetici bulunamadı."));
+		                                     .orElseThrow(() -> new EntityNotFoundException("Yönetici bulunamadı."));
 		
 		if (manager.getRole() == null || !manager.getRole().equals(Role.COMPANY_ADMIN)) {
 			throw new SecurityException("Yalnızca şirket yöneticileri izin taleplerini onaylayabilir.");
@@ -84,7 +83,7 @@ public class LeaveService {
 	// İzin talebini reddetme (Yönetici tarafından)
 	public LeaveRequest rejectLeaveRequest(Long managerId, Long employeeId) {
 		UserRole manager = userRoleRepository.findById(managerId)
-		                             .orElseThrow(() -> new EntityNotFoundException("Yönetici bulunamadı."));
+		                                     .orElseThrow(() -> new EntityNotFoundException("Yönetici bulunamadı."));
 		
 		if (manager.getRole() == null || !manager.getRole().equals(Role.COMPANY_ADMIN)) {
 			throw new SecurityException("Yalnızca şirket yöneticileri izin taleplerini reddedebilir.");
@@ -100,9 +99,6 @@ public class LeaveService {
 		leaveRequest.setUpdatedAt(LocalDateTime.now());
 		return leaveRepository.save(leaveRequest);
 	}
-	
-	
-	
 	
 	// Kullanıcı var mı?
 	public boolean isUserExists(Long employeeId) {

@@ -119,6 +119,11 @@ public class UserRoleService {
 		return userRoleRepository.countByUserRoleRole(role);
 	}
 	
+	// Kullanıcının rolünü ID üzerinden bulan metod
+	public List<UserRole> findRoleByUserId(Long userId) {
+		return userRoleRepository.findByUserId(userId);
+	}
+	
 //	// userId'ye göre UserRole'ü bulma
 //	public Optional<UserRole> findByCompanyId(Long companyId) throws Exception {
 //		return userRoleRepository.findByCompanyId(companyId);

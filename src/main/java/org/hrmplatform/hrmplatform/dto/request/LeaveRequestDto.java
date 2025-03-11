@@ -1,5 +1,6 @@
 package org.hrmplatform.hrmplatform.dto.request;
 
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.hrmplatform.hrmplatform.enums.LeaveType;
 
@@ -11,9 +12,7 @@ public record LeaveRequestDto(
 		@NotNull(message = "Bitiş tarihi boş geçilemez.")
 		LocalDate endDate,
 		LeaveType leaveType,
-		@NotNull(message = "Çalışan ID boş olamaz.")
-		Long employeeId,
+		@NotEmpty(message = "Çalışan izin sebebini belirtmelidir.")
 		String reason
-		
 ) {
 }

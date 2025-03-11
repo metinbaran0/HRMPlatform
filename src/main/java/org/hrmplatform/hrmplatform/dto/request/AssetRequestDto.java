@@ -3,7 +3,7 @@ package org.hrmplatform.hrmplatform.dto.request;
 import java.time.LocalDate;
 
 public record AssetRequestDto(
-		String employeeName,
+		String employeeEmail,
 		String assetName,
 		String assetType,
 		String serialNumber,

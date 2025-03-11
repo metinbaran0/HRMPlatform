@@ -21,6 +21,23 @@ public class CommentController {
 		this.commentService = commentService;
 	}
 	
+	// Yeni eklenen public yorumları almak için endpoint
+	@GetMapping("/v1/api/public/comments")  // Public endpoint
+	public ResponseEntity<BaseResponse<List<Comment>>> getPublicComments(
+			@RequestParam(defaultValue = "1") int page,
+			@RequestParam(defaultValue = "10") int size
+	) {
+		List<Comment> comments = commentService.getAllComments();
+		return ResponseEntity.ok(
+				BaseResponse.<List<Comment>>builder()
+				            .code(200)
+				            .success(true)
+				            .data(comments)
+				            .message("Tüm yorumlar başarıyla getirildi.")
+				            .build()
+		);
+	}
+	
 	@PostMapping(CREATE_COMMENT)
 	public ResponseEntity<BaseResponse<Comment>> addComment(@RequestBody CommentRequestDto request) {
 		if (request == null || request.content() == null || request.content().trim().isEmpty()) {

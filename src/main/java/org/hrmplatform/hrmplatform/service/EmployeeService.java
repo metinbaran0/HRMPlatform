@@ -39,6 +39,7 @@ public class EmployeeService {
     private final CompanyService companyService;
     private final EmployeeMapper employeeMapper;
     private final JwtManager jwtManager;
+    private final PasswordService passwordService;
     
     
     public Page<Employee> getAllEmployeesByCompanyId(Long companyId, int page, int size) {
@@ -47,8 +48,7 @@ public class EmployeeService {
     }
     
     public EmployeeResponseDto createEmployee(@RequestHeader("Authorization") String token, @RequestBody @Valid EmployeeRequestDto request) {
-        
-        // Token'ı doğrula ve companyId bilgisini al
+        // Token doğrulama ve companyId alındıktan sonra işlem başlatılıyor
         Optional<TokenValidationResult> tokenValidationResult = jwtManager.validateToken(token.replace("Bearer ", ""));
         if (tokenValidationResult.isEmpty()) {
             throw new IllegalArgumentException("Geçersiz token");
@@ -56,7 +56,7 @@ public class EmployeeService {
         
         Long companyId = tokenValidationResult.get().companyId();
         
-        // Eğer companyId null ise, bu kullanıcının bir şirketi yok demektir
+        // Eğer companyId null ise, bu kullanıcının bir şirkete ait olmalısınız
         if (companyId == null) {
             throw new IllegalArgumentException("Bu işlemi gerçekleştirmek için bir şirkete ait olmalısınız");
         }
@@ -65,20 +65,45 @@ public class EmployeeService {
         Company company = companyService.findByCompanyId(companyId)
                                         .orElseThrow(() -> new IllegalArgumentException("Company not found with ID: " + companyId));
         
-        // Employee nesnesini oluştur ve companyId bilgisini ekle
-        Employee employee =
-                Employee.builder().companyId(company.getId()).name(request.name()).surname(request.surname())
-                        .email(request.email()).phone(request.phone()).position(request.position()).isActive(false)
-                        .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).build();
+        // Yeni çalışan objesini oluştur
+        Employee employee = Employee.builder()
+                                    .companyId(company.getId())
+                                    .name(request.name())
+                                    .surname(request.surname())
+                                    .email(request.email())
+                                    .phone(request.phone())
+                                    .position(request.position())
+                                    .isActive(false)
+                                    .createdAt(LocalDateTime.now())
+                                    .updatedAt(LocalDateTime.now())
+                                    .build();
         
-        // Employee'yi kaydet
+        // Çalışan kaydediliyor
         Employee savedEmployee = employeeRepository.save(employee);
         
-        // EmployeeResponseDto'yu oluştur ve dön
-        return new EmployeeResponseDto(savedEmployee.getId(), company.getName(), // Şirket adını ekledik
-                                       savedEmployee.getName() + " " + savedEmployee.getSurname(), // fullName = name + surname
-                                       savedEmployee.getEmail(), savedEmployee.getPhone(), savedEmployee.getPosition(), savedEmployee.isActive());
+        // Rastgele bir şifre oluşturuyoruz
+        String generatedPassword = passwordService.generateRandomPassword();
+        
+        // Şifreyi çalışana e-posta ile gönderiyoruz
+        String subject = "Hesap Bilgileriniz";
+        String text = "Merhaba " + savedEmployee.getName() + ",\n\n" +
+                "Hesabınız oluşturuldu. Şifreniz: " + generatedPassword + "\n\n" +
+                "Şifrenizi güvenli bir şekilde saklayın.";
+        emailService.sendEmail(savedEmployee.getEmail(), subject, text);
+        
+        // Şifreyi hash'leyip veritabanına kaydediyoruz
+        passwordService.saveHashedPassword(savedEmployee.getEmail(), generatedPassword);
+        
+        // EmployeeResponseDto'yu oluşturuyoruz ve dönüyoruz
+        return new EmployeeResponseDto(savedEmployee.getId(),
+                                       company.getName(),
+                                       savedEmployee.getName() + " " + savedEmployee.getSurname(),
+                                       savedEmployee.getEmail(),
+                                       savedEmployee.getPhone(),
+                                       savedEmployee.getPosition(),
+                                       savedEmployee.isActive());
     }
+    
     
     public void deleteEmployee(Long id, String token) {
         // Token'ı doğrula ve companyId bilgisini al

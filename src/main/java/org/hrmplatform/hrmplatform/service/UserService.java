@@ -38,6 +38,7 @@ private final UserRepository userRepository;
 	
 	@Lazy
 	private UserRoleService userRoleService;
+	private PasswordService passwordService;
 
 	
 	
@@ -237,14 +238,21 @@ private final UserRepository userRepository;
 		if (userRepository.findByEmail(company.getEmail()).isPresent()) {
 			throw new HRMPlatformException(ErrorType.USER_ALREADY_EXISTS);
 		}
+		// Rastgele bir şifre oluştur
+		String generatedPassword = passwordService.generateRandomPassword();
+
+		// Şifreyi hash'le
+		String hashedPassword = passwordEncoder.encode(generatedPassword);
+
 
 		// Kullanıcıyı (User) oluştur ve kaydet
 		User user = User.builder()
 				.name(company.getContactPerson() )
 				.email(company.getEmail())
-				.password("")  // Hashlenmiş şifreyi ekliyoruz
+				.password(hashedPassword)  // Hashlenmiş şifreyi ekliyoruz
 				.status(true)  // Kullanıcı aktif
 				.companyId(company.getId())
+				.employeeId(null)
 				.activated(false)  // İlk başta aktif değilse
 				.activationCode(null)  // Eğer aktivasyon gerekmiyorsa null
 				.activationCodeExpireAt(null)

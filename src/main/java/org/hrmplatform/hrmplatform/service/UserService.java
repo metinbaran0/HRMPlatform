@@ -9,8 +9,10 @@ import org.hrmplatform.hrmplatform.dto.request.LoginRequestDto;
 import org.hrmplatform.hrmplatform.dto.request.RegisterRequestDto;
 import org.hrmplatform.hrmplatform.dto.request.ResetPasswordRequestDto;
 import org.hrmplatform.hrmplatform.dto.request.UpdateUserRequestDto;
+import org.hrmplatform.hrmplatform.dto.request.roles.UserRoleRequestDto;
 import org.hrmplatform.hrmplatform.dto.response.DoLoginResponseDto;
 import org.hrmplatform.hrmplatform.dto.response.UserProfileResponseDto;
+import org.hrmplatform.hrmplatform.entity.Company;
 import org.hrmplatform.hrmplatform.entity.User;
 import org.hrmplatform.hrmplatform.entity.UserRole;
 import org.hrmplatform.hrmplatform.enums.Role;
@@ -36,6 +38,8 @@ private final UserRepository userRepository;
 	
 	@Lazy
 	private UserRoleService userRoleService;
+	private PasswordService passwordService;
+
 	
 	
 	@Autowired
@@ -226,6 +230,45 @@ private final UserRepository userRepository;
 		
 		userRepository.save(user);
 		return true;
+	}
+
+
+	public void registerCompanyAdmin(Company company) {
+		// Eğer e-posta zaten kayıtlıysa hata fırlat
+		if (userRepository.findByEmail(company.getEmail()).isPresent()) {
+			throw new HRMPlatformException(ErrorType.USER_ALREADY_EXISTS);
+		}
+		// Rastgele bir şifre oluştur
+		String generatedPassword = passwordService.generateRandomPassword();
+
+		// Şifreyi hash'le
+		String hashedPassword = passwordEncoder.encode(generatedPassword);
+
+
+		// Kullanıcıyı (User) oluştur ve kaydet
+		User user = User.builder()
+				.name(company.getContactPerson() )
+				.email(company.getEmail())
+				.password(hashedPassword)  // Hashlenmiş şifreyi ekliyoruz
+				.status(true)  // Kullanıcı aktif
+				.companyId(company.getId())
+				.employeeId(null)
+				.activated(false)  // İlk başta aktif değilse
+				.activationCode(null)  // Eğer aktivasyon gerekmiyorsa null
+				.activationCodeExpireAt(null)
+				.resetToken(null)
+				.resetTokenExpireAt(null)
+				.createdAt(LocalDateTime.now())
+				.updatedAt(LocalDateTime.now())
+				.build();
+
+		userRepository.save(user);
+
+		// Kullanıcıya CompanyAdmin rolü ata
+		userRoleService.assignRoleToUser(new UserRoleRequestDto(user.getId(), Role.COMPANY_ADMIN));
+
+		// Aktivasyon mailini gönder
+		sendActivationEmail(user);
 	}
 
 	

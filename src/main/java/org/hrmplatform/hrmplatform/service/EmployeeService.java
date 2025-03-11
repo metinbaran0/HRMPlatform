@@ -8,6 +8,9 @@ import org.hrmplatform.hrmplatform.dto.response.EmployeeResponseDto;
 import org.hrmplatform.hrmplatform.dto.response.TokenValidationResult;
 import org.hrmplatform.hrmplatform.entity.Company;
 import org.hrmplatform.hrmplatform.entity.Employee;
+import org.hrmplatform.hrmplatform.entity.User;
+import org.hrmplatform.hrmplatform.entity.UserRole;
+import org.hrmplatform.hrmplatform.enums.Role;
 import org.hrmplatform.hrmplatform.exception.*;
 import org.hrmplatform.hrmplatform.exception.ErrorType;
 import org.hrmplatform.hrmplatform.mapper.EmployeeMapper;
@@ -19,6 +22,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,6 +43,10 @@ public class EmployeeService {
     private final CompanyService companyService;
     private final EmployeeMapper employeeMapper;
     private final JwtManager jwtManager;
+    private final PasswordService passwordService;
+    private final UserService userService;
+    private final UserRoleService userRoleService;
+    private final PasswordEncoder passwordEncoder;
     
     
     public Page<Employee> getAllEmployeesByCompanyId(Long companyId, int page, int size) {
@@ -47,8 +55,7 @@ public class EmployeeService {
     }
     
     public EmployeeResponseDto createEmployee(@RequestHeader("Authorization") String token, @RequestBody @Valid EmployeeRequestDto request) {
-        
-        // Token'ı doğrula ve companyId bilgisini al
+        // Token doğrulama ve companyId alındıktan sonra işlem başlatılıyor
         Optional<TokenValidationResult> tokenValidationResult = jwtManager.validateToken(token.replace("Bearer ", ""));
         if (tokenValidationResult.isEmpty()) {
             throw new IllegalArgumentException("Geçersiz token");
@@ -56,7 +63,6 @@ public class EmployeeService {
         
         Long companyId = tokenValidationResult.get().companyId();
         
-        // Eğer companyId null ise, bu kullanıcının bir şirketi yok demektir
         if (companyId == null) {
             throw new IllegalArgumentException("Bu işlemi gerçekleştirmek için bir şirkete ait olmalısınız");
         }
@@ -65,20 +71,73 @@ public class EmployeeService {
         Company company = companyService.findByCompanyId(companyId)
                                         .orElseThrow(() -> new IllegalArgumentException("Company not found with ID: " + companyId));
         
-        // Employee nesnesini oluştur ve companyId bilgisini ekle
-        Employee employee =
-                Employee.builder().companyId(company.getId()).name(request.name()).surname(request.surname())
-                        .email(request.email()).phone(request.phone()).position(request.position()).isActive(false)
-                        .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).build();
+        // Yeni çalışan objesini oluştur
+        Employee employee = Employee.builder()
+                                    .companyId(company.getId())
+                                    .name(request.name())
+                                    .surname(request.surname())
+                                    .email(request.email())
+                                    .phone(request.phone())
+                                    .position(request.position())
+                                    .isActive(false)
+                                    .createdAt(LocalDateTime.now())
+                                    .updatedAt(LocalDateTime.now())
+                                    .build();
         
-        // Employee'yi kaydet
+        // Çalışanı kaydet
         Employee savedEmployee = employeeRepository.save(employee);
         
-        // EmployeeResponseDto'yu oluştur ve dön
-        return new EmployeeResponseDto(savedEmployee.getId(), company.getName(), // Şirket adını ekledik
-                                       savedEmployee.getName() + " " + savedEmployee.getSurname(), // fullName = name + surname
-                                       savedEmployee.getEmail(), savedEmployee.getPhone(), savedEmployee.getPosition(), savedEmployee.isActive());
+        // Rastgele bir şifre oluştur
+        String generatedPassword = passwordService.generateRandomPassword();
+        
+        // Şifreyi hash'le
+        String hashedPassword = passwordEncoder.encode(generatedPassword);
+        
+        // Kullanıcıyı (User) oluştur ve kaydet
+        User user = User.builder()
+                        .name(savedEmployee.getName() + " " + savedEmployee.getSurname())
+                        .email(savedEmployee.getEmail())
+                        .password(hashedPassword)  // Hashlenmiş şifreyi ekliyoruz
+                        .status(true)  // Kullanıcı aktif
+                        .companyId(savedEmployee.getCompanyId())
+                        .employeeId(savedEmployee.getId())  // Employee ID ile eşleşiyor
+                        .activated(false)  // İlk başta aktif değilse
+                        .activationCode(null)  // Eğer aktivasyon gerekmiyorsa null
+                        .activationCodeExpireAt(null)
+                        .resetToken(null)
+                        .resetTokenExpireAt(null)
+                        .createdAt(LocalDateTime.now())
+                        .updatedAt(LocalDateTime.now())
+                        .build();
+        
+        userService.save(user);
+        
+        
+        // Kullanıcıya rol atama işlemi
+        UserRole userRole = UserRole.builder()
+                                    .userId(user.getId())  // User nesnesi yerine ID kullanılmalı
+                                    .role(Role.EMPLOYEE)   // Çalışana EMPLOYEE rolü atanıyor
+                                    .build();
+        
+        userRoleService.save(userRole);
+        
+        // Kullanıcıya e-posta gönder
+        String subject = "Hesap Bilgileriniz";
+        String text = "Merhaba " + savedEmployee.getName() + ",\n\n" +
+                "Hesabınız oluşturuldu. Şifreniz: " + generatedPassword + "\n\n" +
+                "Şifrenizi güvenli bir şekilde saklayın ve giriş yaparken kullanın.";
+        emailService.sendEmail(savedEmployee.getEmail(), subject, text);
+        
+        // EmployeeResponseDto oluştur ve dön
+        return new EmployeeResponseDto(savedEmployee.getId(),
+                                       company.getName(),
+                                       savedEmployee.getName() + " " + savedEmployee.getSurname(),
+                                       savedEmployee.getEmail(),
+                                       savedEmployee.getPhone(),
+                                       savedEmployee.getPosition(),
+                                       savedEmployee.isActive());
     }
+    
     
     public void deleteEmployee(Long id, String token) {
         // Token'ı doğrula ve companyId bilgisini al

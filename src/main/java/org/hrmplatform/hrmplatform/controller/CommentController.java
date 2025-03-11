@@ -22,7 +22,7 @@ public class CommentController {
 	}
 	
 	// Yeni eklenen public yorumları almak için endpoint
-	@GetMapping("/v1/api/public/comments")  // Public endpoint
+	@GetMapping("/comments")  // Public endpoint
 	public ResponseEntity<BaseResponse<List<Comment>>> getPublicComments(
 			@RequestParam(defaultValue = "1") int page,
 			@RequestParam(defaultValue = "10") int size

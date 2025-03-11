@@ -189,14 +189,19 @@ public class CompanyService {
         
         // Şirketin durumunu onaylı olarak güncelle
         company.setStatus(Status.APPROVED);
-        
+        companyRepository.save(company);
+
+        // 🔹 Kullanıcıyı oluştur ve aktivasyon kodu gönder
+        userService.registerCompanyAdmin(company);
+
         // Onay mailini başvuran şirkete gönder
         emailService.sendEmail(
                 company.getEmail(), "Şirket Başvurunuz Onaylandı",
                 "Tebrikler, " + company.getName() + " şirketinizin başvurusu onaylandı! " +
                         "Platformumuza giriş yaparak yönetim işlemlerini gerçekleştirebilirsiniz.");
-        
-        return companyRepository.save(company);
+
+        return company;
+
     }
     
     
@@ -339,6 +344,8 @@ public class CompanyService {
         return findById(companyId)
                 .orElseThrow(() -> new HRMPlatformException(ErrorType.COMPANY_NOT_FOUND));
     }
+
+
 
 
     

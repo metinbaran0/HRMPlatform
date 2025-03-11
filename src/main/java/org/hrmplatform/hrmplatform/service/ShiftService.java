@@ -52,17 +52,19 @@ public class ShiftService {
     }
 
     public boolean deleteShift(Long id, Long companyId) {
-        Optional<Shift> shift = shiftRepository.findByIdAndCompanyId(id, companyId); // Yetkili şirket mi?
+        Optional<Shift> shiftOptional = shiftRepository.findByIdAndCompanyId(id, companyId); // Yetkili şirket mi?
 
-        if (shift.isPresent()) {
-            Shift existingShift = shift.get();
-            existingShift.setDeleted(true);
-            shiftRepository.save(existingShift);
-            return true;
+        if (!shiftOptional.isPresent()) {
+            log.warn("Silme başarısız: Shift ID={} Company ID={} - Vardiya bulunamadı veya Yetkisiz Erişim!", id, companyId);
+            return false; // Vardiya yoksa veya companyId eşleşmiyorsa silme başarısız olur.
         }
 
-        log.warn("Silme başarısız: Shift ID={} Company ID={} Yetkisiz!", id, companyId);
-        return false; // Eğer vardiya yoksa veya companyId eşleşmiyorsa silme başarısız olur.
+        Shift shift = shiftOptional.get();
+        shift.setDeleted(true); // Soft delete
+        shiftRepository.save(shift);
+
+        log.info("Vardiya başarıyla silindi: Shift ID={} Company ID={}", id, companyId);
+        return true;
     }
 
     // Vardiya güncelleme (giriş yapan kullanıcının companyId'sine göre)

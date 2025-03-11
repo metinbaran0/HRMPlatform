@@ -29,6 +29,7 @@ public class Shift {
     private LocalDateTime updatedAt;
 
     private Integer durationInMinutes; //vardiya süresini hesaplamak için ayrı bir alan
+    @Builder.Default
     private boolean deleted = false; // Soft delete
 
     @Enumerated(EnumType.STRING)

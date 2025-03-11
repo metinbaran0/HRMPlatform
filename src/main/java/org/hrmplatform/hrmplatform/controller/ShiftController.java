@@ -132,7 +132,8 @@ public class ShiftController {
         }
     }
 
-    //vardiya silme(soft delete)
+
+    // Vardiya silme (soft delete)
     @DeleteMapping(DELETE_SHIFT)
     public ResponseEntity<BaseResponse<Void>> deleteShift(
             @PathVariable Long id,
@@ -143,17 +144,26 @@ public class ShiftController {
         boolean isDeleted = shiftService.deleteShift(id, companyId); // Company ID'yi de gönder
 
         if (isDeleted) {
-            return ResponseEntity.noContent().build();
+            // Başarılı işlem, 200 OK dönüyoruz ve mesaj içeriyor
+            BaseResponse<Void> successResponse = BaseResponse.<Void>builder()
+                    .code(200)
+                    .data(null)
+                    .success(true)
+                    .message("Vardiya başarıyla silindi.")
+                    .build();
+            return ResponseEntity.ok(successResponse);
         }
 
-        BaseResponse<Void> response = BaseResponse.<Void>builder()
+        // Vardiya bulunamadı veya yetkisiz erişim durumunda 404 döndürüyoruz
+        BaseResponse<Void> errorResponse = BaseResponse.<Void>builder()
                 .code(404)
                 .data(null)
                 .success(false)
                 .message("Vardiya bulunamadı veya yetkisiz erişim.")
                 .build();
-        return ResponseEntity.status(404).body(response);
+        return ResponseEntity.status(404).body(errorResponse); // 404, bulunamadı hatası
     }
+
 
     // Silinmemiş tüm vardiyaları getir
     @GetMapping(ACTIVE_SHIFT)

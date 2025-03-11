@@ -13,12 +13,10 @@ public interface EmployeeShiftMapper {
 
     @Mapping(target = "employeeId", source = "employeeId")
     @Mapping(target = "shiftId", source = "shiftId")
-    @Mapping(target = "shiftDate", source = "request.shiftDate") // assignedDate yerine shiftDate
     @Mapping(target = "isActive", constant = "true") // Yeni vardiya eklenirken aktif olsun
     public EmployeeShift toEmployeeShift(CreateEmployeeShiftRequest request, Long employeeId, Long shiftId, Long companyId);
 
     @Mapping(target = "employeeId", source = "request.employeeId")
     @Mapping(target = "shiftId", source = "request.shiftId")
-    @Mapping(target = "shiftDate", source = "request.shiftDate") // assignedDate yerine shiftDate
     void updateEmployeeShiftFromRequest(CreateEmployeeShiftRequest request, @MappingTarget EmployeeShift employeeShift);
 }

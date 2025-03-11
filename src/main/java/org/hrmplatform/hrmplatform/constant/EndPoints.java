@@ -66,6 +66,8 @@ public class EndPoints {
     public static final String REJECT = "/reject-company";
     public static final String SUBSCRIPTION = "/subscription";
     public static final String FINDBYCOMPANYNAME = "/find-byname-company";
+    public static final String ACTIVESUBSCRIPTIONS = "/active-subscriptions";
+    public static final String STATISTICS = "/statistics";
 
     //LEAVEREQUEST
 

@@ -5,6 +5,7 @@ import org.hrmplatform.hrmplatform.enums.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -17,4 +18,6 @@ public interface LeaveRepository extends JpaRepository<LeaveRequest, Long> {
 	
 	// Çalışan ve durum ile tek bir izin talebini sorgulama
 	LeaveRequest findByEmployeeIdAndStatusAndId(Long employeeId, Status status, Long leaveRequestId);
+
+    boolean existsByEmployeeIdAndStatusAndStartDateBeforeAndEndDateAfter(Long employeeId, Status status, LocalDate shiftStart, LocalDate shiftEnd);
 }

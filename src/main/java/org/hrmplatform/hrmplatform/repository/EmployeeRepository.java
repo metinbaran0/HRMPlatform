@@ -25,7 +25,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 	
 	// Email'e göre çalışan ID'sini döndüren metot
 	Optional<Employee> findByEmail(String email);
-	
-	
-	
+
+
+	boolean existsByIdAndCompanyId(Long employeeId, Long companyId);
 }

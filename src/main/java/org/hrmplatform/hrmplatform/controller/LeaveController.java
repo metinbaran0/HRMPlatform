@@ -67,6 +67,49 @@ public class LeaveController {
 		                                     .build());
 	}
 	
+	
+	
+	// Şirket yöneticisinin izin talebi oluşturma
+	@PreAuthorize("hasAuthority('COMPANY_ADMIN')")
+	@PostMapping(LEAVEREQUEST_MANAGER)
+	public ResponseEntity<BaseResponse<LeaveRequest>> requestLeaveByAdmin(
+			@RequestHeader("Authorization") String token,
+			@RequestBody LeaveRequestDto dto) {
+		// Authorization başlığını kontrol edin
+		if (token == null || !token.startsWith("Bearer ")) {
+			return ResponseEntity.ok(BaseResponse.<LeaveRequest>builder()
+			                                     .code(400)
+			                                     .success(false)
+			                                     .message("Hata: Geçersiz veya eksik token.")
+			                                     .build());
+		}
+		
+		// Company ID'yi token'dan alıyoruz (employeeId'ye gerek yok)
+		Long companyId = authService.getCompanyIdFromToken(token);
+		
+		// Token doğrulama ve companyId kontrolünü gözden geçirin
+		if (companyId == null) {
+			return ResponseEntity.ok(BaseResponse.<LeaveRequest>builder()
+			                                     .code(400)
+			                                     .success(false)
+			                                     .message("Hata: Token geçersiz veya kullanıcı bilgileri eksik.")
+			                                     .build());
+		}
+		
+		// Şirket yöneticisi izin talebini oluşturuyor
+		LeaveRequest createdLeave = leaveService.requestLeave(dto, companyId, null); // employeeId null, çünkü admin için geçerli değil
+		return ResponseEntity.ok(BaseResponse.<LeaveRequest>builder()
+		                                     .code(200)
+		                                     .success(true)
+		                                     .data(createdLeave)
+		                                     .message("İzin talebi başarıyla oluşturuldu.")
+		                                     .build());
+	}
+	
+	
+	
+	
+	
 	// Kullanıcıya ait izin taleplerini listeleme
 	@PreAuthorize("hasAuthority('EMPLOYEE')")
 	@GetMapping(LEAVEBYUSERID)

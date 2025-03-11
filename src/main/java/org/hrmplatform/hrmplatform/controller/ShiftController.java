@@ -268,18 +268,7 @@ public class ShiftController {
         );
     }
 
-    // Vardiya çakışmasını kontrol eden endpoint
-    @GetMapping("/employee/{employeeId}/shift-conflict")
-    public ResponseEntity<BaseResponse<Boolean>> checkShiftConflict(@PathVariable Long employeeId, @RequestParam LocalDate date) {
-        boolean hasConflict = shiftService.checkShiftConflict(employeeId, date);
-        return ResponseEntity.ok(
-                BaseResponse.<Boolean>builder()
-                        .code(200)
-                        .message("true")
-                        .success(true)
-                        .data(hasConflict)
-                        .build());
-    }
+
 
     // Vardiya dağılımını almak için endpoint
     @GetMapping(DISTRIBUTION)

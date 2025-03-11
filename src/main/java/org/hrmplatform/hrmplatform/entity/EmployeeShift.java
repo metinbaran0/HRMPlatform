@@ -24,17 +24,21 @@ public class EmployeeShift {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    private LocalDateTime assignedDate;
+    private LocalDate shiftDate; // shiftDate olarak değiştirilmiş
+    private Long companyId;
+
+
     private Boolean isActive;
     @Builder.Default
     private Boolean deleted = false;
-
-    private LocalDate shiftDate;
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        if (shiftDate == null) {
+            shiftDate = LocalDate.now(); // Eğer shiftDate null ise, güncel tarih atansın
+        }
     }
 
     @PreUpdate

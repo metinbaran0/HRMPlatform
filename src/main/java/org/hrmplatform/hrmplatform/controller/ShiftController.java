@@ -9,6 +9,7 @@ import org.hrmplatform.hrmplatform.entity.Shift;
 import org.hrmplatform.hrmplatform.enums.ShiftType;
 import org.hrmplatform.hrmplatform.exception.ErrorType;
 import org.hrmplatform.hrmplatform.mapper.ShiftMapper;
+import org.hrmplatform.hrmplatform.service.AuthService;
 import org.hrmplatform.hrmplatform.service.ShiftService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +17,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.hrmplatform.hrmplatform.constant.EndPoints.COMPANY;
 import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
@@ -32,6 +35,7 @@ import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
 public class ShiftController {
     private final ShiftService shiftService;
     private final ShiftMapper shiftMapper;
+    private final AuthService authService;
 
 
     @PostMapping(CREATE_SHIFT)
@@ -61,24 +65,6 @@ public class ShiftController {
                             null));
         }
     }
-    /**
-     *@PostMapping(CREATE_SHIFT)
-     * public ResponseEntity<BaseResponse<ShiftDto>> createShift(@RequestBody ShiftDto shiftDto, @AuthenticationPrincipal UserDetails userDetails) {
-     *     Long companyId = userDetails.getCompanyId();  // Oturumdan veya kullanıcıdan companyId'yi alıyorsunuz
-     *     ShiftDto createdShift = shiftService.createShift(companyId, shiftDto.shiftName(),
-     *             shiftDto.startTime(), shiftDto.endTime(), shiftDto.shiftType());
-     *
-     *     BaseResponse<ShiftDto> response = BaseResponse.<ShiftDto>builder()
-     *             .success(true)
-     *             .message("Shift created successfully")
-     *             .code(HttpStatus.CREATED.value())
-     *             .data(createdShift)
-     *             .build();
-     *
-     *     return ResponseEntity.status(HttpStatus.CREATED).body(response);
-     * }
-     *
-     */
 
 
     // Id'ye göre vardiya getirme
@@ -138,35 +124,39 @@ public class ShiftController {
 
     //vardiya silme(soft delete)
     @DeleteMapping(DELETE_SHIFT)
-    public ResponseEntity<BaseResponse<Void>> deleteShift(@PathVariable Long id) {
-        boolean isDeleted = shiftService.deleteShift(id);
+    public ResponseEntity<BaseResponse<Void>> deleteShift(
+            @PathVariable Long id,
+            @RequestHeader("Authorization") String token) {
+
+        Long companyId = authService.getCompanyIdFromToken(token); // Token'dan companyId al
+
+        boolean isDeleted = shiftService.deleteShift(id, companyId); // Company ID'yi de gönder
+
         if (isDeleted) {
-            BaseResponse<Void> response = BaseResponse.<Void>builder()
-                    .code(200)
-                    .data(null)
-                    .success(true)
-                    .message("Vardiya başarıyla silindi (soft delete).")
-                    .build();
-            return ResponseEntity.noContent().build(); // No content döner çünkü aslında veriyi silmedik
+            return ResponseEntity.noContent().build();
         }
+
         BaseResponse<Void> response = BaseResponse.<Void>builder()
                 .code(404)
                 .data(null)
                 .success(false)
-                .message("Vardiya bulunamadı.")
+                .message("Vardiya bulunamadı veya yetkisiz erişim.")
                 .build();
         return ResponseEntity.status(404).body(response);
     }
 
     // Silinmemiş tüm vardiyaları getir
     @GetMapping(ACTIVE_SHIFT)
-    public ResponseEntity<BaseResponse<List<Shift>>> getAllActiveShifts() {
-        List<Shift> shifts = shiftService.getAllActiveShifts(); // Servisten silinmemiş vardiyaları alıyoruz
+    public ResponseEntity<BaseResponse<List<Shift>>> getAllActiveShifts(
+            @RequestHeader("Authorization") String token) {
+
+        List<Shift> shifts = shiftService.getAllActiveShifts(token); // Token üzerinden companyId alınıyor
+
         BaseResponse<List<Shift>> response = BaseResponse.<List<Shift>>builder()
                 .code(200)
                 .data(shifts)
                 .success(true)
-                .message("Silinmemiş vardiyalar başarıyla alındı.")
+                .message("Şirketin silinmemiş vardiyaları başarıyla alındı.")
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -288,6 +278,21 @@ public class ShiftController {
         return ResponseEntity.ok(distribution);
     }
 
+    @GetMapping(GET_ALL_SHIFT_TYPE)
+    public ResponseEntity<BaseResponse<List<String>>> getShiftTypes() {
+        List<String> shiftTypes = Arrays.stream(ShiftType.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
+
+        BaseResponse<List<String>> response = BaseResponse.<List<String>>builder()
+                .code(200)
+                .data(shiftTypes)
+                .success(true)
+                .message("Vardiya tipleri başarıyla alındı.")
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
 
 
 

@@ -3,6 +3,7 @@ package org.hrmplatform.hrmplatform.service;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hrmplatform.hrmplatform.dto.request.CreateShiftRequest;
 import org.hrmplatform.hrmplatform.dto.request.ShiftDto;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
@@ -21,6 +22,7 @@ import java.util.*;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class ShiftService {
     private final ShiftRepository shiftRepository;
     private final ShiftMapper shiftMapper;
@@ -28,8 +30,10 @@ public class ShiftService {
     private final AuthService authService;
 
 
-    public List<Shift> getAllActiveShifts() {
-        return shiftRepository.findByDeletedFalse(); // Silinmemiş vardiyaları alıyoruz
+    public List<Shift> getAllActiveShifts(String token) {
+        Long companyId = authService.getCompanyIdFromToken(token); // Token'dan şirket ID al
+
+        return shiftRepository.findByCompanyIdAndDeletedFalse(companyId); // Silinmemişleri getir
     }
 
 
@@ -47,15 +51,18 @@ public class ShiftService {
         return shift.orElse(null);
     }
 
-    public boolean deleteShift(Long id) {
-        Optional<Shift> shift = shiftRepository.findById(id);
+    public boolean deleteShift(Long id, Long companyId) {
+        Optional<Shift> shift = shiftRepository.findByIdAndCompanyId(id, companyId); // Yetkili şirket mi?
+
         if (shift.isPresent()) {
             Shift existingShift = shift.get();
             existingShift.setDeleted(true);
             shiftRepository.save(existingShift);
             return true;
         }
-        return false;
+
+        log.warn("Silme başarısız: Shift ID={} Company ID={} Yetkisiz!", id, companyId);
+        return false; // Eğer vardiya yoksa veya companyId eşleşmiyorsa silme başarısız olur.
     }
 
     // Vardiya güncelleme (giriş yapan kullanıcının companyId'sine göre)

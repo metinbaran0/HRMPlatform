@@ -64,15 +64,23 @@ public class SecurityConfig {
 					    .requestMatchers(EndPoints.EMPLOYEE + "/**", EndPoints.EMAIL + "/**").permitAll()
 					    .requestMatchers(EndPoints.COMPANY + EndPoints.ADDCOMPANY, EndPoints.COMPANY + "/verify-email").permitAll()
 					    
+					    // Çalışan (EMPLOYEE) yetkilendirmesi
+					    .requestMatchers(EndPoints.EXPENSE + EndPoints.CREATE_EXPENSE).hasAuthority("EMPLOYEE")
+					    .requestMatchers(EndPoints.EXPENSE + EndPoints.GET_MY_EXPENSES).hasAuthority("EMPLOYEE")
+					    .requestMatchers(EndPoints.ASSET + "/{id}").hasAuthority("EMPLOYEE")
+					    
 					    // "COMPANY_ADMIN" yetkisiyle erişilebilen endpointler
 					    .requestMatchers(EndPoints.LEAVE + EndPoints.PENDINGLEAVESFORMANAGER).hasAuthority("COMPANY_ADMIN")
 					    .requestMatchers(EndPoints.ASSET + "/add").hasAuthority("COMPANY_ADMIN")
-					    .requestMatchers(EndPoints.ASSET + "/update/**").hasRole("COMPANY_ADMIN")
-					    .requestMatchers(EndPoints.ASSET + "/delete/**").hasRole("COMPANY_ADMIN")
+					    .requestMatchers(EndPoints.ASSET + "/update/**").hasAuthority("COMPANY_ADMIN")
+					    .requestMatchers(EndPoints.ASSET + "/delete/**").hasAuthority("COMPANY_ADMIN")
+					    .requestMatchers(EndPoints.EXPENSE + EndPoints.GETALL_EXPENSE).hasAuthority("COMPANY_ADMIN")
+					    .requestMatchers(EndPoints.EXPENSE + EndPoints.APPROVE_EXPENSE).hasAuthority("COMPANY_ADMIN")
+					    .requestMatchers(EndPoints.EXPENSE + EndPoints.REJECT_EXPENSE).hasAuthority("COMPANY_ADMIN")
+					    
 					    
 					    // "EMPLOYEE" ve "COMPANY_ADMIN" rollerinin erişebileceği endpointler
 					    .requestMatchers(EndPoints.LEAVE + "/**").hasAnyAuthority("EMPLOYEE", "COMPANY_ADMIN")
-					    .requestMatchers(EndPoints.ASSET + "/{id}").hasAnyRole("EMPLOYEE", "COMPANY_ADMIN")
 					    .requestMatchers(EndPoints.ASSET + "/all").hasAnyRole("EMPLOYEE", "COMPANY_ADMIN")
 					    .requestMatchers("/company/**", "/shift/**").hasAnyRole("SITE_ADMIN", "COMPANY_ADMIN")
 					    
@@ -80,7 +88,7 @@ public class SecurityConfig {
 					    .requestMatchers(EndPoints.ROOT + EndPoints.DEVELOPER + "/**").hasAnyAuthority("SITE_ADMIN", "COMPANY_ADMIN")
 					    
 					    // Diğer istekler kimlik doğrulama gerektirir
-					    .anyRequest().authenticated();
+					    .anyRequest().authenticated();  // Burada anyRequest()'i en son kullanıyoruz
 		    });
 		
 		// CSRF'yi devre dışı bırak

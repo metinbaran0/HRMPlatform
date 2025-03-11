@@ -92,18 +92,7 @@ public class ShiftService {
         return shiftRepository.findByStartTimeBetween(startDate, endDate);
     }
 
-    /**
-     *
-     * TODO : Bu metodu gözden geçir
-     */
-    // Vardiya çakışmasını kontrol etme metodu
-    public boolean checkShiftConflict(Long employeeId, LocalDate date) {
-        // Çalışanın o gün alacağı vardiya listesini al
-        List<EmployeeShift> employeeShifts = employeeShiftRepository.findByEmployeeIdAndAssignedDate(employeeId, date);
 
-        // Eğer listede birden fazla vardiya varsa, çakışma vardır
-        return employeeShifts.size() > 1;
-    }
 
 
 

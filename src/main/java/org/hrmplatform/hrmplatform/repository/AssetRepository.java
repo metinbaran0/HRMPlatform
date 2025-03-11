@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface AssetRepository extends JpaRepository<Asset,Long> {
 	List<Asset> findByCompanyId(Long companyId);
 	Optional<Asset> findByIdAndCompanyId(Long id, Long companyId);
+	boolean existsByIdAndEmployeeId(Long assetId, Long employeeId);
 
 	
 	

@@ -9,7 +9,10 @@ import org.hrmplatform.hrmplatform.entity.Shift;
 import org.hrmplatform.hrmplatform.enums.ShiftType;
 import org.hrmplatform.hrmplatform.exception.ErrorType;
 import org.hrmplatform.hrmplatform.mapper.ShiftMapper;
+
 import org.hrmplatform.hrmplatform.service.AuthService;
+
+
 import org.hrmplatform.hrmplatform.service.ShiftService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +38,10 @@ import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
 public class ShiftController {
     private final ShiftService shiftService;
     private final ShiftMapper shiftMapper;
+
     private final AuthService authService;
+
+
 
 
     @PostMapping(CREATE_SHIFT)
@@ -65,6 +71,10 @@ public class ShiftController {
                             null));
         }
     }
+
+
+
+
 
 
     // Id'ye göre vardiya getirme
@@ -258,18 +268,7 @@ public class ShiftController {
         );
     }
 
-    // Vardiya çakışmasını kontrol eden endpoint
-    @GetMapping("/employee/{employeeId}/shift-conflict")
-    public ResponseEntity<BaseResponse<Boolean>> checkShiftConflict(@PathVariable Long employeeId, @RequestParam LocalDate date) {
-        boolean hasConflict = shiftService.checkShiftConflict(employeeId, date);
-        return ResponseEntity.ok(
-                BaseResponse.<Boolean>builder()
-                        .code(200)
-                        .message("true")
-                        .success(true)
-                        .data(hasConflict)
-                        .build());
-    }
+
 
     // Vardiya dağılımını almak için endpoint
     @GetMapping(DISTRIBUTION)

@@ -134,6 +134,9 @@ public class EndPoints {
     //EXPENCE
     public static final String CREATE_EXPENSE = "/create-expense";
     public static final String GETALL_EXPENSE = "/getall-expense";
+    public static final String GET_MY_EXPENSES = "/my-expenses";
+    public static final String APPROVE_EXPENSE = "/approve/{expenseId}";
+    public static final String REJECT_EXPENSE = "/reject/{expenseId}";
     
     
 }

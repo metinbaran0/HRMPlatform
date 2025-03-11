@@ -25,6 +25,7 @@ public class EmployeeShiftService {
     public final EmployeeRepository employeeRepository;
     public final ShiftRepository shiftRepository;
     public final LeaveRepository leaveRepository;
+    public final BreakRepository breakRepository;
     public final AuthService authService;
 
     public EmployeeShift createEmployeeShift(String token, CreateEmployeeShiftRequest request, Long employeeId, Long shiftId) {

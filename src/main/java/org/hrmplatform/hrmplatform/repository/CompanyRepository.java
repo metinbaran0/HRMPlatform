@@ -1,8 +1,6 @@
 package org.hrmplatform.hrmplatform.repository;
 
-import org.hrmplatform.hrmplatform.dto.request.CompanyDto;
 import org.hrmplatform.hrmplatform.entity.Company;
-import org.hrmplatform.hrmplatform.entity.Employee;
 import org.hrmplatform.hrmplatform.enums.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -26,7 +24,6 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     Optional<Company> findByEmailVerificationToken(String token);
 
 
-
     @Query("SELECT c.name FROM Company c WHERE c.id = :companyId")
     String findCompanyNameById(@Param("companyId") Long companyId);
 
@@ -40,4 +37,15 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     List<Company> findByNameIgnoreCase(@Param("name") String name);
 
     List<Company> findByStatusAndIsDeletedFalse(Status status); // Silinmemiş ve onaylanmış şirketler
+
+    Long countBySubscriptionEndDateAfterAndIsDeletedFalse(LocalDateTime now);
+
+
+    @Query("SELECT EXTRACT(MONTH FROM c.createdAt) as month, COUNT(c) as count " +
+            "FROM Company c " +
+            "WHERE EXTRACT(YEAR FROM c.createdAt) = :year " +
+            "GROUP BY EXTRACT(MONTH FROM c.createdAt) " +
+            "ORDER BY EXTRACT(MONTH FROM c.createdAt)")
+    List<Object[]> countByYearGroupedByMonth(@Param("year") int year);
+
 }

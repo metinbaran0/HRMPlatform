@@ -4,17 +4,22 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.hrmplatform.hrmplatform.dto.request.CreateEmployeeShiftRequest;
+import org.hrmplatform.hrmplatform.entity.Employee;
 import org.hrmplatform.hrmplatform.entity.EmployeeShift;
+import org.hrmplatform.hrmplatform.entity.LeaveRequest;
 import org.hrmplatform.hrmplatform.entity.Shift;
+import org.hrmplatform.hrmplatform.enums.Status;
 import org.hrmplatform.hrmplatform.exception.ErrorType;
 import org.hrmplatform.hrmplatform.exception.HRMPlatformException;
 import org.hrmplatform.hrmplatform.mapper.EmployeeShiftMapper;
 import org.hrmplatform.hrmplatform.repository.EmployeeRepository;
 import org.hrmplatform.hrmplatform.repository.EmployeeShiftRepository;
+import org.hrmplatform.hrmplatform.repository.LeaveRepository;
 import org.hrmplatform.hrmplatform.repository.ShiftRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,26 +30,44 @@ public class EmployeeShiftService {
     public final EmployeeShiftMapper employeeShiftMapper;
     public final EmployeeRepository employeeRepository;
     public final ShiftRepository shiftRepository;
+    public final LeaveRepository leaveRepository;
     public final AuthService authService;
 
-    // Çalışan vardiyası oluşturma
     public EmployeeShift createEmployeeShift(String token, CreateEmployeeShiftRequest request, Long employeeId, Long shiftId) {
-        Long companyId = authService.getCompanyIdFromToken(token); // Token'den şirket ID'sini alıyoruz.
+        Long companyId = authService.getCompanyIdFromToken(token); // Token'den şirket ID'sini al
 
-        // Geçerli bir çalışan olup olmadığını ve çalışanı doğru şirkete ait olup olmadığını kontrol et
-        if (!employeeRepository.existsByIdAndCompanyId(employeeId, companyId)) {
+        // Çalışanın şirkete ait olup olmadığını doğrula
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new HRMPlatformException(ErrorType.EMPLOYEE_NOT_FOUND));
+
+        if (!employee.getCompanyId().equals(companyId)) {
             throw new HRMPlatformException(ErrorType.EMPLOYEE_NOT_FOUND_OR_NOT_IN_COMPANY);
         }
 
-        // Geçerli bir vardiya olup olmadığını kontrol et
-        if (!shiftRepository.existsById(shiftId)) {
-            throw new HRMPlatformException(ErrorType.SHIFT_NOT_FOUND);
+        // Geçerli bir vardiya olup olmadığını ve şirketin bu vardiyaya sahip olup olmadığını kontrol et
+        Shift shift = shiftRepository.findById(shiftId)
+                .orElseThrow(() -> new HRMPlatformException(ErrorType.SHIFT_NOT_FOUND));
+
+        if (!shift.getCompanyId().equals(companyId)) {
+            throw new HRMPlatformException(ErrorType.SHIFT_NOT_FOUND_IN_COMPANY);
         }
 
         // Aynı çalışan için aynı vardiyanın atanıp atanmadığını kontrol et
         boolean alreadyAssigned = employeeShiftRepository.existsByEmployeeIdAndShiftId(employeeId, shiftId);
         if (alreadyAssigned) {
             throw new HRMPlatformException(ErrorType.SHIFT_ALREADY_ASSIGNED);
+        }
+
+        // Çalışanın izinli olup olmadığını kontrol et
+        LocalDate shiftStart = shift.getStartTime(); // Vardiya başlangıç tarihi
+        LocalDate shiftEnd = shift.getEndTime(); // Vardiya bitiş tarihi
+
+        // Çalışanın izinli olup olmadığına dair sorgu yapıyoruz
+        boolean isOnLeave = leaveRepository.existsByEmployeeIdAndStatusAndStartDateBeforeAndEndDateAfter(
+                employeeId, Status.APPROVED, shiftStart, shiftEnd);
+
+        if (isOnLeave) {
+            throw new HRMPlatformException(ErrorType.EMPLOYEE_ON_LEAVE);
         }
 
         // EmployeeShift entity'si oluşturuluyor
@@ -54,6 +77,9 @@ public class EmployeeShiftService {
         return employeeShiftRepository.save(employeeShift);
     }
 
+
+
+
     // Bütün çalışan vardiyalarını getirme
     public List<EmployeeShift> getAllEmployeeShifts(String token) {
         Long companyId = authService.getCompanyIdFromToken(token); // Token'den şirket ID'sini alıyoruz
@@ -61,7 +87,18 @@ public class EmployeeShiftService {
     }
 
     // Çalışan ID'sine göre vardiyalar
-    public List<EmployeeShift> getEmployeeShiftsByEmployeeId(Long employeeId) {
+    public List<EmployeeShift> getEmployeeShiftsByEmployeeId(String token, Long employeeId) {
+        Long companyId = authService.getCompanyIdFromToken(token); // Token'den şirket ID'sini al
+
+        // Çalışanı veritabanında bul ve şirket ID'sini doğrula
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new HRMPlatformException(ErrorType.EMPLOYEE_NOT_FOUND));
+
+        if (!employee.getCompanyId().equals(companyId)) {
+            throw new HRMPlatformException(ErrorType.EMPLOYEE_NOT_FOUND_OR_NOT_IN_COMPANY);
+        }
+
+        // Çalışanın vardiyalarını getir
         return employeeShiftRepository.findByEmployeeId(employeeId);
     }
 
@@ -96,17 +133,49 @@ public class EmployeeShiftService {
     }
 
 
-    // Çalışan vardiyasını güncelleme
-    public EmployeeShift updateEmployeeShift(Long id, CreateEmployeeShiftRequest request) {
-        Optional<EmployeeShift> optionalShift = employeeShiftRepository.findById(id);
-        if (optionalShift.isPresent()) {
-            EmployeeShift existingShift = optionalShift.get();
-            employeeShiftMapper.updateEmployeeShiftFromRequest(request, existingShift);
-            return employeeShiftRepository.save(existingShift); // Güncellenmiş vardiya kaydedilir
-        } else {
-            throw new HRMPlatformException(ErrorType.DATA_NOT_FOUND);
+    public EmployeeShift updateEmployeeShift(String token, Long employeeShiftId, CreateEmployeeShiftRequest request) {
+        Long companyId = authService.getCompanyIdFromToken(token); // Token'den şirket ID'sini al
+
+        // Güncellenecek vardiyanın var olup olmadığını kontrol et
+        EmployeeShift existingShift = employeeShiftRepository.findById(employeeShiftId)
+                .orElseThrow(() -> new HRMPlatformException(ErrorType.DATA_NOT_FOUND));
+
+        // Çalışanın şirkete ait olup olmadığını doğrula
+        Employee employee = employeeRepository.findById(request.employeeId())
+                .orElseThrow(() -> new HRMPlatformException(ErrorType.EMPLOYEE_NOT_FOUND));
+
+        if (!employee.getCompanyId().equals(companyId)) {
+            throw new HRMPlatformException(ErrorType.EMPLOYEE_NOT_FOUND_OR_NOT_IN_COMPANY);
         }
+
+        // Güncellenmek istenen vardiyanın şirkete ait olup olmadığını kontrol et
+        Shift shift = shiftRepository.findById(request.shiftId())
+                .orElseThrow(() -> new HRMPlatformException(ErrorType.SHIFT_NOT_FOUND));
+
+        if (!shift.getCompanyId().equals(companyId)) {
+            throw new HRMPlatformException(ErrorType.SHIFT_NOT_FOUND_IN_COMPANY);
+        }
+
+        // Vardiya değişmişse, aynı çalışan için aynı vardiyaya atanıp atanmadığını kontrol et
+        if (!existingShift.getShiftId().equals(request.shiftId())) {
+            boolean alreadyAssigned = employeeShiftRepository.existsByEmployeeIdAndShiftId(request.employeeId(), request.shiftId());
+            if (alreadyAssigned) {
+                throw new HRMPlatformException(ErrorType.SHIFT_ALREADY_ASSIGNED);
+            }
+        }
+
+        // Güncellenmek istenen vardiyanın giriş yapan şirketin vardiyası olup olmadığını kontrol et
+        if (!existingShift.getCompanyId().equals(companyId)) {
+            throw new HRMPlatformException(ErrorType.UNAUTHORIZED_OPERATION);
+        }
+
+        // Mapper ile güncelleme işlemi
+        employeeShiftMapper.updateEmployeeShiftFromRequest(request, existingShift);
+
+        return employeeShiftRepository.save(existingShift);
     }
+
+
 
     public void validateEmployeeAndShift(Long employeeId, Long shiftId) {
         // Logic to validate if the employee and shift are valid

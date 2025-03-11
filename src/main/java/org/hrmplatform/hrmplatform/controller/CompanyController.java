@@ -336,54 +336,5 @@ public class CompanyController {
 	
 	
 
-
-
-//		// 2️⃣ COMPANY_ADMIN → Sadece kendi şirketinin profiline erişebilir
-//		@GetMapping("/profile/company-admin")
-//		@PreAuthorize("hasRole('COMPANY_ADMIN')")
-//		public ResponseEntity<BaseResponse<Company>> getCompanyAdminProfile() {
-//			String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-//			Optional<Company> company = companyService.findCompanyByUserEmail(currentUsername);
-//
-//			return company.map(value -> ResponseEntity.ok(
-//					              BaseResponse.<Company>builder()
-//					                          .code(200)
-//					                          .data(value)
-//					                          .message("Şirket profili başarıyla getirildi")
-//					                          .success(true)
-//					                          .build()))
-//			              .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-//			                                             .body(BaseResponse.<Company>builder()
-//			                                                               .code(ErrorType.DATA_NOT_FOUND.getCode())
-//			                                                               .message("Şirket bulunamadı veya yetkiniz yok.")
-//			                                                               .success(false)
-//			                                                               .build()));
-//		}
-
-//		// 3️⃣ EMPLOYEE → Sadece çalıştığı şirketin profiline erişebilir
-//		@GetMapping("/profile/employee")
-//		@PreAuthorize("hasRole('EMPLOYEE')")
-//		public ResponseEntity<BaseResponse<Company>> getEmployeeProfile() {
-//			String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-//			Optional<Company> company = companyService.findCompanyByEmployeeEmail(currentUsername);
-//
-//			return company.map(value -> ResponseEntity.ok(
-//					              BaseResponse.<Company>builder()
-//					                          .code(200)
-//					                          .data(value)
-//					                          .message("Şirket profili başarıyla getirildi")
-//					                          .success(true)
-//					                          .build()))
-//			              .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-//			                                             .body(BaseResponse.<Company>builder()
-//			                                                               .code(ErrorType.DATA_NOT_FOUND.getCode())
-//			                                                               .message("Çalıştığınız şirket bulunamadı veya yetkiniz yok.")
-//			                                                               .success(false)
-//			                                                               .build()));
-//		}
-//	}
-	
-
-	
 	
 }

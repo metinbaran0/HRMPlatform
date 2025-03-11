@@ -6,6 +6,7 @@ import org.hrmplatform.hrmplatform.entity.LeaveRequest;
 import org.hrmplatform.hrmplatform.service.LeaveService;
 import org.hrmplatform.hrmplatform.service.AuthService; // Eğer AuthService kullanıyorsanız
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -51,14 +52,10 @@ public class LeaveController {
 			                                     .build());
 		}
 		
-//		// Kullanıcının varlığını kontrol et
-//		if (!leaveService.isUserExists(employeeId)) {
-//			return ResponseEntity.ok(BaseResponse.<LeaveRequest>builder()
-//			                                     .code(400)
-//			                                     .success(false)
-//			                                     .message("Hata: Belirtilen kullanıcı mevcut değil.")
-//			                                     .build());
-//		}
+
+
+		
+
 		
 		// İzin talebini oluşturuyoruz
 		LeaveRequest createdLeave = leaveService.requestLeave(dto, employeeId, companyId);
@@ -71,18 +68,11 @@ public class LeaveController {
 	}
 	
 	// Kullanıcıya ait izin taleplerini listeleme
-	@PreAuthorize("hasRole('EMPLOYEE')")
+	@PreAuthorize("hasAuthority('EMPLOYEE')")
 	@GetMapping(LEAVEBYUSERID)
 	public ResponseEntity<BaseResponse<List<LeaveRequest>>> getUserLeaves(
 			@RequestHeader("Authorization") String token) {
 		Long employeeId = authService.getEmployeeIdFromToken(token);
-		if (!leaveService.isUserExists(employeeId)) {
-			return ResponseEntity.ok(BaseResponse.<List<LeaveRequest>>builder()
-			                                     .code(404)
-			                                     .success(false)
-			                                     .message("Hata: Kullanıcı bulunamadı.")
-			                                     .build());
-		}
 		List<LeaveRequest> leaveRequests = leaveService.getLeaveRequestsByUserId(employeeId);
 		return ResponseEntity.ok(BaseResponse.<List<LeaveRequest>>builder()
 		                                     .code(200)
@@ -93,8 +83,8 @@ public class LeaveController {
 	}
 	
 	// Yönetici tüm bekleyen izin taleplerini görme
-	@PreAuthorize("hasRole('COMPANY_ADMIN')")
-	@GetMapping("/pending")
+	@PreAuthorize("hasAuthority('COMPANY_ADMIN')")
+	@GetMapping(PENDINGLEAVESFORMANAGER)
 	public ResponseEntity<BaseResponse<List<LeaveRequest>>> getAllPendingLeaveRequests() {
 		List<LeaveRequest> pendingRequests = leaveService.getAllPendingLeaveRequests();
 		return ResponseEntity.ok(BaseResponse.<List<LeaveRequest>>builder()
@@ -106,13 +96,19 @@ public class LeaveController {
 	}
 	
 	// Yönetici izin talebini onaylama
-	@PreAuthorize("hasRole('COMPANY_ADMIN')")
-	@PostMapping("/accept/{employeeId}")
+	@PreAuthorize("hasAuthority('COMPANY_ADMIN')")
+	@PostMapping(ACCEPTLEAVE)
 	public ResponseEntity<BaseResponse<LeaveRequest>> acceptLeaveRequest(
 			@RequestHeader("Authorization") String token,
 			@PathVariable Long employeeId) {
+		
+		// Token'dan yönetici ID'sini al
 		Long managerId = authService.getEmployeeIdFromToken(token);
+		
+		
+		// İzni onayla
 		LeaveRequest acceptedLeave = leaveService.acceptLeaveRequest(managerId, employeeId);
+		
 		return ResponseEntity.ok(BaseResponse.<LeaveRequest>builder()
 		                                     .code(200)
 		                                     .success(true)
@@ -122,13 +118,19 @@ public class LeaveController {
 	}
 	
 	// Yönetici izin talebini reddetme
-	@PreAuthorize("hasRole('COMPANY_ADMIN')")
-	@PostMapping("/reject/{employeeId}")
+	@PreAuthorize("hasAuthority('COMPANY_ADMIN')")
+	@PostMapping(REJECTLEAVE)
 	public ResponseEntity<BaseResponse<LeaveRequest>> rejectLeaveRequest(
 			@RequestHeader("Authorization") String token,
 			@PathVariable Long employeeId) {
+		
+		// Token'dan yönetici ID'sini al
 		Long managerId = authService.getEmployeeIdFromToken(token);
+		
+		
+		// İzni reddet
 		LeaveRequest rejectedLeave = leaveService.rejectLeaveRequest(managerId, employeeId);
+		
 		return ResponseEntity.ok(BaseResponse.<LeaveRequest>builder()
 		                                     .code(200)
 		                                     .success(true)
@@ -136,4 +138,5 @@ public class LeaveController {
 		                                     .message("İzin talebi başarıyla reddedildi.")
 		                                     .build());
 	}
+	
 }

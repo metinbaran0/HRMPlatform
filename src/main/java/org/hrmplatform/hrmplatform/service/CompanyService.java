@@ -417,26 +417,7 @@ public class CompanyService {
 //    public Optional<Company> findByCompanyId(Long companyId) {
 //        return companyRepository.findById(companyId);
 //    }
-//
-//    // 2️⃣ COMPANY_ADMIN → Kullanıcının yönettiği şirketi getir
-//    public Optional<Company> findCompanyByUserEmail(String email) {
-//        Optional<User> user = userRepository.findByEmail(email);
-//
-//        if (user.isPresent() && user.get().getCompany() != null) {
-//            return Optional.of(user.get().getCompany());
-//        }
-//        return Optional.empty();
-//    }
-//
-//    // 3️⃣ EMPLOYEE → Kullanıcının çalıştığı şirketi getir
-//    public Optional<Company> findCompanyByEmployeeEmail(String email) {
-//        Optional<User> user = userRepository.findByEmail(email);
-//
-//        if (user.isPresent() && user.get().getCompany() != null) {
-//            return Optional.of(user.get().getCompany());
-//        }
-//        return Optional.empty();
-//    }
+
 
 
 

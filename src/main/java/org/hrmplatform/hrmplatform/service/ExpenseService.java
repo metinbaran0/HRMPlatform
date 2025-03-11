@@ -7,6 +7,7 @@ import org.hrmplatform.hrmplatform.enums.Status;
 import org.hrmplatform.hrmplatform.repository.ExpenseRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,36 +16,85 @@ import java.util.List;
 public class ExpenseService {
 	private final ExpenseRepository expenseRepository;
 	
-	public ExpenseResponseDto createExpense(ExpenseResponseDto expenseRequestDTO) {
-		// expenseDate bir LocalDate olduğu varsayılmıştır
+	/**
+	 * Çalışan için yeni bir harcama kaydı oluşturur.
+	 */
+	public ExpenseResponseDto createExpense(Long employeeId, ExpenseResponseDto expenseRequestDTO) {
 		LocalDateTime expenseDateTime = expenseRequestDTO.expenseDate();
 		
-		// Aynı türde ve onaylanmış harcama olup olmadığını kontrol et
-		List<Expense> existingApprovedExpenses = expenseRepository.findByEmployeeId(expenseRequestDTO.employeeId())
-		                                                          .stream()
-		                                                          .filter(expense -> expense.getStatus() == Status.APPROVED &&
-				                                                          expense.getExpenseType().equals(expenseRequestDTO.expenseType()))
-		                                                          .toList();
+		// Aynı türde onaylanmış harcama kontrolü
+		boolean hasApprovedExpense = expenseRepository.findByEmployeeId(employeeId).stream()
+		                                              .anyMatch(expense -> expense.getStatus() == Status.APPROVED &&
+				                                              expense.getExpenseType().equals(expenseRequestDTO.expenseType()));
 		
-		if (!existingApprovedExpenses.isEmpty()) {
+		if (hasApprovedExpense) {
 			throw new IllegalArgumentException("Hata: Aynı türde onaylanmış bir harcamanız zaten var.");
 		}
 		
+		// Harcama objesini oluşturuyoruz
 		Expense expense = Expense.builder()
-		                         .employeeId(expenseRequestDTO.employeeId())
+		                         .employeeId(employeeId)
 		                         .expenseType(expenseRequestDTO.expenseType())
 		                         .amount(expenseRequestDTO.amount())
 		                         .expenseDate(expenseDateTime)
 		                         .description(expenseRequestDTO.description())
-		                         .status(Status.PENDING) // Varsayılan olarak beklemede
+		                         .status(Status.PENDING)
 		                         .createdAt(LocalDateTime.now())
 		                         .updatedAt(LocalDateTime.now())
 		                         .build();
 		
+		// Harcamayı kaydediyoruz ve DTO'ya çeviriyoruz
 		return mapToResponseDTO(expenseRepository.save(expense));
 	}
 	
-	// Expense nesnesini ExpenseResponseDto'ya dönüştüren metot
+	/**
+	 * Çalışanın kendi harcamalarını getirir.
+	 */
+	public List<ExpenseResponseDto> getEmployeeExpenses(Long employeeId) {
+		return expenseRepository.findByEmployeeId(employeeId)
+		                        .stream()
+		                        .map(this::mapToResponseDTO)
+		                        .toList();
+	}
+	
+	/**
+	 * Şirkete ait tüm harcamaları getirir.
+	 */
+	public List<ExpenseResponseDto> getAllExpensesByCompany(Long companyId) {
+		return expenseRepository.findByCompanyId(companyId)
+		                        .stream()
+		                        .map(this::mapToResponseDTO)
+		                        .toList();
+	}
+	
+	/**
+	 * Harcamayı onaylar.
+	 */
+	public void approveExpense(Long companyId, Long expenseId) {
+		Expense expense = expenseRepository.findByIdAndCompanyId(expenseId, companyId)
+		                                   .orElseThrow(() -> new IllegalArgumentException("Hata: Bu harcama sizin şirketinize ait değil veya bulunamadı."));
+		
+		expense.setStatus(Status.APPROVED);
+		expense.setUpdatedAt(LocalDateTime.now());
+		expenseRepository.save(expense);
+	}
+	
+	/**
+	 * Harcamayı reddeder.
+	 */
+	public void rejectExpense(Long companyId, Long expenseId) {
+		Expense expense = expenseRepository.findByIdAndCompanyId(expenseId, companyId)
+		                                   .orElseThrow(() -> new IllegalArgumentException("Hata: Bu harcama sizin şirketinize ait değil veya bulunamadı."));
+		
+		expense.setStatus(Status.REJECTED);
+		expense.setUpdatedAt(LocalDateTime.now());
+		expenseRepository.save(expense);
+	}
+	
+	
+	/**
+	 * Expense nesnesini ExpenseResponseDto'ya dönüştürür.
+	 */
 	private ExpenseResponseDto mapToResponseDTO(Expense expense) {
 		return new ExpenseResponseDto(
 				expense.getEmployeeId(),
@@ -52,16 +102,7 @@ public class ExpenseService {
 				expense.getAmount(),
 				expense.getExpenseDate(),
 				expense.getDescription(),
-				expense.getStatus() == Status.APPROVED // Yeni eklediğimiz harcama status.pending ise false döner.
-				// (dto içinde boolean olarak tanımladığımız için.
+				expense.getStatus() == Status.APPROVED
 		);
 	}
-	
-	public List<ExpenseResponseDto> getAllExpenses() {
-		return expenseRepository.findAll()
-		                        .stream()
-		                        .map(this::mapToResponseDTO) // Expense → ExpenseResponseDto dönüşümü
-		                        .toList();
-	}
-	
 }

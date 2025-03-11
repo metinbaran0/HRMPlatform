@@ -22,8 +22,12 @@ public enum ErrorType implements ErrorTypeInterface {
 	EMAIL_SENDING_FAILED(789,"Mail gönderirken hata oluştu" ,HttpStatus.BAD_REQUEST ),
 	SHIFT_ALREADY_ASSIGNED(2001, "Çalışan bu vardiyaya zaten atanmış.", HttpStatus.CONFLICT),
 	SHIFT_NOT_FOUND(2001, "Vardiya bulunamadı.", HttpStatus.BAD_REQUEST),
+
+
+
 	BREAK_NOT_FOUND_BY_SHIFT(404, "Vardiyaya ait mola bulunamadı",HttpStatus.BAD_REQUEST),
 	BREAK_NOT_FOUND_BY_COMPANY(404,"Şirkete ait mola bulunamadı" ,HttpStatus.BAD_REQUEST),
+
 
 	UNAUTHORIZED_OPERATION(403, "Bu işlemi yapmak için yetkiniz yok.", HttpStatus.FORBIDDEN),
 

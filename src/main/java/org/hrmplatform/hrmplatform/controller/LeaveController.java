@@ -1,41 +1,42 @@
 package org.hrmplatform.hrmplatform.controller;
 
-import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.hrmplatform.hrmplatform.dto.request.LeaveRequestDto;
-import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
 import org.hrmplatform.hrmplatform.entity.LeaveRequest;
 import org.hrmplatform.hrmplatform.service.LeaveService;
+import org.hrmplatform.hrmplatform.service.AuthService; // Eğer AuthService kullanıyorsanız
+import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
 import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
 
 @RestController
 @RequestMapping(LEAVE)
-@CrossOrigin("*")
+@RequiredArgsConstructor
 public class LeaveController {
+	
 	private final LeaveService leaveService;
+	private final AuthService authService; // AuthService sınıfını kullanıyorsanız ekleyin
 	
-	public LeaveController(LeaveService leaveService) {
-		this.leaveService = leaveService;
-	}
-	
-	// Yeni izin talebi oluşturma (Kullanıcı yapacak)
+	// Kullanıcı izin talebi oluşturma
 	@PreAuthorize("hasRole('EMPLOYEE')")
 	@PostMapping(LEAVEREQUEST)
-	public ResponseEntity<BaseResponse<LeaveRequest>> requestLeave(@RequestBody LeaveRequestDto dto) {
-		if (!leaveService.isUserExists(dto.employeeId())) {
+	public ResponseEntity<BaseResponse<LeaveRequest>> requestLeave(
+			@RequestHeader("Authorization") String token,
+			@RequestBody LeaveRequestDto dto) {
+		Long employeeId = authService.getEmployeeIdFromToken(token);
+		if (!leaveService.isUserExists(employeeId)) {
 			return ResponseEntity.ok(BaseResponse.<LeaveRequest>builder()
 			                                     .code(400)
 			                                     .success(false)
 			                                     .message("Hata: Belirtilen kullanıcı mevcut değil.")
 			                                     .build());
 		}
-		LeaveRequest createdLeave = leaveService.requestLeave(dto);
+		LeaveRequest createdLeave = leaveService.requestLeave(dto, employeeId);
 		return ResponseEntity.ok(BaseResponse.<LeaveRequest>builder()
 		                                     .code(200)
 		                                     .success(true)
@@ -44,10 +45,12 @@ public class LeaveController {
 		                                     .build());
 	}
 	
-	// Kullanıcıya ait izin taleplerini getirme
-	@PreAuthorize("hasRole('EMPLOYEE,COMPANY_ADMIN')")
+	// Kullanıcıya ait izin taleplerini listeleme
+	@PreAuthorize("hasRole('EMPLOYEE')")
 	@GetMapping(LEAVEBYUSERID)
-	public ResponseEntity<BaseResponse<List<LeaveRequest>>> getUserLeaves(@PathVariable Long employeeId) {
+	public ResponseEntity<BaseResponse<List<LeaveRequest>>> getUserLeaves(
+			@RequestHeader("Authorization") String token) {
+		Long employeeId = authService.getEmployeeIdFromToken(token);
 		if (!leaveService.isUserExists(employeeId)) {
 			return ResponseEntity.ok(BaseResponse.<List<LeaveRequest>>builder()
 			                                     .code(404)
@@ -64,61 +67,48 @@ public class LeaveController {
 		                                     .build());
 	}
 	
-	// Yöneticinin tüm bekleyen izin taleplerini getirme
+	// Yönetici tüm bekleyen izin taleplerini görme
 	@PreAuthorize("hasRole('COMPANY_ADMIN')")
-	@GetMapping(PENDINGLEAVESFORMANAGER)
-	public ResponseEntity<BaseResponse<List<LeaveRequest>>> getPendingLeavesForManager(@PathVariable Long managerId) {
-		// Yönetici sadece bekleyen izin taleplerini görmeli
-		List<LeaveRequest> leaveRequests = leaveService.getAllPendingLeaveRequests();
+	@GetMapping("/pending")
+	public ResponseEntity<BaseResponse<List<LeaveRequest>>> getAllPendingLeaveRequests() {
+		List<LeaveRequest> pendingRequests = leaveService.getAllPendingLeaveRequests();
 		return ResponseEntity.ok(BaseResponse.<List<LeaveRequest>>builder()
 		                                     .code(200)
 		                                     .success(true)
-		                                     .data(leaveRequests)
+		                                     .data(pendingRequests)
 		                                     .message("Bekleyen izin talepleri getirildi.")
 		                                     .build());
 	}
 	
-	// İzin talebini kabul etme (Yönetici tarafından)
+	// Yönetici izin talebini onaylama
 	@PreAuthorize("hasRole('COMPANY_ADMIN')")
-	@PutMapping(ACCEPTLEAVE)
-	public ResponseEntity<BaseResponse<LeaveRequest>> acceptLeaveRequest(@PathVariable Long managerId, @PathVariable Long employeeId) {
-		try {
-			LeaveRequest acceptedLeaveRequest = leaveService.acceptLeaveRequest(managerId, employeeId);
-			return ResponseEntity.ok(BaseResponse.<LeaveRequest>builder()
-			                                     .code(200)
-			                                     .success(true)
-			                                     .data(acceptedLeaveRequest)
-			                                     .message("İzin talebi başarıyla kabul edildi.")
-			                                     .build());
-		} catch (EntityNotFoundException | SecurityException e) {
-			return ResponseEntity.ok(BaseResponse.<LeaveRequest>builder()
-			                                     .code(400)
-			                                     .success(false)
-			                                     .message(e.getMessage())
-			                                     .build());
-		}
+	@PostMapping("/accept/{employeeId}")
+	public ResponseEntity<BaseResponse<LeaveRequest>> acceptLeaveRequest(
+			@RequestHeader("Authorization") String token,
+			@PathVariable Long employeeId) {
+		Long managerId = authService.getEmployeeIdFromToken(token);
+		LeaveRequest acceptedLeave = leaveService.acceptLeaveRequest(managerId, employeeId);
+		return ResponseEntity.ok(BaseResponse.<LeaveRequest>builder()
+		                                     .code(200)
+		                                     .success(true)
+		                                     .data(acceptedLeave)
+		                                     .message("İzin talebi başarıyla onaylandı.")
+		                                     .build());
 	}
 	
-	// İzin talebini reddetme (Yönetici tarafından)
+	// Yönetici izin talebini reddetme
 	@PreAuthorize("hasRole('COMPANY_ADMIN')")
-	@PutMapping(REJECTLEAVE)
-	public ResponseEntity<BaseResponse<LeaveRequest>> rejectLeaveRequest(@PathVariable Long managerId, @PathVariable Long employeeId) {
-		try {
-			LeaveRequest rejectedLeaveRequest = leaveService.rejectLeaveRequest(managerId, employeeId);
-			return ResponseEntity.ok(BaseResponse.<LeaveRequest>builder()
-			                                     .code(200)
-			                                     .success(true)
-			                                     .data(rejectedLeaveRequest)
-			                                     .message("İzin talebi başarıyla reddedildi.")
-			                                     .build());
-		} catch (EntityNotFoundException | SecurityException e) {
-			return ResponseEntity.ok(BaseResponse.<LeaveRequest>builder()
-			                                     .code(400)
-			                                     .success(false)
-			                                     .message(e.getMessage())
-			                                     .build());
-		}
+	@PostMapping("/reject/{employeeId}")
+	public ResponseEntity<BaseResponse<LeaveRequest>> rejectLeaveRequest(
+			@RequestHeader("Authorization") String token,
+			@PathVariable Long employeeId) {
+		Long managerId = authService.getEmployeeIdFromToken(token);
+		LeaveRequest rejectedLeave = leaveService.rejectLeaveRequest(managerId, employeeId);
+		return ResponseEntity.ok(BaseResponse.<LeaveRequest>builder()
+		                                     .code(200)
+		                                     .success(true)
+		                                     .data(rejectedLeave)
+		                                     .message("İzin talebi başarıyla reddedildi.")
+		                                     .build());
 	}
-	
-	
 }

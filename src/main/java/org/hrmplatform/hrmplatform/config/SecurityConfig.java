@@ -80,7 +80,7 @@ public class SecurityConfig {
 					    .requestMatchers(EndPoints.ROOT + EndPoints.DEVELOPER + "/**").hasAnyAuthority("SITE_ADMIN", "COMPANY_ADMIN")
 					    
 					    // Diğer istekler kimlik doğrulama gerektirir
-					    .anyRequest().authenticated();
+					    .anyRequest().authenticated();  // Burada anyRequest()'i en son kullanıyoruz
 		    });
 		
 		// CSRF'yi devre dışı bırak

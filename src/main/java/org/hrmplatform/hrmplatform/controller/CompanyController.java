@@ -7,6 +7,7 @@ import org.hrmplatform.hrmplatform.dto.request.CompanyDto;
 import org.hrmplatform.hrmplatform.dto.request.EmailRequest;
 import org.hrmplatform.hrmplatform.dto.request.SubscriptionPlanRequest;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
+import org.hrmplatform.hrmplatform.dto.response.CompanyDetailDto;
 import org.hrmplatform.hrmplatform.dto.response.CompanySummaryResponseDto;
 import org.hrmplatform.hrmplatform.dto.response.SubscriptionResponse;
 import org.hrmplatform.hrmplatform.entity.Company;
@@ -34,14 +35,12 @@ import static org.hrmplatform.hrmplatform.constant.EndPoints.*;
 public class
 
 
-
-
 CompanyController {
-	private final CompanyService companyService;
-	private final UserService userService;
-	
+    private final CompanyService companyService;
+    private final UserService userService;
 
-  //findbyname ve token işemleri yapılacak
+
+    //findbyname ve token işemleri yapılacak
     //bütün şirketleri görme
     @GetMapping(FINDALLCOMPANY)
     public ResponseEntity<BaseResponse<List<Company>>> findAllCompanies() {
@@ -78,10 +77,6 @@ CompanyController {
                             .success(false)
                             .build());
         }
-		
-		
-		
-		
 
     }
 
@@ -108,8 +103,6 @@ CompanyController {
         }
     }
 
- 
- 
 
     //şirket güncelleme
     @PutMapping(UPDATECOMPANY + "/{id}")
@@ -149,7 +142,7 @@ CompanyController {
     //şirket başvurusu onaylama
     @PutMapping(APPROVE + "/{id}")
     public ResponseEntity<BaseResponse<Company>> approveCompany(@PathVariable Long id, String token) {
-        Company approvedCompany = companyService.approveCompany(id,token);
+        Company approvedCompany = companyService.approveCompany(id, token);
 
         return ResponseEntity.ok(BaseResponse.<Company>builder()
                 .code(200)
@@ -158,20 +151,21 @@ CompanyController {
                 .data(approvedCompany)
                 .build());
     }
-	//onaylanmış şirketleri getirme
-	@GetMapping(APPROVED)
-	public ResponseEntity<BaseResponse<List<CompanyDto>>> getApprovedCompanies() {
-		List<CompanyDto> companies = companyService.getApprovedCompanies();
 
-		 return ResponseEntity.ok(
-				BaseResponse.<List<CompanyDto>>builder()
-						.code(201)
-						.data(companies)
-						.message("Onaylanmış şirketler başarıyla getirildi")
-						.success(true)
-						.build());
+    //onaylanmış şirketleri getirme
+    @GetMapping(APPROVED)
+    public ResponseEntity<BaseResponse<List<CompanyDto>>> getApprovedCompanies() {
+        List<CompanyDto> companies = companyService.getApprovedCompanies();
 
-	}
+        return ResponseEntity.ok(
+                BaseResponse.<List<CompanyDto>>builder()
+                        .code(201)
+                        .data(companies)
+                        .message("Onaylanmış şirketler başarıyla getirildi")
+                        .success(true)
+                        .build());
+
+    }
 
     //şirket başvurusu reddetme
     @PutMapping(REJECT + "/{id}")
@@ -231,192 +225,121 @@ CompanyController {
         );
     }
 
-	//Aktif üyelikler
-	@GetMapping(ACTIVESUBSCRIPTIONS)
-	public ResponseEntity<BaseResponse<Long>> getActiveSubscriptionsCount(){
-		Long activeSubscriptions = companyService.getActiveSubscriptionsCount();
-		return ResponseEntity.ok(
-				BaseResponse.<Long>builder()
-						.code(200)
-						.message("Aktif üyelikler getirildi")
-						.success(true)
-						.data(activeSubscriptions)
-						.build()
-		);
-	}
+    //Aktif üyelikler
+    @GetMapping(ACTIVESUBSCRIPTIONS)
+    public ResponseEntity<BaseResponse<Long>> getActiveSubscriptionsCount() {
+        Long activeSubscriptions = companyService.getActiveSubscriptionsCount();
+        return ResponseEntity.ok(
+                BaseResponse.<Long>builder()
+                        .code(200)
+                        .message("Aktif üyelikler getirildi")
+                        .success(true)
+                        .data(activeSubscriptions)
+                        .build()
+        );
+    }
 
-	//istatistikler
-	@GetMapping(STATISTICS)
-	public BaseResponse<Map<String, Long>> getMonthlyCompanyStats(@RequestParam("year") int year) {
-		Map<String, Long> monthlyStats = companyService.getMonthlyCompanyStats(year);
+    //istatistikler
+    @GetMapping(STATISTICS)
+    public BaseResponse<Map<String, Long>> getMonthlyCompanyStats(@RequestParam("year") int year) {
+        Map<String, Long> monthlyStats = companyService.getMonthlyCompanyStats(year);
 
-		// BaseResponse'ı controller'da döndürüyoruz.
-		return BaseResponse.<Map<String, Long>>builder()
-				.success(true)
-				.message(year + " yılı için aylık şirket kayıt istatistikleri")
-				.code(200)
-				.data(monthlyStats)
-				.build();
-	}
+        // BaseResponse'ı controller'da döndürüyoruz.
+        return BaseResponse.<Map<String, Long>>builder()
+                .success(true)
+                .message(year + " yılı için aylık şirket kayıt istatistikleri")
+                .code(200)
+                .data(monthlyStats)
+                .build();
+    }
 
+    //şirket detaylarını getirme
+    @GetMapping(COMPANYDETAILS)
+    public ResponseEntity<BaseResponse<CompanyDetailDto>> getCompanyDetails(@PathVariable("id") Long companyId) {
+        CompanyDetailDto companyDetail = companyService.getCompanyDetails(companyId);
 
+        // BaseResponse ile sarılmış başarılı yanıt
+        BaseResponse<CompanyDetailDto> response = BaseResponse.<CompanyDetailDto>builder()
+                .success(true)
+                .message("Şirket detayları getirildi")
+                .code(200)
+                .data(companyDetail)
+                .build();
 
+        return ResponseEntity.ok(response);
+    }
 
+    //Şirket, yöneticiler ve çalışan sayısını döner
+    @GetMapping(SUMMARY)
+    public ResponseEntity<BaseResponse<CompanySummaryResponseDto>> getDashboardSummary() {
+        CompanySummaryResponseDto summary = new CompanySummaryResponseDto(
+                companyService.getTotalCompanyCount(),
+                userService.getTotalAdminCount(),
+                userService.getTotalEmployeeCount()
+        );
 
+        return ResponseEntity.ok(
+                BaseResponse.<CompanySummaryResponseDto>builder()
+                        .code(200)
+                        .message("Dashboard summary retrieved successfully")
+                        .success(true)
+                        .data(summary)
+                        .build()
+        );
+    }
 
+    //Yaklaşan üyelik sonlandırma listesini döner
+    @GetMapping(SUBSCRIPTION_SOON)
+    public ResponseEntity<BaseResponse<List<Company>>> getExpiringSoonCompanies() {
+        List<Company> expiringSoonCompanies = companyService.getExpiringSoonCompanies();
 
-	                //     METIN
-	
-	
-	
-	//Şirket, yöneticiler ve çalışan sayısını döner
-	@GetMapping("/summary")
-	public ResponseEntity<BaseResponse<CompanySummaryResponseDto>> getDashboardSummary() {
-		CompanySummaryResponseDto summary = new CompanySummaryResponseDto(
-				companyService.getTotalCompanyCount(),
-				userService.getTotalAdminCount(),
-				userService.getTotalEmployeeCount()
-		);
-		
-		return ResponseEntity.ok(
-				BaseResponse.<CompanySummaryResponseDto>builder()
-				            .code(200)
-				            .message("Dashboard summary retrieved successfully")
-				            .success(true)
-				            .data(summary)
-				            .build()
-		);
-	}
-	
-	//Yaklaşan üyelik sonlandırma listesini döner
-	@GetMapping("/subscriptions/expiring-soon")
-	public ResponseEntity<BaseResponse<List<Company>>> getExpiringSoonCompanies() {
-		List<Company> expiringSoonCompanies = companyService.getExpiringSoonCompanies();
-		
-		return ResponseEntity.ok(BaseResponse.<List<Company>>builder()
-		                                     .code(200)
-		                                     .message("Yaklaşan üyelik sonlandırma listesi başarıyla getirildi")
-		                                     .success(true)
-		                                     .data(expiringSoonCompanies)
-		                                     .build());
-	}
-	
+        return ResponseEntity.ok(BaseResponse.<List<Company>>builder()
+                .code(200)
+                .message("Yaklaşan üyelik sonlandırma listesi başarıyla getirildi")
+                .success(true)
+                .data(expiringSoonCompanies)
+                .build());
+    }
 
-	
+    //Şirket ekleme
+    @PostMapping(ADDCOMPANY)
+    public ResponseEntity<BaseResponse<Boolean>> addCompany(@RequestBody @Valid CompanyDto companyDto) {
+        companyService.addCompany(companyDto);
 
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(BaseResponse.<Boolean>builder()
+                        .code(201)
+                        .message("Şirket başarıyla oluşturuldu")
+                        .success(true)
+                        .data(true)
+                        .build());
+    }
 
+    @GetMapping(VERIFY_EMAIL)
+    public ResponseEntity<BaseResponse<String>> verifyEmail(@RequestParam String token
+    ) {
+        System.out.println("Token received: " + token);
+        companyService.verifyEmail(token);
 
-		//Şirket ekleme
-	@PostMapping(ADDCOMPANY)
-	public ResponseEntity<BaseResponse<Boolean>> addCompany(@RequestBody @Valid CompanyDto companyDto) {
-		companyService.addCompany(companyDto);
-		
-		return ResponseEntity.status(HttpStatus.CREATED)
-		                     .body(BaseResponse.<Boolean>builder()
-		                                       .code(201)
-		                                       .message("Şirket başarıyla oluşturuldu")
-		                                       .success(true)
-		                                       .data(true)
-		                                       .build());
-	}
-	
-	@GetMapping("/verify-email")
-	public ResponseEntity<BaseResponse<String>> verifyEmail(@RequestParam String token
-	                                                        ) {
-		System.out.println("Token received: " + token);
-		companyService.verifyEmail(token);
-		
-		// JSON yanıt döndür
-		return ResponseEntity.ok(BaseResponse.<String>builder()
-		                                     .code(200)
-		                                     .message("E-posta başarıyla doğrulandı")
-		                                     .success(true)
-		                                     .data("Hesabınız onaylandı.")
-		                                     .build());
-	}
-	
-	@GetMapping("/{companyId}")
-	public ResponseEntity<?> getCompanyDetails(@PathVariable Long companyId, @RequestHeader("Authorization") String token) {
-		Company company = companyService.getCompanyById(companyId);
-		if (company != null) {
-			return ResponseEntity.ok(company);
-		}
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Şirket bulunamadı");
-	}
-	
-	
-	
-		
-		// 1️⃣ SITE_ADMIN → Tüm şirket profillerine erişebilir
-		@GetMapping("/profile/admin")
-		@PreAuthorize("hasRole('SITE_ADMIN')")
-		public ResponseEntity<BaseResponse<Company>> getAnyCompanyProfile(@RequestParam Long companyId) {
-			Optional<Company> company = companyService.findByCompanyId(companyId);
-			return company.map(value -> ResponseEntity.ok(
-					              BaseResponse.<Company>builder()
-					                          .code(200)
-					                          .data(value)
-					                          .message("Şirket profili başarıyla getirildi")
-					                          .success(true)
-					                          .build()))
-			              .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-			                                             .body(BaseResponse.<Company>builder()
-			                                                               .code(ErrorType.DATA_NOT_FOUND.getCode())
-			                                                               .message(ErrorType.DATA_NOT_FOUND.getMessage())
-			                                                               .success(false)
-			                                                               .build()));
-		}
-	
-	
+        // JSON yanıt döndür
+        return ResponseEntity.ok(BaseResponse.<String>builder()
+                .code(200)
+                .message("E-posta başarıyla doğrulandı")
+                .success(true)
+                .data("Hesabınız onaylandı.")
+                .build());
+    }
+
+    @GetMapping("/{companyId}")
+    public ResponseEntity<?> getCompanyDetails(@PathVariable Long companyId, @RequestHeader("Authorization") String token) {
+        Company company = companyService.getCompanyById(companyId);
+        if (company != null) {
+            return ResponseEntity.ok(company);
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Şirket bulunamadı");
+    }
 
 
 
-//		// 2️⃣ COMPANY_ADMIN → Sadece kendi şirketinin profiline erişebilir
-//		@GetMapping("/profile/company-admin")
-//		@PreAuthorize("hasRole('COMPANY_ADMIN')")
-//		public ResponseEntity<BaseResponse<Company>> getCompanyAdminProfile() {
-//			String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-//			Optional<Company> company = companyService.findCompanyByUserEmail(currentUsername);
-//
-//			return company.map(value -> ResponseEntity.ok(
-//					              BaseResponse.<Company>builder()
-//					                          .code(200)
-//					                          .data(value)
-//					                          .message("Şirket profili başarıyla getirildi")
-//					                          .success(true)
-//					                          .build()))
-//			              .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-//			                                             .body(BaseResponse.<Company>builder()
-//			                                                               .code(ErrorType.DATA_NOT_FOUND.getCode())
-//			                                                               .message("Şirket bulunamadı veya yetkiniz yok.")
-//			                                                               .success(false)
-//			                                                               .build()));
-//		}
 
-//		// 3️⃣ EMPLOYEE → Sadece çalıştığı şirketin profiline erişebilir
-//		@GetMapping("/profile/employee")
-//		@PreAuthorize("hasRole('EMPLOYEE')")
-//		public ResponseEntity<BaseResponse<Company>> getEmployeeProfile() {
-//			String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-//			Optional<Company> company = companyService.findCompanyByEmployeeEmail(currentUsername);
-//
-//			return company.map(value -> ResponseEntity.ok(
-//					              BaseResponse.<Company>builder()
-//					                          .code(200)
-//					                          .data(value)
-//					                          .message("Şirket profili başarıyla getirildi")
-//					                          .success(true)
-//					                          .build()))
-//			              .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-//			                                             .body(BaseResponse.<Company>builder()
-//			                                                               .code(ErrorType.DATA_NOT_FOUND.getCode())
-//			                                                               .message("Çalıştığınız şirket bulunamadı veya yetkiniz yok.")
-//			                                                               .success(false)
-//			                                                               .build()));
-//		}
-//	}
-	
-
-	
-	
 }

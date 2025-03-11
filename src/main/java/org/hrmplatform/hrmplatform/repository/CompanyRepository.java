@@ -1,8 +1,6 @@
 package org.hrmplatform.hrmplatform.repository;
 
-import org.hrmplatform.hrmplatform.dto.request.CompanyDto;
 import org.hrmplatform.hrmplatform.entity.Company;
-import org.hrmplatform.hrmplatform.entity.Employee;
 import org.hrmplatform.hrmplatform.enums.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -24,7 +22,6 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 
 
     Optional<Company> findByEmailVerificationToken(String token);
-
 
 
     @Query("SELECT c.name FROM Company c WHERE c.id = :companyId")

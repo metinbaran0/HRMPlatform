@@ -55,7 +55,7 @@ public class SecurityConfig {
 						    EndPoints.COMPANY + EndPoints.ADDCOMPANY, // add company endpointi
 						    EndPoints.AUTH + "/dologin",              // login için
 						    EndPoints.AUTH + "/register" ,           // register için
-						    EndPoints.COMMENT + "/getall-comment"      // yorumlar için
+						    EndPoints.COMMENT + "/comments"      // yorumlar için
 				    ))
 		    .authorizeHttpRequests(req -> {
 			    req
@@ -68,6 +68,7 @@ public class SecurityConfig {
 					    .requestMatchers(EndPoints.EXPENSE + EndPoints.CREATE_EXPENSE).hasAuthority("EMPLOYEE")
 					    .requestMatchers(EndPoints.EXPENSE + EndPoints.GET_MY_EXPENSES).hasAuthority("EMPLOYEE")
 					    .requestMatchers(EndPoints.ASSET + "/{id}").hasAuthority("EMPLOYEE")
+					    .requestMatchers(EndPoints.LEAVE + EndPoints.LEAVEREQUEST).hasAuthority("EMPLOYEE")
 					    
 					    // "COMPANY_ADMIN" yetkisiyle erişilebilen endpointler
 					    .requestMatchers(EndPoints.LEAVE + EndPoints.PENDINGLEAVESFORMANAGER).hasAuthority("COMPANY_ADMIN")

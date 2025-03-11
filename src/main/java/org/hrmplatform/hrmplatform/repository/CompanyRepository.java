@@ -40,4 +40,15 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     List<Company> findByNameIgnoreCase(@Param("name") String name);
 
     List<Company> findByStatusAndIsDeletedFalse(Status status); // Silinmemiş ve onaylanmış şirketler
+
+    Long countBySubscriptionEndDateAfterAndIsDeletedFalse(LocalDateTime now);
+
+
+    @Query("SELECT EXTRACT(MONTH FROM c.createdAt) as month, COUNT(c) as count " +
+            "FROM Company c " +
+            "WHERE EXTRACT(YEAR FROM c.createdAt) = :year " +
+            "GROUP BY EXTRACT(MONTH FROM c.createdAt) " +
+            "ORDER BY EXTRACT(MONTH FROM c.createdAt)")
+    List<Object[]> countByYearGroupedByMonth(@Param("year") int year);
+
 }

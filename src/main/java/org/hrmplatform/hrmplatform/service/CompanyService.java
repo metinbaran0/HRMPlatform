@@ -3,6 +3,7 @@ package org.hrmplatform.hrmplatform.service;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.hrmplatform.hrmplatform.dto.request.CompanyDto;
+import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
 import org.hrmplatform.hrmplatform.dto.response.SubscriptionResponse;
 import org.hrmplatform.hrmplatform.entity.Company;
 import org.hrmplatform.hrmplatform.entity.Employee;
@@ -24,9 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -315,7 +314,7 @@ public class CompanyService {
     
     //     METIN
     
-    
+
     public int getTotalCompanyCount() {
         return (int) companyRepository.count();
     }
@@ -431,4 +430,38 @@ public class CompanyService {
                 .collect(Collectors.toList());
 
     }
+    //Aktif üyelikler
+    public Long getActiveSubscriptionsCount() {
+        return companyRepository.countBySubscriptionEndDateAfterAndIsDeletedFalse(java.time.LocalDateTime.now());
+
+    }
+
+    //istatistik
+    public Map<String, Long> getMonthlyCompanyStats(int year) {
+        List<Object[]> results = companyRepository.countByYearGroupedByMonth(year);
+
+        // Ay isimlerini içeren bir LinkedHashMap oluşturuyoruz. LinkedHashMap sıralama sırasını korur.
+        Map<String, Long> monthlyStats = new LinkedHashMap<>();
+        String[] monthNames = {
+                "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+                "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
+        };
+
+        // Ayların tamamını sıfırla başlatıyoruz.
+        for (String month : monthNames) {
+            monthlyStats.put(month, 0L);  // Başlangıçta her ay için 0 değerini atıyoruz.
+        }
+
+        // Veritabanından gelen her ay için veriyi eşleştiriyoruz.
+        for (Object[] result : results) {
+            int monthIndex = (int) result[0] - 1; // SQL'de Ocak = 1, Java dizisinde 0
+            Long count = (Long) result[1];
+            monthlyStats.put(monthNames[monthIndex], count);  // Ayın adına göre değer güncelleniyor.
+        }
+
+        return monthlyStats;
+    }
+
+
+
 }

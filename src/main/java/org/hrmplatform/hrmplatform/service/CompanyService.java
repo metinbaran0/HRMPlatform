@@ -87,7 +87,6 @@ public class CompanyService {
         
         companyRepository.save(company);
         
-        
         // SITE_ADMIN'e ve başvuran şirkete e-posta gönder
         emailNotificationService.notifyAdminAndApplicant(company);
     }
@@ -190,7 +189,7 @@ public class CompanyService {
         // Şirketin durumunu onaylı olarak güncelle
         company.setStatus(Status.APPROVED);
         companyRepository.save(company);
-
+        
         // 🔹 Kullanıcıyı oluştur ve aktivasyon kodu gönder
         userService.registerCompanyAdmin(company);
 

@@ -231,8 +231,8 @@ private final UserRepository userRepository;
 		userRepository.save(user);
 		return true;
 	}
-
-
+	
+	@Transactional
 	public void registerCompanyAdmin(Company company) {
 		// Eğer e-posta zaten kayıtlıysa hata fırlat
 		if (userRepository.findByEmail(company.getEmail()).isPresent()) {
@@ -243,8 +243,8 @@ private final UserRepository userRepository;
 
 		// Şifreyi hash'le
 		String hashedPassword = passwordEncoder.encode(generatedPassword);
-
-
+		
+		
 		// Kullanıcıyı (User) oluştur ve kaydet
 		User user = User.builder()
 				.name(company.getContactPerson() )
@@ -266,6 +266,12 @@ private final UserRepository userRepository;
 
 		// Kullanıcıya CompanyAdmin rolü ata
 		userRoleService.assignRoleToUser(new UserRoleRequestDto(user.getId(), Role.COMPANY_ADMIN));
+		// Kullanıcıya e-posta gönder
+		String subject = "Hesap Bilgileriniz";
+		String text = "Merhaba " + company.getContactPerson() + ",\n\n" +
+				"Hesabınız oluşturuldu. Şifreniz: " + generatedPassword + "\n\n" +
+				"Şifrenizi güvenli bir şekilde saklayın ve giriş yaparken kullanın.";
+		emailService.sendEmail(company.getEmail(), subject, text);
 
 		// Aktivasyon mailini gönder
 		sendActivationEmail(user);

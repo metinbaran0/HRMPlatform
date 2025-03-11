@@ -60,7 +60,9 @@ public class SecurityConfig {
 		    .authorizeHttpRequests(req -> {
 			    req
 					    // Herkese açık endpointler
-					    .requestMatchers(EndPoints.AUTH + "/register", EndPoints.AUTH + "/dologin", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+					    .requestMatchers(EndPoints.AUTH + "/register", EndPoints.AUTH + "/dologin",
+					                     EndPoints.COMMENT + "/comments", "/swagger-ui/**"
+					    , "/v3/api-docs/**").permitAll()
 					    .requestMatchers(EndPoints.EMPLOYEE + "/**", EndPoints.EMAIL + "/**").permitAll()
 					    .requestMatchers(EndPoints.COMPANY + EndPoints.ADDCOMPANY, EndPoints.COMPANY + "/verify-email").permitAll()
 					    
@@ -69,6 +71,7 @@ public class SecurityConfig {
 					    .requestMatchers(EndPoints.EXPENSE + EndPoints.GET_MY_EXPENSES).hasAuthority("EMPLOYEE")
 					    .requestMatchers(EndPoints.ASSET + "/{id}").hasAuthority("EMPLOYEE")
 					    .requestMatchers(EndPoints.LEAVE + EndPoints.LEAVEREQUEST).hasAuthority("EMPLOYEE")
+					    .requestMatchers(EndPoints.LEAVE + EndPoints.LEAVEBYUSERID).hasAuthority("EMPLOYEE")
 					    
 					    // "COMPANY_ADMIN" yetkisiyle erişilebilen endpointler
 					    .requestMatchers(EndPoints.LEAVE + EndPoints.PENDINGLEAVESFORMANAGER).hasAuthority("COMPANY_ADMIN")
@@ -78,6 +81,9 @@ public class SecurityConfig {
 					    .requestMatchers(EndPoints.EXPENSE + EndPoints.GETALL_EXPENSE).hasAuthority("COMPANY_ADMIN")
 					    .requestMatchers(EndPoints.EXPENSE + EndPoints.APPROVE_EXPENSE).hasAuthority("COMPANY_ADMIN")
 					    .requestMatchers(EndPoints.EXPENSE + EndPoints.REJECT_EXPENSE).hasAuthority("COMPANY_ADMIN")
+					    .requestMatchers(EndPoints.LEAVE + EndPoints.PENDINGLEAVESFORMANAGER).hasAuthority("COMPANY_ADMIN")
+					    .requestMatchers(EndPoints.LEAVE + EndPoints.ACCEPTLEAVE).hasAuthority("COMPANY_ADMIN")
+					    .requestMatchers(EndPoints.LEAVE + EndPoints.REJECTLEAVE).hasAuthority("COMPANY_ADMIN")
 					    
 					    
 					    // "EMPLOYEE" ve "COMPANY_ADMIN" rollerinin erişebileceği endpointler

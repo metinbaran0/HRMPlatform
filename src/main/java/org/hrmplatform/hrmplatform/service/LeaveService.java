@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.hrmplatform.hrmplatform.dto.request.LeaveRequestDto;
+import org.hrmplatform.hrmplatform.entity.Employee;
 import org.hrmplatform.hrmplatform.entity.LeaveRequest;
 import org.hrmplatform.hrmplatform.entity.UserRole;
 import org.hrmplatform.hrmplatform.enums.Role;
@@ -22,6 +23,7 @@ public class LeaveService {
 	private final LeaveRepository leaveRepository;
 	private final UserRepository userRepository;
 	private final UserRoleRepository userRoleRepository;
+	private final EmployeeService employeeService;
 	
 	// Yeni izin talebi oluşturma
 	public LeaveRequest requestLeave(@Valid LeaveRequestDto leaveRequestDto, Long employeeId, Long companyId) {
@@ -64,13 +66,23 @@ public class LeaveService {
 		return leaveRepository.findByStatus(Status.PENDING);
 	}
 	
-	// İzin talebini kabul etme (Yönetici tarafından)
 	public LeaveRequest acceptLeaveRequest(Long managerId, Long employeeId) {
 		UserRole manager = userRoleRepository.findById(managerId)
 		                                     .orElseThrow(() -> new EntityNotFoundException("Yönetici bulunamadı."));
 		
 		if (manager.getRole() == null || !manager.getRole().equals(Role.COMPANY_ADMIN)) {
 			throw new SecurityException("Yalnızca şirket yöneticileri izin taleplerini onaylayabilir.");
+		}
+		
+		// Yöneticinin şirket ID'sini al
+		Long managerCompanyId = manager.getUserId(); // Yöneticinin şirket ID'si
+		
+		// Çalışanın şirkete ait olup olmadığını kontrol et
+		Employee employee = employeeService.findById(employeeId)
+		                                   .orElseThrow(() -> new EntityNotFoundException("Çalışan bulunamadı."));
+		
+		if (!employee.getCompanyId().equals(managerCompanyId)) {
+			throw new SecurityException("Bu çalışanın izin talebini onaylama yetkiniz yok.");
 		}
 		
 		// Bekleyen izin talebini al
@@ -83,6 +95,7 @@ public class LeaveService {
 		leaveRequest.setUpdatedAt(LocalDateTime.now());
 		return leaveRepository.save(leaveRequest);
 	}
+
 	
 	// İzin talebini reddetme (Yönetici tarafından)
 	public LeaveRequest rejectLeaveRequest(Long managerId, Long employeeId) {

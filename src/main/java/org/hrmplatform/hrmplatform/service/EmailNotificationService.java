@@ -28,7 +28,7 @@ public class EmailNotificationService {
 			// Site Admin'e başvuru bildirimi gönder
 			emailService.sendEmail(siteAdminEmail,
 			                       "Yeni Şirket Başvurusu",
-			                       "Yeni bir şirket başvurusu var. Onaylamak için linki tıklayın: " + verificationLink);
+			                       "Yeni bir şirket başvurusu var. " );
 			log.info("Site Admin'e bilgilendirme e-postası gönderildi.");
 			
 			// Başvuran şirkete bilgilendirme e-postası gönder

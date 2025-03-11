@@ -75,6 +75,7 @@ public class EndPoints {
     //LEAVEREQUEST
 
     public static final String LEAVEREQUEST = "/leaverequest"; // Kullanıcı yeni izin talebi oluşturur
+    public static final String LEAVEREQUEST_MANAGER = "/leaverequest-manager";
     public static final String LEAVEBYUSERID = "/leavebyuserid/{employeeId}"; //kullanıcın kendi izinlerini getirme
     public static final String PENDINGLEAVESFORMANAGER = "/manager/{managerId}/pending-leaves"; // Yönetici, bekleyen izin taleplerini görüntüler
     public static final String ACCEPTLEAVE = "/manager/{managerId}/approve/{employeeId}"; // Yönetici, izin talebini onaylar

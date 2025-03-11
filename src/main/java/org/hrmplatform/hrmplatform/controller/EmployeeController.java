@@ -177,6 +177,11 @@ public class EmployeeController {
             @RequestHeader("Authorization") String token) {
         try {
             // "Bearer " kısmını kaldır
+            
+            
+            
+            
+            
             if (token != null && token.startsWith("Bearer ")) {
                 token = token.substring(7);
             }

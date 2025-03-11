@@ -28,10 +28,27 @@ public class LeaveController {
 	public ResponseEntity<BaseResponse<LeaveRequest>> requestLeave(
 			@RequestHeader("Authorization") String token,
 			@RequestBody LeaveRequestDto dto) {
+		// Authorization başlığını kontrol edin
+		if (token == null || !token.startsWith("Bearer ")) {
+			return ResponseEntity.ok(BaseResponse.<LeaveRequest>builder()
+			                                     .code(400)
+			                                     .success(false)
+			                                     .message("Hata: Geçersiz veya eksik token.")
+			                                     .build());
+		}
 		
 		// Employee ID ve Company ID'yi token'dan alıyoruz
 		Long employeeId = authService.getEmployeeIdFromToken(token);
 		Long companyId = authService.getCompanyIdFromToken(token);
+		
+		// Token doğrulama ve employeeId kontrolünü gözden geçirin
+		if (employeeId == null || companyId == null) {
+			return ResponseEntity.ok(BaseResponse.<LeaveRequest>builder()
+			                                     .code(400)
+			                                     .success(false)
+			                                     .message("Hata: Token geçersiz veya kullanıcı bilgileri eksik.")
+			                                     .build());
+		}
 		
 		// Kullanıcının varlığını kontrol et
 		if (!leaveService.isUserExists(employeeId)) {
@@ -42,9 +59,8 @@ public class LeaveController {
 			                                     .build());
 		}
 		
-		// İzin talebini oluştur
+		// İzin talebini oluşturuyoruz
 		LeaveRequest createdLeave = leaveService.requestLeave(dto, employeeId, companyId);
-		
 		return ResponseEntity.ok(BaseResponse.<LeaveRequest>builder()
 		                                     .code(200)
 		                                     .success(true)

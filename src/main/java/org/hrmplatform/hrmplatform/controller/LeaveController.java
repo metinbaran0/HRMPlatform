@@ -23,12 +23,17 @@ public class LeaveController {
 	private final AuthService authService; // AuthService sınıfını kullanıyorsanız ekleyin
 	
 	// Kullanıcı izin talebi oluşturma
-	@PreAuthorize("hasRole('EMPLOYEE')")
-	@PostMapping(LEAVEREQUEST)
+	@PreAuthorize("hasAuthority('EMPLOYEE')")
+	@PostMapping("/leave-request")
 	public ResponseEntity<BaseResponse<LeaveRequest>> requestLeave(
 			@RequestHeader("Authorization") String token,
 			@RequestBody LeaveRequestDto dto) {
+		
+		// Employee ID ve Company ID'yi token'dan alıyoruz
 		Long employeeId = authService.getEmployeeIdFromToken(token);
+		Long companyId = authService.getCompanyIdFromToken(token);
+		
+		// Kullanıcının varlığını kontrol et
 		if (!leaveService.isUserExists(employeeId)) {
 			return ResponseEntity.ok(BaseResponse.<LeaveRequest>builder()
 			                                     .code(400)
@@ -36,7 +41,10 @@ public class LeaveController {
 			                                     .message("Hata: Belirtilen kullanıcı mevcut değil.")
 			                                     .build());
 		}
-		LeaveRequest createdLeave = leaveService.requestLeave(dto, employeeId);
+		
+		// İzin talebini oluştur
+		LeaveRequest createdLeave = leaveService.requestLeave(dto, employeeId, companyId);
+		
 		return ResponseEntity.ok(BaseResponse.<LeaveRequest>builder()
 		                                     .code(200)
 		                                     .success(true)

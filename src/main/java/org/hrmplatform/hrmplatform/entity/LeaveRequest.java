@@ -21,6 +21,7 @@ public class LeaveRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long employeeId;
+    private Long companyId;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private String reason;
@@ -31,4 +32,5 @@ public class LeaveRequest {
     @Enumerated(EnumType.STRING)
     @Column(name = "leave_type", nullable = false)
     private LeaveType leaveType;
+    
 }

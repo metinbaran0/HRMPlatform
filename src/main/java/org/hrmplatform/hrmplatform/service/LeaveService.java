@@ -24,7 +24,7 @@ public class LeaveService {
 	private final UserRoleRepository userRoleRepository;
 	
 	// Yeni izin talebi oluşturma
-	public LeaveRequest requestLeave(@Valid LeaveRequestDto leaveRequestDto, Long employeeId) {
+	public LeaveRequest requestLeave(@Valid LeaveRequestDto leaveRequestDto, Long employeeId, Long companyId) {
 		LocalDateTime startDateTime = leaveRequestDto.startDate().atStartOfDay();
 		LocalDateTime endDateTime = leaveRequestDto.endDate().atStartOfDay();
 		
@@ -38,6 +38,7 @@ public class LeaveService {
 			}
 		}
 		
+		// Yeni LeaveRequest oluşturuluyor
 		LeaveRequest leaveRequest = LeaveRequest.builder()
 		                                        .startDate(startDateTime)
 		                                        .endDate(endDateTime)
@@ -45,10 +46,13 @@ public class LeaveService {
 		                                        .status(Status.PENDING) // İzin talebi başlangıçta beklemede
 		                                        .createdAt(LocalDateTime.now())
 		                                        .updatedAt(LocalDateTime.now())
+		                                        .employeeId(employeeId)  // Çalışan ID'si ekleniyor
+		                                        .companyId(companyId)    // Şirket ID'si ekleniyor
 		                                        .build();
 		
-		return leaveRepository.save(leaveRequest);
+		return leaveRepository.save(leaveRequest);  // İzin talebi kaydediliyor
 	}
+
 	
 	// Kullanıcıya ait izin taleplerini getirme (Sadece APPROVED)
 	public List<LeaveRequest> getLeaveRequestsByUserId(Long userId) {

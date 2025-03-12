@@ -19,13 +19,16 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    private Long userId;
     private String content;
+    private String author;
+    private String authorImage;
+    private String position;
+    
+    @ManyToOne
+    @JoinColumn(name = "company_id") // Yorumun hangi şirkete ait olduğunu gösterir
+    private Company company;
+    
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     
-    private String author;  // Yorum yazan kişinin adı
-    private String authorImage;  // Yorum yazan kişinin resim URL'si
-    private String position;  // Yorum yazan kişinin pozisyonu
-    private String company;  // Yorum yazan kişinin çalıştığı şirket
 }

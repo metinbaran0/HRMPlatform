@@ -132,8 +132,13 @@ public class LeaveController {
 	// Yönetici tüm bekleyen izin taleplerini görme
 	@PreAuthorize("hasAuthority('COMPANY_ADMIN')")
 	@GetMapping(PENDINGLEAVESFORMANAGER)
-	public ResponseEntity<BaseResponse<List<LeaveRequest>>> getAllPendingLeaveRequests() {
-		List<LeaveRequest> pendingRequests = leaveService.getAllPendingLeaveRequests();
+	public ResponseEntity<BaseResponse<List<LeaveRequest>>> getAllPendingLeaveRequests(@RequestHeader("Authorization") String token) {
+		// Yöneticinin şirket ID'sini token'dan al
+		Long managerCompanyId = authService.getCompanyIdFromToken(token);
+		
+		// Yalnızca yöneticinin şirketine ait bekleyen izin taleplerini al
+		List<LeaveRequest> pendingRequests = leaveService.getAllPendingLeaveRequests(managerCompanyId);
+		
 		return ResponseEntity.ok(BaseResponse.<List<LeaveRequest>>builder()
 		                                     .code(200)
 		                                     .success(true)
@@ -143,7 +148,7 @@ public class LeaveController {
 	}
 	
 	
-   // Yönetici izin talebini onaylama
+	// Yönetici izin talebini onaylama
 	@PreAuthorize("hasAuthority('COMPANY_ADMIN')")
 	@PostMapping(ACCEPTLEAVE)
 	public ResponseEntity<BaseResponse<LeaveRequest>> acceptLeaveRequest(

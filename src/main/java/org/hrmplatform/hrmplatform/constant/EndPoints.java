@@ -112,6 +112,7 @@ public class EndPoints {
     public static final String GET_BREAK_BYCOMPANY = "/getbreak-by-company/{companyId}";
     public static final String UPDATE_BREAK = "/update-break/{breakId}";
     public static final String DELETE_BREAK = "/delete-break/{breakId}";
+    public static final String ALL_ACTIVE_BREAKS = "/all-active-breaks";
 
     //EMPLOYEE_SHIFT
     public static final String CREATE_EMPLOYEE_SHIFT = "/create-employee-shift";

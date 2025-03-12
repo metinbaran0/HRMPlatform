@@ -3,6 +3,7 @@ package org.hrmplatform.hrmplatform.service;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.hrmplatform.hrmplatform.dto.request.CompanyDto;
+import org.hrmplatform.hrmplatform.dto.request.CompanyIdDto;
 import org.hrmplatform.hrmplatform.dto.response.SubscriptionResponse;
 import org.hrmplatform.hrmplatform.entity.Company;
 import org.hrmplatform.hrmplatform.entity.Employee;
@@ -425,10 +426,10 @@ public class CompanyService {
     }
 
 
-    public List<CompanyDto> getApprovedCompanies() {
+    public List<CompanyIdDto> getApprovedCompanies() {
         List<Company> approvedCompanies = companyRepository.findByStatusAndIsDeletedFalse(Status.APPROVED);
         return approvedCompanies.stream()
-                .map(company -> new CompanyDto(
+                .map(company -> new CompanyIdDto(
                         company.getId(),
                         company.getName(),
                         company.getAddress(),

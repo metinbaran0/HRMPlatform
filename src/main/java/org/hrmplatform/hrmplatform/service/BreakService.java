@@ -78,5 +78,16 @@ public class BreakService {
 
     }
 
+
+    // Kullanıcının şirketine ait silinmemiş molaları getirme
+    public List<Break> getActiveBreaksForCompany(String token) {
+        Long companyId = authService.getCompanyIdFromToken(token); // Token'dan şirket ID'si al
+        List<Break> activeBreaks = breakRepository.findByCompanyIdAndDeletedFalse(companyId); // Şirket ID'sine göre filtreleme
+
+        if (activeBreaks.isEmpty()) {
+            throw new RuntimeException("Boş mola listesi"); // Liste boşsa hata fırlatılacak
+        }
+        return activeBreaks;
+    }
 }
 

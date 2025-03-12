@@ -16,4 +16,5 @@ public interface BreakRepository extends JpaRepository<Break, Long> {
 
     List<Break> findByShiftIdAndCompanyId(Long shiftId, Long companyId);
 
+    List<Break> findByCompanyIdAndDeletedFalse(Long companyId);
 }

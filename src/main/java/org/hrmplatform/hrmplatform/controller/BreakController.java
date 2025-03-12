@@ -225,6 +225,32 @@ public class BreakController {
         }
     }
 
+    // Kullanıcının şirketine ait silinmemiş molaları getirme
+    @GetMapping(ALL_ACTIVE_BREAKS)
+    public ResponseEntity<BaseResponse<List<Break>>> getActiveBreaks(@RequestHeader("Authorization") String token) {
+        try {
+            List<Break> activeBreaks = breakService.getActiveBreaksForCompany(token); // Token ile filtreleme
+            return ResponseEntity.ok(
+                    BaseResponse.<List<Break>>builder()
+                            .code(200)
+                            .data(activeBreaks)
+                            .message("Silinmemiş molalar başarıyla getirildi")
+                            .success(true)
+                            .build()
+            );
+        } catch (RuntimeException e) {
+            // Eğer liste boşsa veya başka bir hata oluşursa
+            return ResponseEntity.ok(
+                    BaseResponse.<List<Break>>builder()
+                            .code(200)
+                            .data(List.of()) // Boş liste döndür
+                            .message("Boş mola listesi")
+                            .success(true)
+                            .build()
+            );
+        }
+    }
+
 
     private ResponseEntity<BaseResponse<List<Break>>> buildBreakResponse(List<Break> breaks, String successMessage) {
         if (!breaks.isEmpty()) {

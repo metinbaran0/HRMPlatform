@@ -6,8 +6,6 @@ import jakarta.validation.constraints.Size;
 import org.hrmplatform.hrmplatform.enums.SubscriptionPlan;
 
 public record CompanyDto(
-
-        Long id,
         @Size(min = 2, max = 100)
         String name,
 

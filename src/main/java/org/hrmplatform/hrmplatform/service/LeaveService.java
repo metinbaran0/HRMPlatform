@@ -66,24 +66,11 @@ public class LeaveService {
 		return leaveRepository.findByStatus(Status.PENDING);
 	}
 	
-	public LeaveRequest acceptLeaveRequest(Long managerId, Long employeeId) {
-		UserRole manager = userRoleRepository.findById(managerId)
-		                                     .orElseThrow(() -> new EntityNotFoundException("Yönetici bulunamadı."));
-		
-		if (manager.getRole() == null || !manager.getRole().equals(Role.COMPANY_ADMIN)) {
-			throw new SecurityException("Yalnızca şirket yöneticileri izin taleplerini onaylayabilir.");
-		}
-		
-		// Yöneticinin şirket ID'sini al
-		Long managerCompanyId = manager.getUserId(); // Yöneticinin şirket ID'si
-		
+	
+	public LeaveRequest acceptLeaveRequest(Long employeeId) {
 		// Çalışanın şirkete ait olup olmadığını kontrol et
-		Employee employee = employeeService.findById(employeeId)
-		                                   .orElseThrow(() -> new EntityNotFoundException("Çalışan bulunamadı."));
-		
-		if (!employee.getCompanyId().equals(managerCompanyId)) {
-			throw new SecurityException("Bu çalışanın izin talebini onaylama yetkiniz yok.");
-		}
+		employeeService.findById(employeeId)
+		               .orElseThrow(() -> new EntityNotFoundException("Çalışan bulunamadı."));
 		
 		// Bekleyen izin talebini al
 		LeaveRequest leaveRequest = leaveRepository.findByEmployeeIdAndStatus(employeeId, Status.PENDING)
@@ -95,16 +82,15 @@ public class LeaveService {
 		leaveRequest.setUpdatedAt(LocalDateTime.now());
 		return leaveRepository.save(leaveRequest);
 	}
-
+	
+	
 	
 	// İzin talebini reddetme (Yönetici tarafından)
-	public LeaveRequest rejectLeaveRequest(Long managerId, Long employeeId) {
-		UserRole manager = userRoleRepository.findById(managerId)
-		                                     .orElseThrow(() -> new EntityNotFoundException("Yönetici bulunamadı."));
+	public LeaveRequest rejectLeaveRequest( Long employeeId) {
+		// Çalışanın şirkete ait olup olmadığını kontrol et
+		employeeService.findById(employeeId)
+		               .orElseThrow(() -> new EntityNotFoundException("Çalışan bulunamadı."));
 		
-		if (manager.getRole() == null || !manager.getRole().equals(Role.COMPANY_ADMIN)) {
-			throw new SecurityException("Yalnızca şirket yöneticileri izin taleplerini reddedebilir.");
-		}
 		
 		// Bekleyen izin talebini al
 		LeaveRequest leaveRequest = leaveRepository.findByEmployeeIdAndStatus(employeeId, Status.PENDING)

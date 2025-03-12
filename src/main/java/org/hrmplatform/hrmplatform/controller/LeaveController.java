@@ -142,29 +142,26 @@ public class LeaveController {
 		                                     .build());
 	}
 	
-	// Yönetici izin talebini onaylama
+	
+   // Yönetici izin talebini onaylama
 	@PreAuthorize("hasAuthority('COMPANY_ADMIN')")
 	@PostMapping(ACCEPTLEAVE)
 	public ResponseEntity<BaseResponse<LeaveRequest>> acceptLeaveRequest(
-			@RequestHeader("Authorization") String token,
 			@PathVariable Long employeeId) {
-		
-		// Token'dan yönetici ID'sini al
-		Long managerId = authService.getEmployeeIdFromToken(token); // Bu yönetici ID'sidir
 		
 		// Çalışanın şirketine ait olup olmadığını kontrol et
 		Employee employee = employeeService.findById(employeeId)
 		                                   .orElseThrow(() -> new EntityNotFoundException("Çalışan bulunamadı."));
 		
-		// Çalışanın şirket ID'si ile yöneticinin şirket ID'sini karşılaştır
-		Long managerCompanyId = authService.getCompanyIdFromToken(token); // Yönetici şirket ID'si
+		// Yöneticinin şirket ID'sini al
+		Long managerCompanyId = employee.getCompanyId();  // Çalışanın şirketi ile yöneticinin şirketi aynı olmalı
 		
 		if (!employee.getCompanyId().equals(managerCompanyId)) {
 			throw new SecurityException("Bu çalışanın izin talebini onaylama yetkiniz yok.");
 		}
 		
 		// İzni onayla
-		LeaveRequest acceptedLeave = leaveService.acceptLeaveRequest(managerId, employeeId);
+		LeaveRequest acceptedLeave = leaveService.acceptLeaveRequest(employeeId);
 		
 		return ResponseEntity.ok(BaseResponse.<LeaveRequest>builder()
 		                                     .code(200)
@@ -173,21 +170,24 @@ public class LeaveController {
 		                                     .message("İzin talebi başarıyla onaylandı.")
 		                                     .build());
 	}
+
+	
 	
 	
 	// Yönetici izin talebini reddetme
 	@PreAuthorize("hasAuthority('COMPANY_ADMIN')")
 	@PostMapping(REJECTLEAVE)
 	public ResponseEntity<BaseResponse<LeaveRequest>> rejectLeaveRequest(
-			@RequestHeader("Authorization") String token,
+			
+			
 			@PathVariable Long employeeId) {
 		
-		// Token'dan yönetici ID'sini al
-		Long managerId = authService.getCompanyIdFromToken(token);
+		
+		
 		
 		
 		// İzni reddet
-		LeaveRequest rejectedLeave = leaveService.rejectLeaveRequest(managerId, employeeId);
+		LeaveRequest rejectedLeave = leaveService.rejectLeaveRequest(employeeId);
 		
 		return ResponseEntity.ok(BaseResponse.<LeaveRequest>builder()
 		                                     .code(200)

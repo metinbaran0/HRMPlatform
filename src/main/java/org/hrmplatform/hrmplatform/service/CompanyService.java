@@ -436,8 +436,8 @@ public class CompanyService {
                         company.getSubscriptionPlan(),
                         company.getContactPerson(),
                         company.getSector(),
-                        company.getEmployeeCount(),
-                        company.getId()
+                        company.getEmployeeCount()
+                       
                 ))
                 .collect(Collectors.toList());
 

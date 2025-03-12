@@ -23,8 +23,8 @@ public record CompanyDto(
         String contactPerson,
 
         String sector,
-        Integer employeeCount,
-        Long companyId
+        Integer employeeCount
+       
 
 ) {
 }

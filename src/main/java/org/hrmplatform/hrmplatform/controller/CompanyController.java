@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.hrmplatform.hrmplatform.config.JwtUserDetails;
 import org.hrmplatform.hrmplatform.dto.request.CompanyDto;
+import org.hrmplatform.hrmplatform.dto.request.CompanyIdDto;
 import org.hrmplatform.hrmplatform.dto.request.EmailRequest;
 import org.hrmplatform.hrmplatform.dto.request.SubscriptionPlanRequest;
 import org.hrmplatform.hrmplatform.dto.response.BaseResponse;
@@ -156,11 +157,11 @@ public class CompanyController {
     }
 	//onaylanmış şirketleri getirme
 	@GetMapping(APPROVED)
-	public ResponseEntity<BaseResponse<List<CompanyDto>>> getApprovedCompanies() {
-		List<CompanyDto> companies = companyService.getApprovedCompanies();
+	public ResponseEntity<BaseResponse<List<CompanyIdDto>>> getApprovedCompanies() {
+		List<CompanyIdDto> companies = companyService.getApprovedCompanies();
 
 		 return ResponseEntity.ok(
-				BaseResponse.<List<CompanyDto>>builder()
+				BaseResponse.<List<CompanyIdDto>>builder()
 						.code(201)
 						.data(companies)
 						.message("Onaylanmış şirketler başarıyla getirildi")

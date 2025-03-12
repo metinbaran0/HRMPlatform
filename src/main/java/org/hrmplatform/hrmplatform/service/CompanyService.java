@@ -415,8 +415,8 @@ public class CompanyService {
     public List<CompanyIdDto> getApprovedCompanies() {
         List<Company> approvedCompanies = companyRepository.findByStatusAndIsDeletedFalse(Status.APPROVED);
         return approvedCompanies.stream()
-
-                .map(company -> new CompanyDto(
+                .map(company -> new CompanyIdDto(
+                        company.getId(),
                         company.getName(),
                         company.getAddress(),
                         company.getPhone(),
@@ -424,11 +424,7 @@ public class CompanyService {
                         company.getSubscriptionPlan(),
                         company.getContactPerson(),
                         company.getSector(),
-                        company.getEmployeeCount()
-
-                ))
-                .collect(Collectors.toList());
-
+                        company.getEmployeeCount())).collect(Collectors.toList());
     }
 
     //Aktif üyelikler

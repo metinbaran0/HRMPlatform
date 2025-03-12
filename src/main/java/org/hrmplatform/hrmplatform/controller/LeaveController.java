@@ -187,10 +187,6 @@ public class LeaveController {
 			
 			@PathVariable Long employeeId) {
 		
-		
-		
-		
-		
 		// İzni reddet
 		LeaveRequest rejectedLeave = leaveService.rejectLeaveRequest(employeeId);
 		

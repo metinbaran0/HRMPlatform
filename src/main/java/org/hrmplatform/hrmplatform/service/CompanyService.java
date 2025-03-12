@@ -429,8 +429,8 @@ public class CompanyService {
     public List<CompanyIdDto> getApprovedCompanies() {
         List<Company> approvedCompanies = companyRepository.findByStatusAndIsDeletedFalse(Status.APPROVED);
         return approvedCompanies.stream()
-                .map(company -> new CompanyIdDto(
-                        company.getId(),
+
+                .map(company -> new CompanyDto(
                         company.getName(),
                         company.getAddress(),
                         company.getPhone(),

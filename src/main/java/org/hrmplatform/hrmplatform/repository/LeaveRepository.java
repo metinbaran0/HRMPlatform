@@ -20,4 +20,7 @@ public interface LeaveRepository extends JpaRepository<LeaveRequest, Long> {
 	LeaveRequest findByEmployeeIdAndStatusAndId(Long employeeId, Status status, Long leaveRequestId);
 
     boolean existsByEmployeeIdAndStatusAndStartDateBeforeAndEndDateAfter(Long employeeId, Status status, LocalDate shiftStart, LocalDate shiftEnd);
+	
+	// Şirket ID'si ve izin durumu ile sorgulama yap
+	List<LeaveRequest> findByCompanyIdAndStatus(Long companyId, Status status);
 }

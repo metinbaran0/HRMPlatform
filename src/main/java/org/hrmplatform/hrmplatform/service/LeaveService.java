@@ -62,10 +62,10 @@ public class LeaveService {
 	}
 	
 	// Yöneticinin tüm bekleyen izin taleplerini getirme
-	public List<LeaveRequest> getAllPendingLeaveRequests() {
-		return leaveRepository.findByStatus(Status.PENDING);
+	public List<LeaveRequest> getAllPendingLeaveRequests(Long companyId) {
+		
+		return leaveRepository.findByCompanyIdAndStatus(companyId, Status.PENDING);
 	}
-	
 	
 	public LeaveRequest acceptLeaveRequest(Long employeeId) {
 		// Çalışanın şirkete ait olup olmadığını kontrol et
